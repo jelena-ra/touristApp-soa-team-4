@@ -1,0 +1,42 @@
+package main
+
+import (
+    "context"
+    "flag"
+    "log"
+    "net/http"
+
+    "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials/insecure"
+
+    stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
+)
+
+var (
+    grpcServerEndpoint = flag.String("grpc-server-endpoint", "localhost:50051", "gRPC server endpoint")
+)
+
+func run() error {
+    ctx := context.Background()
+    ctx, cancel := context.WithCancel(ctx)
+    defer cancel()
+
+    mux := runtime.NewServeMux()
+    opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+  
+    err := stakeholder_proto.RegisterStakeholderServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
+    if err != nil {
+        return err
+    }
+
+    log.Printf("Gateway server listening on port 8080...")
+    return http.ListenAndServe(":8080", mux)
+}
+
+func main() {
+    flag.Parse()
+    if err := run(); err != nil {
+        log.Fatal(err)
+    }
+}
