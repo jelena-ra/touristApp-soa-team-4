@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+package stakeholder;
+
+// Definisanje Stakeholder poruke
+message Stakeholder {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+// Poruke za operacije
+message CreateStakeholderRequest {
+  Stakeholder stakeholder = 1;
+}
+
+message CreateStakeholderResponse {
+  Stakeholder stakeholder = 1;
+}
+
+message GetStakeholderRequest {
+  string id = 1;
+}
+
+message GetStakeholderResponse {
+  Stakeholder stakeholder = 1;
+}
+
+message GetAllStakeholdersRequest {}
+
+message GetAllStakeholdersResponse {
+  repeated Stakeholder stakeholders = 1;
+}
+
+// Definisanje gRPC servisa
+service StakeholderService {
+  rpc CreateStakeholder (CreateStakeholderRequest) returns (CreateStakeholderResponse);
+  rpc GetStakeholder (GetStakeholderRequest) returns (GetStakeholderResponse);
+  rpc GetAllStakeholders (GetAllStakeholdersRequest) returns (GetAllStakeholdersResponse);
+}
