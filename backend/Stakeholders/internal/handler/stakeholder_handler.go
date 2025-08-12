@@ -1,16 +1,18 @@
 package handler
 
 import (
-	"context"
+	//"context"
 	"log"
-
+	"net/http"
+	"encoding/json"
+	//"github.com/gorilla/mux"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
-	stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
+	//stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 )
 
 
 type StakeholderHandler struct {
-	stakeholder_proto.UnimplementedStakeholderServiceServer
+	//stakeholder_proto.UnimplementedStakeholderServiceServer
 	service *service.StakeholderService
 }
 
@@ -18,21 +20,19 @@ func NewStakeholderHandler(service *service.StakeholderService) *StakeholderHand
 	return &StakeholderHandler{service: service}
 }
 
-
-func (h *StakeholderHandler) GetAllStakeholders(ctx context.Context, req *stakeholder_proto.GetAllStakeholdersRequest) (*stakeholder_proto.GetAllStakeholdersResponse, error) {
-	// Ovdje će ići logika za pozivanje service sloja 
+func (h *StakeholderHandler) GetAllStakeholders(writer http.ResponseWriter, req *http.Request) {
 	log.Println("Handling GetAllStakeholders request")
-	return &stakeholder_proto.GetAllStakeholdersResponse{}, nil
-}
 
+	stakeholders, err := h.service.GetAllStakeholders(req.Context())
 
-func (h *StakeholderHandler) CreateStakeholder(ctx context.Context, req *stakeholder_proto.CreateStakeholderRequest) (*stakeholder_proto.CreateStakeholderResponse, error) {
-	log.Println("Handling CreateStakeholder request")
-	return &stakeholder_proto.CreateStakeholderResponse{}, nil
-}
+	if err != nil {
+		http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-
-func (h *StakeholderHandler) GetStakeholder(ctx context.Context, req *stakeholder_proto.GetStakeholderRequest) (*stakeholder_proto.GetStakeholderResponse, error) {
-	log.Println("Handling GetStakeholder request")
-	return &stakeholder_proto.GetStakeholderResponse{}, nil
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(writer).Encode(stakeholders); err != nil {
+		log.Printf("Error encoding response: %v", err)
+	}
 }

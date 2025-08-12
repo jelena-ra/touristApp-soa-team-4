@@ -2,21 +2,31 @@ package main
 
 import (
 	"context"
-	"log"
-	"net" 
+	"log" 
 	"os"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/joho/godotenv"
-	"google.golang.org/grpc"
 
+	"net/http"
+
+	"github.com/gorilla/mux"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
-	stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto" 
+
 
 )
+
+func startServer(stakeholderHandler *handler.StakeholderHandler) {
+	router := mux.NewRouter().StrictSlash(true)
+
+	router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
+
+	log.Println("Server starting on port :8081...")
+	log.Fatal(http.ListenAndServe(":8081", router))
+}
 
 func main() {
 	
@@ -57,24 +67,7 @@ func main() {
 	stakeholderService := service.NewStakeholderService(stakeholderRepo)
 	stakeholderHandler := handler.NewStakeholderHandler(stakeholderService)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081" 
-	}
 
-	 listen, err := net.Listen("tcp", ":" + port)
-    if err != nil {
-        log.Fatalf("failed to listen: %v", err)
-    }
-
-
-   	grpcServer := grpc.NewServer()
-
-    
-    stakeholder_proto.RegisterStakeholderServiceServer(grpcServer, stakeholderHandler)
-
-    log.Println("Stakeholder gRPC service is running on port 8081...")
-    log.Fatal(grpcServer.Serve(listen))
-
+	startServer(stakeholderHandler)
 
 }
