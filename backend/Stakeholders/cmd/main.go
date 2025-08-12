@@ -15,17 +15,25 @@ import (
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
-
+	
+	"github.com/glebarez/sqlite" 
+    "gorm.io/gorm"
 
 )
 
-func startServer(stakeholderHandler *handler.StakeholderHandler) {
-	router := mux.NewRouter().StrictSlash(true)
+func startServer(stakeholderHandler *handler.StakeholderHandler, imageHandler *handler.ImageHandler,profileHandler *handler.ProfileHandler) {
+    router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
+    router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
 
-	log.Println("Server starting on port :8081...")
-	log.Fatal(http.ListenAndServe(":8081", router))
+	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
+	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
+
+    router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
+    router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
+
+    log.Println("Server starting on port :8081...")
+    log.Fatal(http.ListenAndServe(":8081", router))
 }
 
 func main() {
@@ -63,11 +71,29 @@ func main() {
 	log.Println("Successfully connected to Neo4j.")
 
 
+	 imageDB, err := gorm.Open(sqlite.Open("images.db"), &gorm.Config{})
+    if err != nil {
+        log.Fatalf("Failed to connect to image database: %v", err)
+    }
+
+	
+    imageDB.AutoMigrate(&repository.Image{})
+
+	
+    imageRepo := repository.NewImageRepository(imageDB)
+    imageService := service.NewImageService(imageRepo)
+    imageHandler := handler.NewImageHandler(imageService)
+
 	stakeholderRepo := repository.NewStakeholderRepository(driver)	
 	stakeholderService := service.NewStakeholderService(stakeholderRepo)
 	stakeholderHandler := handler.NewStakeholderHandler(stakeholderService)
 
+	
+	profileRepo := repository.NewProfileRepository(driver)	
+	profileService := service.NewProfileService(profileRepo)
+	profileHandler := handler.NewProfileHandler(profileService)
 
-	startServer(stakeholderHandler)
+
+	startServer(stakeholderHandler,imageHandler,profileHandler)
 
 }

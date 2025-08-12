@@ -17,6 +17,7 @@ func NewStakeholderRepository(driver neo4j.DriverWithContext) *StakeholderReposi
 func (repo *StakeholderRepository) FindAll(ctx context.Context) ([]model.Stakeholder, error) {
 	var stakeholders []model.Stakeholder
 
+
 	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)
 
