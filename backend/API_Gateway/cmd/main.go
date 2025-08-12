@@ -28,9 +28,12 @@ func main() {
 
 	stakeholdersProxy := NewReverseProxy(stakeholdersServiceURL)
     blogProxy := NewReverseProxy(blogServiceURL)
+    
 
 	// 3. Definisanje ruta za Gateway
 	router.PathPrefix("/api/stakeholders").Handler(http.StripPrefix("/api", stakeholdersProxy))
+    router.PathPrefix("/api/profile/{userId}").Handler(http.StripPrefix("/api", stakeholdersProxy))
+    router.PathPrefix("/api/profile").Methods("POST").Handler(http.StripPrefix("/api", stakeholdersProxy))
     router.PathPrefix("/api/blog").Handler(http.StripPrefix("/api", blogProxy))
 
 	log.Println("API Gateway is running on port :8000...")
