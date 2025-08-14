@@ -4,6 +4,7 @@ import (
 	"context"
 	"log" 
 	"os"
+	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/joho/godotenv"
@@ -12,19 +13,21 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/auth"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/config"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/middleware"
 	
 	"github.com/glebarez/sqlite" 
     "gorm.io/gorm"
 
 )
 
-func startServer(stakeholderHandler *handler.StakeholderHandler, imageHandler *handler.ImageHandler,profileHandler *handler.ProfileHandler) {
-    router := mux.NewRouter().StrictSlash(true)
+func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHandler, profileHandler *handler.ProfileHandler, router *mux.Router) {
 
-    router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
+    router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
 
 	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
 	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
@@ -84,16 +87,59 @@ func main() {
     imageService := service.NewImageService(imageRepo)
     imageHandler := handler.NewImageHandler(imageService)
 
-	stakeholderRepo := repository.NewStakeholderRepository(driver)	
-	stakeholderService := service.NewStakeholderService(stakeholderRepo)
-	stakeholderHandler := handler.NewStakeholderHandler(stakeholderService)
+	// Učitavanje JWT konfiguracije iz promenljivih okruženja
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		log.Fatalf("JWT_SECRET_KEY is not set in .env file or environment variables.")
+	}
+	jwtIssuer := os.Getenv("JWT_ISSUER")
+	jwtAudience := os.Getenv("JWT_AUDIENCE")
+	jwtDurationStr := os.Getenv("JWT_DURATION")
 
 	
 	profileRepo := repository.NewProfileRepository(driver)	
 	profileService := service.NewProfileService(profileRepo)
 	profileHandler := handler.NewProfileHandler(profileService)
+	// Parsiranje trajanja, sa podrazumevanom vrednošću ako nije definisano
+	jwtDuration, err := time.ParseDuration(jwtDurationStr)
+	if err != nil {
+		log.Println("Error parsing JWT_DURATION from .env, using default of 24h.")
+		jwtDuration = 24 * time.Hour
+	}
+	
+	jwtConfig := &config.JWTConfig{
+		SecretKey: jwtSecretKey,
+		Issuer:    jwtIssuer,
+		Audience:  jwtAudience,
+		Duration:  jwtDuration,
+	}
+
+	router := mux.NewRouter().StrictSlash(true)
+	
+	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
+	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
 
-	startServer(stakeholderHandler,imageHandler,profileHandler)
+
+	userRepo := repository.NewUserRepository(driver)
+	userService := service.NewUserService(userRepo)
+	jwtGenerator := auth.NewJWTGenerator(jwtConfig)
+	authenticationService := service.NewAuthenticationService(userRepo, jwtGenerator)
+	userHandler := handler.NewUserHandler(userService)
+	authenticationHandler := handler.NewAuthenticationHandler(authenticationService)
+
+
+
+	//router.Handle("/api/users", handler.AuthMiddleware(userHandler.FindAll)).Methods("GET")
+	// Lančano povezivanje middleware-a za zaštićene rute
+	router.Handle(
+		"/api/users/{id}/block", 
+		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.HandlerFunc(userHandler.BlockUser))),
+	).Methods("PUT")
+
+	
+	authenticationHandler.RegisterRoutes(router)
+	//userHandler.RegisterRoutes(router)
+	startServer(userHandler,imageHandler,profileHandler, router)
 
 }
