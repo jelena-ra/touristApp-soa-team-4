@@ -38,8 +38,6 @@ func (repo *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 			node := record.Values[0].(neo4j.Node)
 			props := node.Props
 
-			// Mapiranje svih Neo4j svojstava u Go strukturu.
-			// Ovo bi trebalo da radi ako je model.User.ID tipa string.
 			user := model.User{
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
@@ -88,7 +86,6 @@ func (repo *UserRepository) GetActiveByName(username string) (*model.User, error
 			node := record.Values[0].(neo4j.Node)
 			props := node.Props
 
-			// Mapiranje Neo4j svojstava u Go strukturu.
 			user := model.User{
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
@@ -99,7 +96,7 @@ func (repo *UserRepository) GetActiveByName(username string) (*model.User, error
 			return &user, nil
 		}
 
-		// Ako nema pronađenih zapisa, vraća se greška.
+	
 		return nil, errors.New("user not found")
 	})
 
@@ -137,7 +134,7 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 			node := record.Values[0].(neo4j.Node)
 			props := node.Props
 
-			// Mapiranje Neo4j svojstava u Go strukturu.
+	
 			user := model.User{
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
@@ -148,7 +145,6 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 			return &user, nil
 		}
 
-		// Ako nema pronađenih zapisa, vraća se greška.
 		return nil, errors.New("user not found")
 	})
 
@@ -203,7 +199,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 	defer session.Close(ctx)
 
 	result, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		// Generisanje jedinstvenog ID-a pre kreiranja
+
 		id := uuid.New().String()
 		user.ID = id
 		

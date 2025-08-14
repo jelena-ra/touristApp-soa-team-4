@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-
+	"strings"
 	"github.com/gorilla/mux"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
@@ -69,7 +69,50 @@ func (h *AuthenticationHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 
+func (h *AuthenticationHandler) ValidateTokenRoute(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, "Podržana je samo GET metoda.", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		http.Error(w, "Nedostaje Authorization header ili format nije ispravan.", http.StatusUnauthorized)
+		return
+	}
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	
+	requiredRole := r.URL.Query().Get("role")
+	if requiredRole == "" {
+		http.Error(w, "Nedostaje 'role' query parametar.", http.StatusBadRequest)
+		return
+	}
+
+
+	claims, err := h.authenticationService.ValidateTokenAndRole(token, requiredRole)
+	if err != nil {
+		
+		if strings.Contains(err.Error(), "invalid token") {
+			http.Error(w, "Token je nevalidan ili istekao.", http.StatusUnauthorized)
+		} else if strings.Contains(err.Error(), "rola iz tokena") {
+			http.Error(w, "Nemate potrebnu ulogu.", http.StatusForbidden)
+		} else {
+			http.Error(w, "Greška prilikom validacije tokena.", http.StatusInternalServerError)
+		}
+		return
+	}
+
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(claims)
+}
+
+
 func (h *AuthenticationHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/api/users", h.Register).Methods("POST")
 	router.HandleFunc("/api/users/login", h.Login).Methods("POST")
+	router.HandleFunc("/api/auth/validate", h.ValidateTokenRoute).Methods("GET")
 }

@@ -84,3 +84,26 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		AccessToken: token,
 	}, nil
 }
+
+func (s *AuthenticationService) ValidateToken(tokenString string) (*auth.Claims, error) {
+	claims, err := s.tokenGen.ValidateToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	return claims, nil
+}
+
+func (s *AuthenticationService) ValidateTokenAndRole(token, requiredRole string) (*auth.Claims, error) {
+
+	claims, err := s.tokenGen.ValidateToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+
+	if claims.Role != requiredRole {
+		return nil, errors.New("rola iz tokena se ne podudara sa trazenom rolom")
+	}
+
+	return claims, nil
+}
