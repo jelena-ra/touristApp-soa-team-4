@@ -19,17 +19,25 @@ import (
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/middleware"
-
+	
+	"github.com/glebarez/sqlite" 
+    "gorm.io/gorm"
 
 )
 
-func startServer(router *mux.Router) {
-	//router := mux.NewRouter().StrictSlash(true)
+func startServer(stakeholderHandler *handler.StakeholderHandler, imageHandler *handler.ImageHandler,profileHandler *handler.ProfileHandler, router *mux.Router) {
 
+    router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
 	//router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
 
-	log.Println("Server starting on port :8081...")
-	log.Fatal(http.ListenAndServe(":8081", router))
+	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
+	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
+
+    router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
+    router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
+
+    log.Println("Server starting on port :8081...")
+    log.Fatal(http.ListenAndServe(":8081", router))
 }
 
 func main() {
@@ -67,6 +75,19 @@ func main() {
 	log.Println("Successfully connected to Neo4j.")
 
 
+	 imageDB, err := gorm.Open(sqlite.Open("images.db"), &gorm.Config{})
+    if err != nil {
+        log.Fatalf("Failed to connect to image database: %v", err)
+    }
+
+	
+    imageDB.AutoMigrate(&repository.Image{})
+
+	
+    imageRepo := repository.NewImageRepository(imageDB)
+    imageService := service.NewImageService(imageRepo)
+    imageHandler := handler.NewImageHandler(imageService)
+
 	// Učitavanje JWT konfiguracije iz promenljivih okruženja
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	if jwtSecretKey == "" {
@@ -76,6 +97,10 @@ func main() {
 	jwtAudience := os.Getenv("JWT_AUDIENCE")
 	jwtDurationStr := os.Getenv("JWT_DURATION")
 
+	
+	profileRepo := repository.NewProfileRepository(driver)	
+	profileService := service.NewProfileService(profileRepo)
+	profileHandler := handler.NewProfileHandler(profileService)
 	// Parsiranje trajanja, sa podrazumevanom vrednošću ako nije definisano
 	jwtDuration, err := time.ParseDuration(jwtDurationStr)
 	if err != nil {
@@ -95,7 +120,6 @@ func main() {
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
-	router := mux.NewRouter().StrictSlash(true)
 
 
 	userRepo := repository.NewUserRepository(driver)
@@ -117,7 +141,6 @@ func main() {
 	
 	authenticationHandler.RegisterRoutes(router)
 	//userHandler.RegisterRoutes(router)
-
-	startServer(router)
+	startServer(stakeholderHandler,imageHandler,profileHandler, router)
 
 }
