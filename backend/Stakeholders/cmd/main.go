@@ -25,10 +25,9 @@ import (
 
 )
 
-func startServer(stakeholderHandler *handler.StakeholderHandler, imageHandler *handler.ImageHandler,profileHandler *handler.ProfileHandler, router *mux.Router) {
+func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHandler, profileHandler *handler.ProfileHandler, router *mux.Router) {
 
-    router.HandleFunc("/stakeholders", stakeholderHandler.GetAllStakeholders).Methods("GET")
-	//router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
+    router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
 
 	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
 	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
@@ -115,7 +114,7 @@ func main() {
 		Duration:  jwtDuration,
 	}
 
-	
+	router := mux.NewRouter().StrictSlash(true)
 	
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
@@ -141,6 +140,6 @@ func main() {
 	
 	authenticationHandler.RegisterRoutes(router)
 	//userHandler.RegisterRoutes(router)
-	startServer(stakeholderHandler,imageHandler,profileHandler, router)
+	startServer(userHandler,imageHandler,profileHandler, router)
 
 }
