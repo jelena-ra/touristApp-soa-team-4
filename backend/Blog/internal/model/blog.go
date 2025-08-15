@@ -13,4 +13,14 @@ type Blog struct {
 	AuthorID  int                `bson:"authorId"`
 	CreatedAt time.Time          `bson:"createdAt"`
 	Likes     []int              `bson:"likes"`
+	Images    []string           `bson:"images"`
+	Comments  []Comment          `bson:"comments,omitempty"`
+}
+
+type Comment struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	UserID       int                `bson:"userId"`
+	Content      string             `bson:"content"`
+	CreatedAt    time.Time          `bson:"createdAt"`
+	LastModified time.Time          `bson:"lastModified"`
 }

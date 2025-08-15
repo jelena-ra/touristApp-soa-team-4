@@ -7,6 +7,7 @@ import (
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
@@ -31,6 +32,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Title:    blogReq.Title,
 		Content:  blogReq.Content,
 		AuthorID: int(blogReq.GetAuthorId()),
+		Images:   blogReq.GetImages(),
 	}
 	createdBlog, err := h.service.CreateBlog(ctx, blog)
 
@@ -43,9 +45,105 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Title:    createdBlog.Title,
 		Content:  createdBlog.Content,
 		AuthorId: int32(createdBlog.AuthorID),
+		Images:   createdBlog.Images,
 	}
 
 	return &blog_proto.CreateBlogResponse{
 		BlogPost: protoBlogRes,
+	}, nil
+}
+
+func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequest) (*blog_proto.LikeBlogResponse, error) {
+	id_blog := req.GetBlogId() // Sigurnije je koristiti Gettere
+	id_user := req.GetUserId()
+	likedBlog, err := h.service.LikeBlog(ctx, id_blog, int(id_user))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to like blog: %v", err)
+	}
+
+	protoComments := make([]*blog_proto.Comment, 0)
+	for _, commentModel := range likedBlog.Comments {
+		protoComments = append(protoComments, &blog_proto.Comment{
+			Id:           commentModel.ID.Hex(),
+			UserId:       int32(commentModel.UserID),
+			Content:      commentModel.Content,
+			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
+			LastModified: timestamppb.New(commentModel.LastModified),
+		})
+	}
+
+	LikedBlogProto := blog_proto.BlogFull{
+		Id:            likedBlog.ID.Hex(),
+		Title:         likedBlog.Title,
+		Content:       likedBlog.Content,
+		AuthorId:      int32(likedBlog.AuthorID),
+		Images:        likedBlog.Images,
+		NumberOfLikes: int32(len(likedBlog.Likes)),
+		Comments:      protoComments,
+	}
+
+	LikedBlogResponse := &blog_proto.LikeBlogResponse{
+		BlogPost: &LikedBlogProto,
+	}
+	return LikedBlogResponse, nil
+}
+
+func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequest) (*blog_proto.LikeBlogResponse, error) {
+	id_blog := req.GetBlogId()
+	id_user := req.GetUserId()
+	likedBlog, err := h.service.UnlikeBlog(ctx, id_blog, int(id_user))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to like blog: %v", err)
+	}
+
+	protoComments := make([]*blog_proto.Comment, 0)
+	for _, commentModel := range likedBlog.Comments {
+		protoComments = append(protoComments, &blog_proto.Comment{
+			Id:           commentModel.ID.Hex(),
+			UserId:       int32(commentModel.UserID),
+			Content:      commentModel.Content,
+			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
+			LastModified: timestamppb.New(commentModel.LastModified),
+		})
+	}
+
+	LikedBlogProto := blog_proto.BlogFull{
+		Id:            likedBlog.ID.Hex(),
+		Title:         likedBlog.Title,
+		Content:       likedBlog.Content,
+		AuthorId:      int32(likedBlog.AuthorID),
+		Images:        likedBlog.Images,
+		NumberOfLikes: int32(len(likedBlog.Likes)),
+		Comments:      protoComments,
+	}
+
+	LikedBlogResponse := &blog_proto.LikeBlogResponse{
+		BlogPost: &LikedBlogProto,
+	}
+	return LikedBlogResponse, nil
+}
+
+func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlogsRequest) (*blog_proto.GetAllBlogsResponse, error) {
+	blogs, err := h.service.GetAllBlogs(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get blogs: %v", err)
+	}
+
+	protoBlogs := make([]*blog_proto.Blog, 0)
+
+	for _, blog := range blogs {
+		protoBlog := &blog_proto.Blog{
+			Id:            blog.ID.Hex(),
+			Title:         blog.Title,
+			Content:       blog.Content,
+			AuthorId:      int32(blog.AuthorID),
+			Images:        blog.Images,
+			NumberOfLikes: int32(len(blog.Likes)),
+		}
+		protoBlogs = append(protoBlogs, protoBlog)
+	}
+
+	return &blog_proto.GetAllBlogsResponse{
+		Blogs: protoBlogs,
 	}, nil
 }
