@@ -42,6 +42,7 @@ func (repo *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
 				Password: props["password"].(string),
+				Email:    props["email"].(string),
 				Role:     props["role"].(string),
 				Blocked:  props["blocked"].(bool),
 			}
@@ -90,6 +91,7 @@ func (repo *UserRepository) GetActiveByName(username string) (*model.User, error
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
 				Password: props["password"].(string),
+				Email:    props["email"].(string),
 				Role:     props["role"].(string),
 				Blocked:  props["blocked"].(bool),
 			}
@@ -139,6 +141,7 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
 				Password: props["password"].(string),
+				Email:    props["email"].(string),
 				Role:     props["role"].(string),
 				Blocked:  props["blocked"].(bool),
 			}
@@ -208,6 +211,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 				id: $id,
 				username: $username,
 				password: $password,
+				email: $email,
 				role: $role,
 				blocked: $blocked
 			})
@@ -217,6 +221,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 			"id":       user.ID,
 			"username": user.Username,
 			"password": user.Password,
+			"email":    user.Email,
 			"role":     user.Role,
 			"blocked":  user.Blocked,
 		}
@@ -238,6 +243,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 			ID:       props["id"].(string),
 			Username: props["username"].(string),
 			Password: props["password"].(string),
+			Email:    props["email"].(string),
 			Role:     props["role"].(string),
 			Blocked:  props["blocked"].(bool),
 		}
@@ -266,6 +272,7 @@ func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 			SET
 				s.username = $username,
 				s.password = $password,
+				s.email = $email,
 				s.role = $role,
 				s.blocked = $blocked
 			RETURN s
@@ -274,6 +281,7 @@ func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 			"id":       user.ID,
 			"username": user.Username,
 			"password": user.Password,
+			"email":    user.Email,
 			"role":     user.Role,
 			"blocked":  user.Blocked,
 		}
@@ -295,6 +303,7 @@ func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 			ID:       props["id"].(string),
 			Username: props["username"].(string),
 			Password: props["password"].(string),
+			Email:    props["email"].(string),
 			Role:     props["role"].(string),
 			Blocked:  props["blocked"].(bool),
 		}

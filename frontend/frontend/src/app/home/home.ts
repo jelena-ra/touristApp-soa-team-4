@@ -17,4 +17,11 @@ export class Home {
   seeProfile(): void {
     this.router.navigate(['profile']);
   }
+
+   registration(): void {
+    this.router.navigate(['registration']);
+  }
+  login(): void {
+    this.router.navigate(['login']);
+  }
 }
