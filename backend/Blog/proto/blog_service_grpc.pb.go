@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	BlogService_CreateBlog_FullMethodName  = "/blog.BlogService/CreateBlog"
 	BlogService_LikeBlog_FullMethodName    = "/blog.BlogService/LikeBlog"
-	BlogService_UnikeBlog_FullMethodName   = "/blog.BlogService/UnikeBlog"
+	BlogService_UnlikeBlog_FullMethodName  = "/blog.BlogService/UnlikeBlog"
 	BlogService_GetAllBlogs_FullMethodName = "/blog.BlogService/GetAllBlogs"
 )
 
@@ -31,7 +31,7 @@ const (
 type BlogServiceClient interface {
 	CreateBlog(ctx context.Context, in *CreateBlogRequest, opts ...grpc.CallOption) (*CreateBlogResponse, error)
 	LikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
-	UnikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
+	UnlikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
 	GetAllBlogs(ctx context.Context, in *GetAllBlogsRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error)
 }
 
@@ -63,10 +63,10 @@ func (c *blogServiceClient) LikeBlog(ctx context.Context, in *LikeBlogRequest, o
 	return out, nil
 }
 
-func (c *blogServiceClient) UnikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error) {
+func (c *blogServiceClient) UnlikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LikeBlogResponse)
-	err := c.cc.Invoke(ctx, BlogService_UnikeBlog_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, BlogService_UnlikeBlog_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *blogServiceClient) GetAllBlogs(ctx context.Context, in *GetAllBlogsRequ
 type BlogServiceServer interface {
 	CreateBlog(context.Context, *CreateBlogRequest) (*CreateBlogResponse, error)
 	LikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
-	UnikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
+	UnlikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
 	GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error)
 	mustEmbedUnimplementedBlogServiceServer()
 }
@@ -107,8 +107,8 @@ func (UnimplementedBlogServiceServer) CreateBlog(context.Context, *CreateBlogReq
 func (UnimplementedBlogServiceServer) LikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LikeBlog not implemented")
 }
-func (UnimplementedBlogServiceServer) UnikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnikeBlog not implemented")
+func (UnimplementedBlogServiceServer) UnlikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnlikeBlog not implemented")
 }
 func (UnimplementedBlogServiceServer) GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllBlogs not implemented")
@@ -170,20 +170,20 @@ func _BlogService_LikeBlog_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BlogService_UnikeBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _BlogService_UnlikeBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LikeBlogRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlogServiceServer).UnikeBlog(ctx, in)
+		return srv.(BlogServiceServer).UnlikeBlog(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlogService_UnikeBlog_FullMethodName,
+		FullMethod: BlogService_UnlikeBlog_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlogServiceServer).UnikeBlog(ctx, req.(*LikeBlogRequest))
+		return srv.(BlogServiceServer).UnlikeBlog(ctx, req.(*LikeBlogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -222,8 +222,8 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BlogService_LikeBlog_Handler,
 		},
 		{
-			MethodName: "UnikeBlog",
-			Handler:    _BlogService_UnikeBlog_Handler,
+			MethodName: "UnlikeBlog",
+			Handler:    _BlogService_UnlikeBlog_Handler,
 		},
 		{
 			MethodName: "GetAllBlogs",

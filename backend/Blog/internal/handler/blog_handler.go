@@ -23,15 +23,15 @@ func NewBlogHandler(service *service.BlogService) *BlogHandler {
 
 func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlogRequest) (*blog_proto.CreateBlogResponse, error) {
 
-	blogReq := req.GetBlogPost()
+	blogReq := req.GetBlogInput()
 	if blogReq == nil {
-		return nil, status.Errorf(codes.InvalidArgument, "CreateBlogRequest.BlogPost cannot be empty")
+		return nil, status.Errorf(codes.InvalidArgument, "blog input cannot be empty")
 	}
 
 	blog := &model.Blog{
 		Title:    blogReq.Title,
 		Content:  blogReq.Content,
-		AuthorID: int(blogReq.GetAuthorId()),
+		AuthorID: blogReq.GetAuthorId(),
 		Images:   blogReq.GetImages(),
 	}
 	createdBlog, err := h.service.CreateBlog(ctx, blog)
@@ -40,12 +40,14 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		return nil, status.Errorf(codes.Internal, "Failed to create blog: %v", err)
 	}
 
-	protoBlogRes := &blog_proto.Blog{ // nazad u Proto oblik
-		Id:       createdBlog.ID.Hex(),
-		Title:    createdBlog.Title,
-		Content:  createdBlog.Content,
-		AuthorId: int32(createdBlog.AuthorID),
-		Images:   createdBlog.Images,
+	protoBlogRes := &blog_proto.BlogFull{ // nazad u Proto oblik
+		Id:            createdBlog.ID.Hex(),
+		Title:         createdBlog.Title,
+		Content:       createdBlog.Content,
+		AuthorId:      createdBlog.AuthorID,
+		Images:        createdBlog.Images,
+		NumberOfLikes: 0,
+		Comments:      make([]*blog_proto.Comment, 0),
 	}
 
 	return &blog_proto.CreateBlogResponse{
@@ -56,7 +58,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequest) (*blog_proto.LikeBlogResponse, error) {
 	id_blog := req.GetBlogId() // Sigurnije je koristiti Gettere
 	id_user := req.GetUserId()
-	likedBlog, err := h.service.LikeBlog(ctx, id_blog, int(id_user))
+	likedBlog, err := h.service.LikeBlog(ctx, id_blog, id_user)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to like blog: %v", err)
 	}
@@ -65,7 +67,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 	for _, commentModel := range likedBlog.Comments {
 		protoComments = append(protoComments, &blog_proto.Comment{
 			Id:           commentModel.ID.Hex(),
-			UserId:       int32(commentModel.UserID),
+			UserId:       commentModel.UserID,
 			Content:      commentModel.Content,
 			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
 			LastModified: timestamppb.New(commentModel.LastModified),
@@ -76,7 +78,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 		Id:            likedBlog.ID.Hex(),
 		Title:         likedBlog.Title,
 		Content:       likedBlog.Content,
-		AuthorId:      int32(likedBlog.AuthorID),
+		AuthorId:      likedBlog.AuthorID,
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
@@ -91,7 +93,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequest) (*blog_proto.LikeBlogResponse, error) {
 	id_blog := req.GetBlogId()
 	id_user := req.GetUserId()
-	likedBlog, err := h.service.UnlikeBlog(ctx, id_blog, int(id_user))
+	likedBlog, err := h.service.UnlikeBlog(ctx, id_blog, id_user)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to like blog: %v", err)
 	}
@@ -100,7 +102,7 @@ func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRe
 	for _, commentModel := range likedBlog.Comments {
 		protoComments = append(protoComments, &blog_proto.Comment{
 			Id:           commentModel.ID.Hex(),
-			UserId:       int32(commentModel.UserID),
+			UserId:       commentModel.UserID,
 			Content:      commentModel.Content,
 			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
 			LastModified: timestamppb.New(commentModel.LastModified),
@@ -111,7 +113,7 @@ func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRe
 		Id:            likedBlog.ID.Hex(),
 		Title:         likedBlog.Title,
 		Content:       likedBlog.Content,
-		AuthorId:      int32(likedBlog.AuthorID),
+		AuthorId:      likedBlog.AuthorID,
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
@@ -136,7 +138,7 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 			Id:            blog.ID.Hex(),
 			Title:         blog.Title,
 			Content:       blog.Content,
-			AuthorId:      int32(blog.AuthorID),
+			AuthorId:      blog.AuthorID,
 			Images:        blog.Images,
 			NumberOfLikes: int32(len(blog.Likes)),
 		}
