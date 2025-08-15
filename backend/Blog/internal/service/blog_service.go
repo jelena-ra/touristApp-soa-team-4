@@ -25,19 +25,27 @@ func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) (*model.
 	return createdBlog, nil
 }
 
-func (s *BlogService) LikeBlog(ctx context.Context, id_blog string, id_user string) (*model.Blog, error) {
-	blogFound, err := s.repo.GetById(ctx, id_blog)
+func (s *BlogService) LikeBlog(ctx context.Context, blogId string, userId string) (*model.Blog, error) {
+	blogFound, err := s.repo.GetById(ctx, blogId)
 	if err != nil {
 		return nil, err
 	}
-	blogFound.Likes = append(blogFound.Likes, id_user)
+
+	for _, existingUserId := range blogFound.Likes {
+		if existingUserId == userId {
+			return blogFound, nil
+		}
+	}
+
+	blogFound.Likes = append(blogFound.Likes, userId)
+
 	blogUpdated, err := s.repo.Update(ctx, blogFound)
 	if err != nil {
 		return nil, err
 	}
+
 	return blogUpdated, nil
 }
-
 func (s *BlogService) UnlikeBlog(ctx context.Context, blogId string, userId string) (*model.Blog, error) {
 	blogFound, err := s.repo.GetById(ctx, blogId)
 	if err != nil {
