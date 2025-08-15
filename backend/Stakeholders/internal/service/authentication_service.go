@@ -65,6 +65,7 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 	user := &model.User{
 		Username: account.Username,
 		Password: account.Password,
+		Email:    account.Email,
 		Role: 	  model.UserRoleTourist,
 		Blocked:  false,
 	}
