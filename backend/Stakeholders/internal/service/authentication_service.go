@@ -61,12 +61,20 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		return nil, ErrUsernameNotUnique
 	}
 
+	var role string
+
+	if account.Role == "turista" {
+		role = model.UserRoleTourist
+	} else {
+		role = model.UserRoleAuthor
+	}
+
 
 	user := &model.User{
 		Username: account.Username,
 		Password: account.Password,
 		Email:    account.Email,
-		Role: 	  model.UserRoleTourist,
+		Role: 	  role,
 		Blocked:  false,
 	}
 

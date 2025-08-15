@@ -21,6 +21,17 @@
             <label for="surname">Prezime</label>
             <input type="text" id="surname" formControlName="surname" placeholder="Unesite svoje prezime" required>
         </div>
+
+        <div class="input-group role-group">
+            <label>Odaberite ulogu:</label>
+            <div class="radio-options">
+                <input type="radio" id="tourist" name="role" formControlName="role" value="turista" required>
+                <label for="tourist">Turista</label>
+
+                <input type="radio" id="guide" name="role" formControlName="role" value="vodic" required>
+                <label for="guide">Vodič</label>
+            </div>
+        </div>
         
         <div class="input-group">
             <label for="email">Email</label>

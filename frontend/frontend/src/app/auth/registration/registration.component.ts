@@ -31,6 +31,7 @@ export class RegistrationComponent {
     email: new FormControl('', [Validators.required]),
     username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required]),
+    role: new FormControl('', [Validators.required]),
   });
 
   register(): void {
@@ -40,6 +41,7 @@ export class RegistrationComponent {
       email: this.registrationForm.value.email || "",
       username: this.registrationForm.value.username || "",
       password: this.registrationForm.value.password || "",
+      role: this.registrationForm.value.role || "",
     };
 
     this.authService.register(registration).subscribe({
