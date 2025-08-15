@@ -9,6 +9,8 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/joho/godotenv"
 
+	"github.com/gorilla/handlers"
+
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -34,9 +36,16 @@ func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHa
 
     router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
     router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
+	 router.HandleFunc("/image/filename/{filename}", imageHandler.GetImageHandlerFilename).Methods("GET")
+
+	corsObj := handlers.CORS(
+    handlers.AllowedOrigins([]string{"http://localhost:4200"}),
+    handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+    handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+)
 
     log.Println("Server starting on port :8081...")
-    log.Fatal(http.ListenAndServe(":8081", router))
+	log.Fatal(http.ListenAndServe(":8081", corsObj(router)))
 }
 
 func main() {

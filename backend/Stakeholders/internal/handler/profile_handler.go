@@ -5,7 +5,6 @@ import(
 	"net/http"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"strconv"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
 
@@ -22,13 +21,9 @@ func NewProfileHandler(service *service.ProfileService) *ProfileHandler {
 func (h *ProfileHandler) GetProfileByUserId(w http.ResponseWriter, r *http.Request) {
  
     vars := mux.Vars(r)
-    userIdStr := vars["userId"]
+    userId := vars["userId"]
 
-    userId, err := strconv.Atoi(userIdStr)
-    if err != nil {
-        http.Error(w, "Invalid user ID", http.StatusBadRequest)
-        return
-    }
+    
 
     profile, err := h.service.GetByUserID(r.Context(), userId)
     if err != nil {

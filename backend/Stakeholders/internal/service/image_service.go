@@ -23,6 +23,7 @@ func (s *ImageService) UploadImage(file multipart.File, fileHeader *multipart.Fi
         return "", err
     }
     return strconv.FormatUint(uint64(imageID), 10), nil
+
 }
 
 
@@ -32,6 +33,15 @@ func (s *ImageService) GetImage(id string) ([]byte, string, error) {
         return nil, "", err
     }
     image, err := s.imageRepo.GetImageByID(uint(imageID))
+    if err != nil {
+        return nil, "", err
+    }
+    return image.Data, image.ContentType, nil
+}
+
+func (s *ImageService) GetImageFilename(id string) ([]byte, string, error) {
+
+    image, err := s.imageRepo.GetImageByFilename(id)
     if err != nil {
         return nil, "", err
     }

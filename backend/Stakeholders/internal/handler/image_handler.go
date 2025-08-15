@@ -11,7 +11,19 @@ type ImageHandler struct {
     imageService *service.ImageService
 }
 
+func (h *ImageHandler) GetImageHandlerFilename(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    imageID := vars["filename"]
 
+    imageData, contentType, err := h.imageService.GetImageFilename(imageID)
+    if err != nil {
+        http.Error(w, "Image not found", http.StatusNotFound)
+        return
+    }
+
+    w.Header().Set("Content-Type", contentType)
+    w.Write(imageData)
+}
 func NewImageHandler(service *service.ImageService) *ImageHandler {
     return &ImageHandler{imageService: service}
 }
@@ -48,3 +60,4 @@ func (h *ImageHandler) GetImageHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", contentType)
     w.Write(imageData)
 }
+

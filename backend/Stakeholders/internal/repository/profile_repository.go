@@ -31,7 +31,7 @@ func(r *ProfileRepository)CreateProfile(profile model.Profile, ctx context.Conte
 		}) RETURN p `
 
 	params := map[string]any{
-			"userId":    int64(profile.UserId),
+			"userId":    profile.UserId,
 			"name":      profile.Name,
 			"surname":   profile.Surname,
 			"biography": profile.Biography,
@@ -50,7 +50,7 @@ func(r *ProfileRepository)CreateProfile(profile model.Profile, ctx context.Conte
 	}
 	props := node.Props
 	newProfile := model.Profile{
-				UserId:    int(props["userId"].(int64)),
+				UserId:    props["userId"].(string),
 				Name:    props["name"].(string),
 				Surname:    props["surname"].(string),
 				Biography:    props["biography"].(string),
@@ -75,7 +75,7 @@ func(r *ProfileRepository)CreateProfile(profile model.Profile, ctx context.Conte
 }
 
 
-func (r *ProfileRepository) GetByUserID(userId int, ctx context.Context) (model.Profile, error) {
+func (r *ProfileRepository) GetByUserID(userId string, ctx context.Context) (model.Profile, error) {
 	var profile model.Profile
 
 	session := r.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -84,7 +84,7 @@ func (r *ProfileRepository) GetByUserID(userId int, ctx context.Context) (model.
 	
 	result, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		query := "MATCH (p:Person{userId: $userId}) RETURN p"
-		params := map[string]any{"userId": int64(userId)} 
+		params := map[string]any{"userId": userId} 
 		records, err := tx.Run(ctx, query, params)
 
 
@@ -102,7 +102,7 @@ func (r *ProfileRepository) GetByUserID(userId int, ctx context.Context) (model.
 		props := node.Props
 		foundProfile := model.Profile{
 
-				UserId:    int(props["userId"].(int64)),
+				UserId:    props["userId"].(string),
 				Name:    props["name"].(string),
 				Surname:    props["surname"].(string),
 				Biography:    props["biography"].(string),
