@@ -1,0 +1,12 @@
+<div class="container">
+    <div class="image-preview" *ngIf="imageSrc; else placeholder">
+        <img [src]="imageSrc" alt="Image Preview">
+    </div>
+    <ng-template #placeholder>
+        <div class="image-preview">
+            <span>Image Preview</span>
+        </div>
+    </ng-template>
+
+    <input #imageUploadInput type="file" (change)="onFileSelected($event)">
+</div>

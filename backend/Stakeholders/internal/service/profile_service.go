@@ -14,7 +14,7 @@ func NewProfileService ( repo* repository.ProfileRepository) *ProfileService {
 	return &ProfileService{r:repo}
 }
 
-func(s* ProfileService) GetByUserID (ctx context.Context, userId int) (model.Profile, error){
+func(s* ProfileService) GetByUserID (ctx context.Context, userId string) (model.Profile, error){
 	
 	profile, err := s.r.GetByUserID( userId, ctx)
 	if err != nil {
