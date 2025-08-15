@@ -2,21 +2,51 @@ package main
 
 import (
 	"context"
-	"log"
-	"net" 
+	"log" 
 	"os"
+	"time"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/joho/godotenv"
-	"google.golang.org/grpc"
 
+	"github.com/gorilla/handlers"
 
+	"net/http"
+
+	"github.com/gorilla/mux"
+
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/auth"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/config"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
-	stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto" 
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/middleware"
+	
+	"github.com/glebarez/sqlite" 
+    "gorm.io/gorm"
 
 )
+
+func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHandler, profileHandler *handler.ProfileHandler, router *mux.Router) {
+
+    router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
+
+	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
+	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
+
+    router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
+    router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
+	 router.HandleFunc("/image/filename/{filename}", imageHandler.GetImageHandlerFilename).Methods("GET")
+
+	corsObj := handlers.CORS(
+    handlers.AllowedOrigins([]string{"http://localhost:4200"}),
+    handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+    handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+)
+
+    log.Println("Server starting on port :8081...")
+	log.Fatal(http.ListenAndServe(":8081", corsObj(router)))
+}
 
 func main() {
 	
@@ -53,28 +83,72 @@ func main() {
 	log.Println("Successfully connected to Neo4j.")
 
 
-	stakeholderRepo := repository.NewStakeholderRepository(driver)	
-	stakeholderService := service.NewStakeholderService(stakeholderRepo)
-	stakeholderHandler := handler.NewStakeholderHandler(stakeholderService)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081" 
-	}
-
-	 listen, err := net.Listen("tcp", ":" + port)
+	 imageDB, err := gorm.Open(sqlite.Open("images.db"), &gorm.Config{})
     if err != nil {
-        log.Fatalf("failed to listen: %v", err)
+        log.Fatalf("Failed to connect to image database: %v", err)
     }
 
+	
+    imageDB.AutoMigrate(&repository.Image{})
 
-   	grpcServer := grpc.NewServer()
+	
+    imageRepo := repository.NewImageRepository(imageDB)
+    imageService := service.NewImageService(imageRepo)
+    imageHandler := handler.NewImageHandler(imageService)
 
-    
-    stakeholder_proto.RegisterStakeholderServiceServer(grpcServer, stakeholderHandler)
+	// Učitavanje JWT konfiguracije iz promenljivih okruženja
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		log.Fatalf("JWT_SECRET_KEY is not set in .env file or environment variables.")
+	}
+	jwtIssuer := os.Getenv("JWT_ISSUER")
+	jwtAudience := os.Getenv("JWT_AUDIENCE")
+	jwtDurationStr := os.Getenv("JWT_DURATION")
 
-    log.Println("Stakeholder gRPC service is running on port 8081...")
-    log.Fatal(grpcServer.Serve(listen))
+	
+	profileRepo := repository.NewProfileRepository(driver)	
+	profileService := service.NewProfileService(profileRepo)
+	profileHandler := handler.NewProfileHandler(profileService)
+	// Parsiranje trajanja, sa podrazumevanom vrednošću ako nije definisano
+	jwtDuration, err := time.ParseDuration(jwtDurationStr)
+	if err != nil {
+		log.Println("Error parsing JWT_DURATION from .env, using default of 24h.")
+		jwtDuration = 24 * time.Hour
+	}
+	
+	jwtConfig := &config.JWTConfig{
+		SecretKey: jwtSecretKey,
+		Issuer:    jwtIssuer,
+		Audience:  jwtAudience,
+		Duration:  jwtDuration,
+	}
 
+	router := mux.NewRouter().StrictSlash(true)
+	
+	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
+	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
+
+
+
+	userRepo := repository.NewUserRepository(driver)
+	userService := service.NewUserService(userRepo)
+	jwtGenerator := auth.NewJWTGenerator(jwtConfig)
+	authenticationService := service.NewAuthenticationService(userRepo, jwtGenerator)
+	userHandler := handler.NewUserHandler(userService)
+	authenticationHandler := handler.NewAuthenticationHandler(authenticationService)
+
+
+
+	//router.Handle("/api/users", handler.AuthMiddleware(userHandler.FindAll)).Methods("GET")
+	// Lančano povezivanje middleware-a za zaštićene rute
+	router.Handle(
+		"/api/users/{id}/block", 
+		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.HandlerFunc(userHandler.BlockUser))),
+	).Methods("PUT")
+
+	
+	authenticationHandler.RegisterRoutes(router)
+	//userHandler.RegisterRoutes(router)
+	startServer(userHandler,imageHandler,profileHandler, router)
 
 }

@@ -1,0 +1,21 @@
+<div class="profile-container" *ngIf="profile">
+  <h1>Profil korisnika</h1>
+
+  <div class="profile-card">
+    <img class="profile-image" [src]="profileImageSrc ? profileImageSrc : '/assets/default-profile.png'"  alt="Profile Image" />
+
+    <div class="profile-info">
+      <p><strong>Ime:</strong> {{ profile.name }}</p>
+      <p><strong>Prezime:</strong> {{ profile.surname }}</p>
+      <p><strong>Biografija:</strong> {{ profile.biography }}</p>
+      <p><strong>Moto:</strong> "{{ profile.moto }}"</p>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="loading">
+  Učitavanje profila...
+</div>
+<div class="error" *ngIf="error">
+  Greška pri učitavanju profila.
+</div>

@@ -1,0 +1,121 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    min-height: 100vh;      
+    padding: 40px 0;        
+    background-color: #f0f4f8;
+    overflow-y: auto;       
+}
+
+    .profile-form {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-title {
+        color: #4a5568;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    input[type="text"],
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    input:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #a7b5d9;
+    }
+
+    /* Stilovi za input tipa file */
+    .file-input-container {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-container input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .custom-file-upload {
+      border: 1px solid #cbd5e0;
+      padding: 12px;
+      display: block;
+      cursor: pointer;
+      border-radius: 8px;
+      text-align: center;
+      transition: background-color 0.3s ease;
+      color: #4a5568;
+      background-color: #f7fafc;
+    }
+
+    .custom-file-upload:hover {
+      background-color: #e2e8f0;
+    }
+
+    /* Stilovi za pregled slike */
+    .image-preview {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .preview-image {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #a7b5d9;
+    }
+
+    button[type="submit"] {
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        color: #ffffff;
+        background-color: #a7b5d9;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-weight: bold;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #8c9cc2;
+        transform: translateY(-2px);
+    }
