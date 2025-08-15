@@ -26,7 +26,7 @@ type Blog struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	AuthorId      string                 `protobuf:"bytes,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	AuthorId      int32                  `protobuf:"varint,4,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -82,11 +82,11 @@ func (x *Blog) GetContent() string {
 	return ""
 }
 
-func (x *Blog) GetAuthorId() string {
+func (x *Blog) GetAuthorId() int32 {
 	if x != nil {
 		return x.AuthorId
 	}
-	return ""
+	return 0
 }
 
 type CreateBlogRequest struct {
@@ -530,7 +530,7 @@ const file_proto_blog_service_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12\x1b\n" +
-	"\tauthor_id\x18\x04 \x01(\tR\bauthorId\"<\n" +
+	"\tauthor_id\x18\x04 \x01(\x05R\bauthorId\"<\n" +
 	"\x11CreateBlogRequest\x12'\n" +
 	"\tblog_post\x18\x01 \x01(\v2\n" +
 	".blog.BlogR\bblogPost\"=\n" +

@@ -8,7 +8,7 @@ message Blog {
   string id = 1;
   string title = 2;
   string content = 3;
-  string author_id = 4;
+  int32 author_id = 4;
 }
 
 message CreateBlogRequest {
