@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "./proto";
 
@@ -9,14 +10,41 @@ message Blog {
   string title = 2;
   string content = 3;
   string author_id = 4;
+  repeated string images = 5;
+  int32 number_of_likes = 6;
+}
+
+message BlogFull {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string author_id = 4;
+  repeated string images = 5;
+  int32 number_of_likes = 6;
+  repeated Comment comments = 7;
+}
+
+message Comment {
+  string id = 1;
+  string user_id = 2;
+  string content = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp last_modified = 5;
+}
+
+message CreateBlogInput {
+  string title = 1;
+  string content = 2;
+  string author_id = 3;
+  repeated string images = 4;
 }
 
 message CreateBlogRequest {
-  Blog blog_post = 1;
+  CreateBlogInput blog_input = 1;
 }
 
 message CreateBlogResponse {
-  Blog blog_post = 1;
+  BlogFull blog_post = 1;
 }
 
 message GetBlogRequest {
@@ -43,13 +71,24 @@ message DeleteBlogResponse {
   bool success = 1;
 }
 
-message GetAllBlogRequest {
+message GetAllBlogsRequest {
 }
 
-message GetAllBlogResponse {
-  repeated Blog blog_posts = 1;
+message GetAllBlogsResponse {
+  repeated Blog blogs = 1; 
 }
-
 service BlogService {
   rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc LikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
+  rpc UnlikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
+  rpc GetAllBlogs (GetAllBlogsRequest) returns (GetAllBlogsResponse);
+}
+
+message LikeBlogRequest {
+  string blog_id = 1;
+  string user_id = 2;
+}
+
+message LikeBlogResponse {
+  BlogFull blog_post = 1;
 }
