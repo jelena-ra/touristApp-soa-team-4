@@ -11,7 +11,7 @@ RUN go mod download
 COPY . .
 
 # Kompajliramo Go aplikaciju
-RUN CGO_ENABLED=0 GOOS=linux go build -o /blog-service .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /blog-service ./cmd/main.go
 
 FROM alpine:latest
 
