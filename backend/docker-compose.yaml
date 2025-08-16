@@ -1,0 +1,31 @@
+version: "3.7"
+services:
+
+  stakeholder-service:
+    image: stakeholder-service:compose_build
+    build:
+      context: ./Stakeholders
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./Stakeholders/.env
+
+  blog-service:
+    image: blog-service:compose_build
+    build:
+      context: ./Blog
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./Blog/.env
+
+
+networks:
+  backend:
+    driver: bridge

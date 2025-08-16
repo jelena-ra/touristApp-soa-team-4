@@ -7,6 +7,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+COPY .env .env
+
 # . . = ostatak koda
 COPY . .
 
@@ -17,7 +19,7 @@ FROM alpine:latest
 
 # kompajlira ono iz prvog koraka 
 COPY --from=builder /blog-service /blog-service
-
+COPY --from=builder /app/.env .env
 EXPOSE 8082
 
 CMD ["/blog-service"]
