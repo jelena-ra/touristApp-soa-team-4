@@ -12,6 +12,21 @@ services:
       - "8081:8081"
     env_file:
       - ./Stakeholders/.env
+    depends_on:
+      - stakeholders-db
+
+  stakeholders-db:
+    image: neo4j:4.4
+    container_name: stakeholders-db
+    environment:
+      NEO4J_AUTH: "neo4j/mojalutka123"
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - stakeholders_db_data:/data
+    networks:
+      - backend
 
   blog-service:
     image: blog-service:compose_build
@@ -24,8 +39,28 @@ services:
       - "8082:8082"
     env_file:
       - ./Blog/.env
+    depends_on:
+      - blog-db
+
+  blog-db:
+    image: mongo:latest
+    container_name: blog-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: blog_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - blog_db_data:/data/db
+    networks:
+      - backend
 
 
 networks:
   backend:
     driver: bridge
+
+volumes:
+  blog_db_data:
+  stakeholders_db_data:
