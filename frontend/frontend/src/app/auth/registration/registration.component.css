@@ -1,0 +1,81 @@
+/* Stilizacija za kontejner forme */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centriranje po vertikali */
+    min-height: 100vh;
+    padding: 40px 0;
+    background-color: #f0f4f8;
+}
+
+/* Stilizacija za samu formu */
+.registration-form {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Stilizacija za naslov forme */
+.form-title {
+    color: #4a5568;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Stilizacija za grupu input polja */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Stilizacija za labelu */
+label {
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* Stilizacija za inpute */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: none;
+    border-color: #a7b5d9;
+}
+
+/* Stilizacija za dugme */
+button[type="submit"] {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    color: #ffffff;
+    background-color: #a7b5d9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+
+button[type="submit"]:hover {
+    background-color: #8c9cc2;
+    transform: translateY(-2px);
+}

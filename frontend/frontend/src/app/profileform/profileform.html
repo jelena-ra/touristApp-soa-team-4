@@ -1,0 +1,33 @@
+<div class="container">
+    <form class="profile-form" [formGroup]="userProfileForm" >
+        <h2 class="form-title">Kreiraj svoj profil</h2>
+        <div class="input-group">
+            <label for="name">Ime</label>
+            <input type="text" id="name" matInput formControlName="name"  placeholder="Unesite svoje ime" required>
+        </div>
+        <div class="input-group">
+            <label for="surname">Prezime</label>
+            <input type="text" id="surname" matInput formControlName="surname" placeholder="Unesite svoje prezime" required>
+        </div>
+        <div class="input-group">
+            <label for="biography">Biografija</label>
+            <textarea id="biography" matInput formControlName="biography" rows="5" placeholder="Ukratko o sebi..."></textarea>
+        </div>
+        <div class="input-group">
+            <label for="moto">Moto</label>
+            <input type="text" id="moto" matInput formControlName="moto" placeholder="Vaš životni moto">
+        </div>
+        <div *ngIf="!showImageUpload; else imageUploadTemplate" class="object-image-container">
+        <img *ngIf="profile?.imageURL" [src]="profile.imageURL" alt="{{ profile.imageURL }}" class="object-image" />
+        <img *ngIf="!profile?.imageURL" src="assets/default-image.png" alt="The image does not exist." class="object-image" />
+        <button (click)="changeImage()" type="button" mat-raised-button color="button">Change image</button>
+      </div>
+      
+      <ng-template #imageUploadTemplate>
+        <div style="margin-bottom: 16px;">
+          <app-image-upload (fileSelected)="onFileSelected($event)" formControlName="imageURL" required></app-image-upload>
+        </div>
+      </ng-template>
+           <button [disabled]="userProfileForm.invalid" mat-raised-button type="submit" (click)="updateProfile()" color="button">Spremi</button>
+    </form>
+</div>

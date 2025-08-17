@@ -1,0 +1,42 @@
+<div class="container">
+    <form class="registration-form" [formGroup]="registrationForm">
+        <h2 class="form-title">Kreiraj svoj nalog</h2>
+        
+        <div class="input-group">
+            <label for="username">Korisničko ime</label>
+            <input type="text" id="username" formControlName="username" placeholder="Unesite korisničko ime" required>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Lozinka</label>
+            <input type="password" id="password" formControlName="password" placeholder="Unesite lozinku" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="name">Ime</label>
+            <input type="text" id="name" formControlName="name" placeholder="Unesite svoje ime" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="surname">Prezime</label>
+            <input type="text" id="surname" formControlName="surname" placeholder="Unesite svoje prezime" required>
+        </div>
+
+        <div class="input-group role-group">
+            <label>Odaberite ulogu:</label>
+            <div class="radio-options">
+                <input type="radio" id="tourist" name="role" formControlName="role" value="turista" required>
+                <label for="tourist">Turista</label>
+
+                <input type="radio" id="guide" name="role" formControlName="role" value="vodic" required>
+                <label for="guide">Vodič</label>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" formControlName="email" placeholder="Unesite email" required>
+        </div>
+        <button type="submit" [disabled]="registrationForm.invalid" mat-raised-button type="submit" (click)="register()" color="button">Registruj se</button>
+    </form> 
+</div>

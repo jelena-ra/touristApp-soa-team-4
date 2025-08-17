@@ -2,20 +2,76 @@ package service
 
 import (
 	"context"
+	"time"
 
-
-	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model" 
+	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/repository"
 )
+
 type BlogService struct {
-	repo *repository.BlogRepository
+	repo repository.BlogRepository
 }
 
-func NewBlogService(repo *repository.BlogRepository) *BlogService {
+func NewBlogService(repo repository.BlogRepository) *BlogService {
 	return &BlogService{repo: repo}
 }
-func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) error {
 
+func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) (*model.Blog, error) {
+	blog.CreatedAt = time.Now()
+	createdBlog, err := s.repo.CreateBlog(ctx, blog)
+	if err != nil {
+		return nil, err
+	}
+	return createdBlog, nil
+}
 
-    return s.repo.CreateBlog(ctx, blog)
+func (s *BlogService) LikeBlog(ctx context.Context, blogId string, userId string) (*model.Blog, error) {
+	blogFound, err := s.repo.GetById(ctx, blogId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, existingUserId := range blogFound.Likes {
+		if existingUserId == userId {
+			return blogFound, nil
+		}
+	}
+
+	blogFound.Likes = append(blogFound.Likes, userId)
+
+	blogUpdated, err := s.repo.Update(ctx, blogFound)
+	if err != nil {
+		return nil, err
+	}
+
+	return blogUpdated, nil
+}
+func (s *BlogService) UnlikeBlog(ctx context.Context, blogId string, userId string) (*model.Blog, error) {
+	blogFound, err := s.repo.GetById(ctx, blogId)
+	if err != nil {
+		return nil, err
+	}
+
+	indexToRemove := -1
+	for i, existingLikeId := range blogFound.Likes {
+		if existingLikeId == userId {
+			indexToRemove = i
+			break
+		}
+	}
+
+	if indexToRemove != -1 {
+		blogFound.Likes = append(blogFound.Likes[:indexToRemove], blogFound.Likes[indexToRemove+1:]...)
+		return s.repo.Update(ctx, blogFound)
+	}
+
+	return blogFound, nil
+}
+
+func (s *BlogService) GetAllBlogs(ctx context.Context) ([]model.Blog, error) {
+	blogs, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return blogs, nil
 }
