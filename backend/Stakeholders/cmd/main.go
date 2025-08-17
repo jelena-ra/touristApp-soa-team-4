@@ -9,8 +9,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/joho/godotenv"
 
-	"github.com/gorilla/handlers"
-
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -27,10 +25,13 @@ import (
 
 )
 
-func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHandler, profileHandler *handler.ProfileHandler, router *mux.Router) {
+func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHandler, profileHandler *handler.ProfileHandler, router *mux.Router, authenticationMiddleware *middleware.AuthenticationMiddleware, authorizationMiddleware *middleware.AuthorizationMiddleware) {
 
     router.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
-
+   /* router.Handle(
+        "/users",
+        authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.HandlerFunc(userHandler.GetAllUsers))),
+    ).Methods("GET", "OPTIONS")*/
 	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
 	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
 
@@ -38,14 +39,10 @@ func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHa
     router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
 	 router.HandleFunc("/image/filename/{filename}", imageHandler.GetImageHandlerFilename).Methods("GET")
 
-	corsObj := handlers.CORS(
-    handlers.AllowedOrigins([]string{"http://localhost:4200"}),
-    handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-    handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
-)
+	
 
     log.Println("Server starting on port :8081...")
-	log.Fatal(http.ListenAndServe(":8081", corsObj(router)))
+	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
 func main() {
@@ -149,6 +146,6 @@ func main() {
 	
 	authenticationHandler.RegisterRoutes(router)
 	//userHandler.RegisterRoutes(router)
-	startServer(userHandler,imageHandler,profileHandler, router)
+	startServer(userHandler,imageHandler,profileHandler, router, authenticationMiddleware, authorizationMiddleware)
 
 }

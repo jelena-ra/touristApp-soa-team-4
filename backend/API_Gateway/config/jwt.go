@@ -20,7 +20,7 @@ func NewJWTConfig() *JWTConfig {
     
     issuer := os.Getenv("JWT_ISSUER")
     if issuer == "" {
-        issuer = "extouristApp"
+        issuer = "toruistApp"
     }
     
     audience := os.Getenv("JWT_AUDIENCE")

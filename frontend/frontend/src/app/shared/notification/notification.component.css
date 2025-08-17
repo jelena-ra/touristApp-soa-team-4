@@ -1,3 +1,6 @@
+/*@import 'src/assets/styles/bootstrap.min.css';
+@import 'src/assets/styles/font-awesome.min.css';
+@import 'src/assets/styles/font-awesome-animation.min.css';*/
 body {
   background: #000e29;
 }
@@ -267,6 +270,3 @@ body {
   height: auto;
 }
 
-@import 'src/assets/styles/bootstrap.min.css';
-@import 'src/assets/styles/font-awesome.min.css';
-@import 'src/assets/styles/font-awesome-animation.min.css';

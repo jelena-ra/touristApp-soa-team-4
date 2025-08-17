@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { AuthService } from '../auth.service';
-
+import { Router } from '@angular/router';
 
 
 
@@ -22,7 +22,7 @@ import { AuthService } from '../auth.service';
 })
 export class LoginComponent {
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required]),
@@ -36,9 +36,11 @@ export class LoginComponent {
     };
 
     this.authService.login(loginData).subscribe({
-        next: () => alert('Korisnik je ulogovan!'),
+        next: () => alert('Korisnik je ulogovan!'),  
+
         error: (err) => console.error('Greška pri logovanju:', err)
     });
+    this.router.navigate(['home'])
   }
 
  

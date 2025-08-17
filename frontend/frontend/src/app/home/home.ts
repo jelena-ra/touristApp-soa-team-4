@@ -24,4 +24,8 @@ export class Home {
   login(): void {
     this.router.navigate(['login']);
   }
+   seeUsers(): void {
+    this.router.navigate(['usersList']);
+  }
+
 }

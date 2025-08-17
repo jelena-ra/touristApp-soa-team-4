@@ -1,0 +1,23 @@
+<div class="user-table-container">
+  <h2>Tabela Korisnika</h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Korisničko Ime</th>
+        <th>Email</th>
+        <th>Uloga</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users"  (click)="onSelectUser(user)"  [ngStyle]="{'cursor': 'pointer'}">
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+      </tr>
+      <tr *ngIf="!users || users.length === 0">
+        <td colspan="3" style="text-align: center;">Nema korisnika za prikaz.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
