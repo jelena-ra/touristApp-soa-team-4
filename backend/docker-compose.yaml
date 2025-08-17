@@ -6,6 +6,7 @@ services:
     build:
       context: ./Stakeholders
       dockerfile: Dockerfile
+    restart: unless-stopped
     networks:
       - backend
     ports:

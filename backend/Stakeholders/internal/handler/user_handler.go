@@ -2,15 +2,15 @@ package handler
 
 import (
 	//"context"
+	"encoding/json"
 	"log"
 	"net/http"
-	"encoding/json"
+
 	//"github.com/gorilla/mux"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
 	//stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/gorilla/mux"
 )
-
 
 type UserHandler struct {
 	//stakeholder_proto.UnimplementedStakeholderServiceServer
@@ -38,7 +38,6 @@ func (h *UserHandler) GetAllUsers(writer http.ResponseWriter, req *http.Request)
 	}
 }
 
-
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -56,4 +55,31 @@ func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updatedUser)
+}
+
+func (h *UserHandler) CheckIfUserExists(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if id == "" {
+		http.Error(w, "Nedostaje ID korisnika.", http.StatusBadRequest)
+		return
+	}
+
+	exists, err := h.service.CheckIfUserExists(id)
+	if err != nil {
+		http.Error(w, "Greška na serveru.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if !exists {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"message": "User wasn't found"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User exists"})
 }
