@@ -1,5 +1,4 @@
-// 1. ISPRAVNA PUTANJA (relativna)
-const followingRepository = require('../repository/followingRepository');
+const followingRepository = require('../repository/followingRepo');
 const stakeholdersClient = require('../client/StakeholdersClient'); 
 
 class FollowingService {
