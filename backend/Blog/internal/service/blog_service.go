@@ -9,11 +9,12 @@ import (
 )
 
 type BlogService struct {
-	repo repository.BlogRepository
+	repo        repository.BlogRepository
+	repoComment repository.CommentRepository
 }
 
-func NewBlogService(repo repository.BlogRepository) *BlogService {
-	return &BlogService{repo: repo}
+func NewBlogService(repo repository.BlogRepository, repoComment repository.CommentRepository) *BlogService {
+	return &BlogService{repo: repo, repoComment: repoComment}
 }
 
 func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) (*model.Blog, error) {
@@ -74,4 +75,25 @@ func (s *BlogService) GetAllBlogs(ctx context.Context) ([]model.Blog, error) {
 		return nil, err
 	}
 	return blogs, nil
+}
+
+func (s *BlogService) CreateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
+	comment.CreatedAt = time.Now()
+	comment.LastModified = time.Now()
+
+	createdComment, err := s.repoComment.CreateComment(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	return createdComment, nil
+}
+
+func (s *BlogService) UpdateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
+	comment.LastModified = time.Now()
+
+	updatedComment, err := s.repoComment.Update(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	return updatedComment, nil
 }

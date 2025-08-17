@@ -149,3 +149,34 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 		Blogs: protoBlogs,
 	}, nil
 }
+
+func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateCommentRequest) (*blog_proto.CreateCommentResponse, error) {
+	commentReq := req.GetCommentInput()
+	if commentReq == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "comment input cannot be empty")
+	}
+
+	comment := &model.Comment{
+		UserID:  commentReq.GetUserId(),
+		Content: commentReq.Content,
+	}
+
+	createdComment, err := h.service.CreateComment(ctx, comment)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create comment: %v", err)
+	}
+
+	protoCommentRes := &blog_proto.Comment{
+		Id:      createdComment.ID.Hex(),
+		UserId:  createdComment.UserID,
+		Content: createdComment.Content,
+
+		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
+		CreatedAt:    timestamppb.New(createdComment.CreatedAt),
+		LastModified: timestamppb.New(createdComment.LastModified),
+	}
+
+	return &blog_proto.CreateCommentResponse{
+		Comment: protoCommentRes,
+	}, nil
+}

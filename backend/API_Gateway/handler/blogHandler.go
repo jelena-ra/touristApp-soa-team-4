@@ -15,13 +15,12 @@ type BlogHandler struct {
 	client blog_proto.BlogServiceClient
 }
 
-
 func NewBlogHandler(client blog_proto.BlogServiceClient) *BlogHandler {
 	return &BlogHandler{client: client}
 }
 
 func (h *BlogHandler) GetAllBlogsHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
@@ -41,75 +40,73 @@ func (h *BlogHandler) GetAllBlogsHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *BlogHandler) CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
-    // Definise se privremena struktura za dekodiranje JSON-a
-    var reqBody struct {
-        BlogInput map[string]interface{} `json:"blogInput"`
-    }
+	// Definise se privremena struktura za dekodiranje JSON-a
+	var reqBody struct {
+		BlogInput map[string]interface{} `json:"blogInput"`
+	}
 
-    // Dekodiranje JSON tela zahteva u privremenu mapu
-    if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-        log.Printf("Failed to decode request body: %v", err)
-        http.Error(w, "Invalid request body", http.StatusBadRequest)
-        return
-    }
+	// Dekodiranje JSON tela zahteva u privremenu mapu
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		log.Printf("Failed to decode request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
-    // Provera da li postoji ugnježdeni 'blogInput' objekat
-    if reqBody.BlogInput == nil {
-        log.Println("blogInput is missing from the request body")
-        http.Error(w, "Required fields are missing", http.StatusBadRequest)
-        return
-    }
+	// Provera da li postoji ugnježdeni 'blogInput' objekat
+	if reqBody.BlogInput == nil {
+		log.Println("blogInput is missing from the request body")
+		http.Error(w, "Required fields are missing", http.StatusBadRequest)
+		return
+	}
 
-    // Kreira se gRPC zahtev sa ugnježdenim blogInput-om
-    blogInput := &blog_proto.CreateBlogInput{
-        Title:    reqBody.BlogInput["title"].(string),
-        Content:  reqBody.BlogInput["content"].(string),
-        AuthorId: reqBody.BlogInput["authorId"].(string),
-    }
+	// Kreira se gRPC zahtev sa ugnježdenim blogInput-om
+	blogInput := &blog_proto.CreateBlogInput{
+		Title:    reqBody.BlogInput["title"].(string),
+		Content:  reqBody.BlogInput["content"].(string),
+		AuthorId: reqBody.BlogInput["authorId"].(string),
+	}
 
-    // Provera da li su obavezna polja popunjena
-    if blogInput.Title == "" || blogInput.Content == "" || blogInput.AuthorId == "" {
-        http.Error(w, "Required fields are missing", http.StatusBadRequest)
-        return
-    }
-    
-    // Dohvaćanje i konverzija niza slika
-    if images, ok := reqBody.BlogInput["images"].([]interface{}); ok {
-        for _, img := range images {
-            if strImg, ok := img.(string); ok {
-                blogInput.Images = append(blogInput.Images, strImg)
-            }
-        }
-    }
+	// Provera da li su obavezna polja popunjena
+	if blogInput.Title == "" || blogInput.Content == "" || blogInput.AuthorId == "" {
+		http.Error(w, "Required fields are missing", http.StatusBadRequest)
+		return
+	}
 
-    // Poziv gRPC metode CreateBlog
-    ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-    defer cancel()
+	// Dohvaćanje i konverzija niza slika
+	if images, ok := reqBody.BlogInput["images"].([]interface{}); ok {
+		for _, img := range images {
+			if strImg, ok := img.(string); ok {
+				blogInput.Images = append(blogInput.Images, strImg)
+			}
+		}
+	}
 
-    resp, err := h.client.CreateBlog(ctx, &blog_proto.CreateBlogRequest{
-        BlogInput: blogInput,
-    })
-    if err != nil {
-        log.Printf("Failed to create blog via gRPC: %v", err)
-        http.Error(w, "Failed to create blog", http.StatusInternalServerError)
-        return
-    }
+	// Poziv gRPC metode CreateBlog
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-    if err := json.NewEncoder(w).Encode(resp.GetBlogPost()); err != nil {
-        log.Printf("Failed to encode response: %v", err)
-        http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-    }
+	resp, err := h.client.CreateBlog(ctx, &blog_proto.CreateBlogRequest{
+		BlogInput: blogInput,
+	})
+	if err != nil {
+		log.Printf("Failed to create blog via gRPC: %v", err)
+		http.Error(w, "Failed to create blog", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(resp.GetBlogPost()); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
-
 
 func (h *BlogHandler) LikeBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	blogID := vars["blogId"]
 	userID := vars["userId"]
 
-	
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
@@ -120,7 +117,6 @@ func (h *BlogHandler) LikeBlogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp.GetBlogPost()); err != nil {
@@ -128,7 +124,6 @@ func (h *BlogHandler) LikeBlogHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
-
 
 func (h *BlogHandler) UnlikeBlogHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -145,10 +140,51 @@ func (h *BlogHandler) UnlikeBlogHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp.GetBlogPost()); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func (h *BlogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	var reqBody struct {
+		CommentInput map[string]interface{} `json:"commentInput"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		log.Printf("Failed to decode request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if reqBody.CommentInput == nil {
+		log.Println("commentInput is missing from the request body")
+		http.Error(w, "Required fields are missing", http.StatusBadRequest)
+		return
+	}
+
+	commentInput := &blog_proto.CreateCommentInput{
+		UserId:  reqBody.CommentInput["userId"].(string),
+		Content: reqBody.CommentInput["content"].(string),
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.CreateComment(ctx, &blog_proto.CreateCommentRequest{
+		CommentInput: commentInput,
+	})
+	if err != nil {
+		log.Printf("Failed to create comment via gRPC: %v", err)
+		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(resp.GetComment()); err != nil {
 		log.Printf("Failed to encode response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: proto/blog_service.proto
+// source: blog_service.proto
 
 package proto
 
@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BlogService_CreateBlog_FullMethodName  = "/blog.BlogService/CreateBlog"
-	BlogService_LikeBlog_FullMethodName    = "/blog.BlogService/LikeBlog"
-	BlogService_UnlikeBlog_FullMethodName  = "/blog.BlogService/UnlikeBlog"
-	BlogService_GetAllBlogs_FullMethodName = "/blog.BlogService/GetAllBlogs"
+	BlogService_CreateBlog_FullMethodName    = "/blog.BlogService/CreateBlog"
+	BlogService_LikeBlog_FullMethodName      = "/blog.BlogService/LikeBlog"
+	BlogService_UnlikeBlog_FullMethodName    = "/blog.BlogService/UnlikeBlog"
+	BlogService_GetAllBlogs_FullMethodName   = "/blog.BlogService/GetAllBlogs"
+	BlogService_CreateComment_FullMethodName = "/blog.BlogService/CreateComment"
 )
 
 // BlogServiceClient is the client API for BlogService service.
@@ -33,6 +34,7 @@ type BlogServiceClient interface {
 	LikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
 	UnlikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
 	GetAllBlogs(ctx context.Context, in *GetAllBlogsRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error)
+	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
 }
 
 type blogServiceClient struct {
@@ -83,6 +85,16 @@ func (c *blogServiceClient) GetAllBlogs(ctx context.Context, in *GetAllBlogsRequ
 	return out, nil
 }
 
+func (c *blogServiceClient) CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCommentResponse)
+	err := c.cc.Invoke(ctx, BlogService_CreateComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BlogServiceServer is the server API for BlogService service.
 // All implementations must embed UnimplementedBlogServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type BlogServiceServer interface {
 	LikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
 	UnlikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
 	GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error)
+	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	mustEmbedUnimplementedBlogServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedBlogServiceServer) UnlikeBlog(context.Context, *LikeBlogReque
 }
 func (UnimplementedBlogServiceServer) GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllBlogs not implemented")
+}
+func (UnimplementedBlogServiceServer) CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateComment not implemented")
 }
 func (UnimplementedBlogServiceServer) mustEmbedUnimplementedBlogServiceServer() {}
 func (UnimplementedBlogServiceServer) testEmbeddedByValue()                     {}
@@ -206,6 +222,24 @@ func _BlogService_GetAllBlogs_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlogService_CreateComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlogServiceServer).CreateComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlogService_CreateComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlogServiceServer).CreateComment(ctx, req.(*CreateCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BlogService_ServiceDesc is the grpc.ServiceDesc for BlogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,7 +263,11 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetAllBlogs",
 			Handler:    _BlogService_GetAllBlogs_Handler,
 		},
+		{
+			MethodName: "CreateComment",
+			Handler:    _BlogService_CreateComment_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/blog_service.proto",
+	Metadata: "blog_service.proto",
 }

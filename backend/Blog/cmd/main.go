@@ -61,7 +61,9 @@ func main() {
 	//log.Printf("!!! APLIKACIJA KORISTI KOLEKCIJU: %s", collectionName)
 
 	blogRepo := repository.NewBlogRepository(client, dbName, collectionName)
-	blogService := service.NewBlogService(blogRepo)
+	commentRepo := repository.NewCommentRepository(client, dbName, "comments")
+
+	blogService := service.NewBlogService(blogRepo, commentRepo)
 	blogHandler := handler.NewBlogHandler(blogService)
 
 	port := os.Getenv("MONGO_PORT")
