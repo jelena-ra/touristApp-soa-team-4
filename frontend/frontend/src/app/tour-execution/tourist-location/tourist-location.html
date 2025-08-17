@@ -1,0 +1,7 @@
+<form class="location-form">
+  <h2>Molimo vas da odaberete lokaciju na mapi</h2>
+  <div class="form-container">
+  <!-- Vaš MapComponent, sada prepoznat! -->
+    <app-map (locationSelected)="onLocationSelected($event)"></app-map>
+  </div>
+</form>

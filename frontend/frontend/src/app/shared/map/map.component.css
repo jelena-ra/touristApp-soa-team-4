@@ -1,0 +1,5 @@
+#map {
+  /* Fiksirajte dimenzije mape ili koristite fleksibilne jedinice */
+  height: 500px;
+  width: 100%;
+}

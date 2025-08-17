@@ -1,0 +1,49 @@
+#imgb {
+    position: fixed;  /* Postavlja sliku fiksiranu u odnosu na ekran */
+    top: 0;
+    left: 0;
+    height: 100%;  /* Pokriva celu visinu ekrana */
+    width: 100%;   /* Pokriva celu širinu ekrana */
+    object-fit: cover;  /* Pokriva ceo ekran, zadržavajući proporcije slike */
+    z-index: -1;  /* Da bude ispod sadržaja */
+    opacity: 0.5;  /* Bleda slika */
+}
+  
+.location-form {
+    max-width: 630px;
+    margin: 20px auto; /* Centriraj formu i dodaće se razmak od vrha i dna ekrana */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+    background-color: #f9f9f9;
+}
+
+
+h2 {
+    text-align: center; 
+    color: #333; 
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%; /* Dodaj širinu na roditeljsku div kako bi zauzela celu širinu */
+}
+
+button {
+    width: 100%; /* Dugme zauzima celu širinu roditeljskog kontejnera */
+    background-color: #34AB45 !important;
+    color: white !important; /* Bela boja za tekst */
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2ecc71 !important; /* Svetlija nijansa zelene pri hover-u kad je dugme omogućeno */
+}
