@@ -45,7 +45,7 @@ export class AuthService {
 
     register(registration: Registration): Observable<AuthenticationResponse> {
     return this.http
-      .post<AuthenticationResponse>(`http://localhost:8081/api/users`, registration)
+      .post<AuthenticationResponse>(`http://localhost:8000/api/users`, registration)
       .pipe(
         tap((authenticationResponse) => {
          
@@ -75,7 +75,7 @@ export class AuthService {
 
   login(login: Login): Observable<AuthenticationResponse> {
     return this.http
-      .post<AuthenticationResponse>(`http://localhost:8081/api/users/login`, login)
+      .post<AuthenticationResponse>(`http://localhost:8000/api/users/login`, login)
       .pipe(
         tap((authenticationResponse) => {
           this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);

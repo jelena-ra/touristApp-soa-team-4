@@ -8,7 +8,7 @@ import { catchError, Observable, tap, throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class ImageService {
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = 'http://localhost:8000/api';
   private controllerPath = "";
 
   constructor(private http: HttpClient) { }
@@ -19,7 +19,7 @@ export class ImageService {
       this.apiUrl = this.apiUrl + this.controllerPath;
     } else if (this.controllerPath !== path) {
       this.controllerPath = path;
-      this.apiUrl = 'http://localhost:8081';
+      this.apiUrl = 'http://localhost:8000/api';
       this.apiUrl = this.apiUrl + this.controllerPath;
     }
   }
