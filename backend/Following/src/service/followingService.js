@@ -4,13 +4,11 @@ const stakeholdersClient = require('../client/StakeholdersClient');
 class FollowingService {
 
   async followUser(followerId, followedId) {
-    console.log(`Servisni sloj: Zahtev za praćenje ${followerId} -> ${followedId}`);
 
     if (followerId === followedId) {
       throw new Error('Korisnik ne može sam sebe da prati.');
     }
 
-    console.log('Provera postojanja korisnika u Stakeholders servisu...');
     const [followerExists, followedExists] = await Promise.all([
       stakeholdersClient.checkUserExistence(followerId),   
       stakeholdersClient.checkUserExistence(followedId)    
@@ -29,6 +27,25 @@ class FollowingService {
     } catch (error) {
       throw new Error('Došlo je do greške prilikom upisa u bazu.' + error);
     }
+  }
+
+  async getRecommendations(userId) { 
+    const userExists = await stakeholdersClient.checkUserExistence(userId);
+    if (!userExists) {
+      throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
+    }
+
+    const recommendedIds = await followingRepository.getRecommendation(userId);
+    if (!recommendedIds || recommendedIds.length === 0) {
+      return [];
+    }
+    const profilePromises = recommendedIds.map(id => {
+      return stakeholdersClient.getProfileByUserId(id);
+    });
+
+    const recommendedProfiles = await Promise.all(profilePromises);
+    const finalProfiles = recommendedProfiles.filter(profile => profile !== null);
+    return finalProfiles;
   }
 }
 

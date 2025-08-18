@@ -4,6 +4,7 @@ package following;
 
 service FollowingService {
   rpc FollowUser(FollowRequest) returns (FollowResponse) {}
+  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse){}
 }
 
 message FollowRequest {
@@ -14,4 +15,21 @@ message FollowRequest {
 message FollowResponse {
   string status = 1;
   string message = 2;
+}
+
+message Profile {
+  string userId = 1;
+  string name = 2;
+  string surname = 3;
+  string biography = 4;
+  string moto = 5;
+  string imageURL = 6;
+}
+
+message GetRecommendationsRequest {
+  string userId = 1;
+}
+
+message GetRecommendationsResponse {
+  repeated Profile profiles = 1;
 }
