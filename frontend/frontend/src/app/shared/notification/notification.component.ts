@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NotificationType } from '../model/notificationType.enum';
-
+import { CommonModule } from '@angular/common';
 interface Notification {
   message: string;
   timeout: number;
@@ -22,8 +22,13 @@ export interface NotifyOptions {
 
 @Component({
   selector: 'app-notification-component',
+   imports: [
+    CommonModule
+  ],
   templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.css'],
+  
+  standalone:true
 })
 export class NotificationComponent {
   notifications: Notification[] = [];

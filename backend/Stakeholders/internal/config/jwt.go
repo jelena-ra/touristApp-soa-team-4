@@ -13,19 +13,19 @@ type JWTConfig struct {
 }
 
 func NewJWTConfig() *JWTConfig {
-    secretKey := os.Getenv("JWT_KEY")
+    secretKey := os.Getenv("JWT_SECRET_KEY")
     if secretKey == "" {
-        secretKey = "explorer_secret_key"
+        secretKey = "neka_tajna_koja_se_ne_ponavlja"
     }
     
     issuer := os.Getenv("JWT_ISSUER")
     if issuer == "" {
-        issuer = "explorer"
+        issuer = "extouristApp"
     }
     
     audience := os.Getenv("JWT_AUDIENCE")
     if audience == "" {
-        audience = "explorer-front.com"
+        audience = "touristApp-users"
     }
     
     return &JWTConfig{

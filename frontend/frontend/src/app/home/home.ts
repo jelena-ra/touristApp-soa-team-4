@@ -28,4 +28,8 @@ export class Home {
   simulator(): void {
     this.router.navigate(['tourist-location']);
   }
+   seeUsers(): void {
+    this.router.navigate(['usersList']);
+  }
+
 }

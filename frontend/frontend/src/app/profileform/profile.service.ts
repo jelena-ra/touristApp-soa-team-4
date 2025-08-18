@@ -2,6 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { TokenStorage } from '../auth/jwt/token.service';
 
 export interface Profile {
   userId: string;
@@ -14,11 +15,15 @@ export interface Profile {
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private baseUrl = 'http://localhost:8081/profile';
 
-  constructor(private http: HttpClient) {}
+  private baseUrl = 'http://localhost:8000/api/profile';
+
+  constructor(private http: HttpClient, private authService: TokenStorage) {}
 
   createProfile(profile: Profile): Observable<Profile> {
-    return this.http.post<Profile>(this.baseUrl, profile);
+       const token = this.authService.getAccessToken();
+    return this.http.post<Profile>(this.baseUrl, profile, { headers: {
+        'Authorization': `Bearer ${token}`
+      } });
   }
 }

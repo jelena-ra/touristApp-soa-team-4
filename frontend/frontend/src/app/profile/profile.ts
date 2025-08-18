@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ImageService } from '../image/image.service';
+import { TokenStorage
 
+ } from '../auth/jwt/token.service';
 export interface Profile {
   userId: string;
   name: string;
@@ -30,10 +32,16 @@ profile: Profile | null = null;
   error = false;
   profileImageSrc: string | null = null;
 
-  constructor(private http: HttpClient,   private imageService: ImageService, ) {}
+  constructor(private http: HttpClient,   private imageService: ImageService,private authService: TokenStorage ) {}
+
+
 
   ngOnInit() {
-    this.http.get<Profile>('http://localhost:8081/profile/2').subscribe({
+      const token = this.authService.getAccessToken();
+
+    this.http.get<Profile>('http://localhost:8000/api/profile/2', { headers: {
+        'Authorization': `Bearer ${token}`
+      } }).subscribe({
       next: (data) => {
         this.profile = data;
         this.loading = false;
