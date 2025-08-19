@@ -90,7 +90,7 @@ func main() {
         authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
     ).Methods("POST", "OPTIONS")
 	router.Handle(
-        "/api/stakeholders/users/{id}/block",
+        "/api/users/{id}/block",
         authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
     ).Methods("PUT", "OPTIONS")
 

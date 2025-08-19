@@ -51,4 +51,27 @@ export class UsersList implements OnInit {
       }
     });
   }
+  onBlockUser(user: User): void {
+  const token = this.authService.getAccessToken();
+  if (!token) {
+    console.error('Nema tokena. Korisnik nije prijavljen.');
+    return;
+  }
+
+  const apiUrl = `http://localhost:8000/api/users/${user.id}/block`;
+
+  this.http.put(apiUrl, {}, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  }).subscribe({
+    next: () => {
+        console.log(`Korisnik ${user.username} je blokiran.`);
+        this.fetchUsers();
+      },
+      error: (error) => {
+        console.error('Greška pri blokiranju korisnika', error);
+      }
+    });
+  }
 }
