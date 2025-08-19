@@ -5,6 +5,7 @@ import { ProfileComponent } from './profile/profile';
 import { RegistrationComponent } from './auth/registration/registration.component';
 import { LoginComponent } from './auth/login/login.component';
 import { UsersList } from './users-list/users-list';
+import { TouristLocationComponent } from './tour-execution/tourist-location/tourist-location';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -12,7 +13,8 @@ export const routes: Routes = [
   { path: 'create-profile', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },
+  { path: 'usersList', component: UsersList },
   { path: 'login', component: LoginComponent },
-  { path: 'usersList', component: UsersList }
+  { path: 'tourist-location', component: TouristLocationComponent }
 
 ];
