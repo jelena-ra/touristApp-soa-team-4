@@ -13,13 +13,15 @@ services:
     env_file:
       - ./Stakeholders/.env
     depends_on:
-      - stakeholders-db
+      stakeholders-db:
+        condition: service_healthy
+    restart: on-failure
 
   stakeholders-db:
     image: neo4j:4.4
     container_name: stakeholders-db
     environment:
-      NEO4J_AUTH: "neo4j/mojalutka123"
+      NEO4J_AUTH: "neo4j/password"
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -27,6 +29,11 @@ services:
       - stakeholders_db_data:/data
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD} -a neo4j://localhost:7687 'RETURN 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   blog-service:
     image: blog-service:compose_build
@@ -55,7 +62,20 @@ services:
       - blog_db_data:/data/db
     networks:
       - backend
-
+    
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./API_Gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    env_file:
+      - ./API_Gateway/.env
+    depends_on:
+      - blog-service
+      - stakeholder-service
 
 networks:
   backend:

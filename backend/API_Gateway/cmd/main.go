@@ -25,7 +25,8 @@ import (
 )
 
 var (
-	stakeholdersServiceURL, _ = url.Parse("http://localhost:8081")
+	//stakeholdersServiceURL, _ = url.Parse("http://localhost:8081")
+	stakeholdersServiceURL, _ = url.Parse("http://stakeholder-service:8081")
 )
 
 func NewReverseProxy(targetURL *url.URL) *httputil.ReverseProxy {
@@ -38,7 +39,8 @@ func main() {
 		log.Println("Error loading .env file")
 	}
 
-	blogGRPCAddr := "localhost:8082"
+	//blogGRPCAddr := "localhost:8082" 
+	blogGRPCAddr := "blog-service:8082" 
 	blogGRPCConn, err := grpc.Dial(blogGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect to blog service: %v", err)
@@ -84,10 +86,10 @@ func main() {
 		"/api/profile",
 		authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
 	).Methods("POST", "OPTIONS")
-	router.Handle(
-		"/api/stakeholders/users/{id}/block",
-		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
-	).Methods("PUT", "OPTIONS")
+    router.Handle(
+        "/api/users/{id}/block",
+        authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
+    ).Methods("PUT", "OPTIONS")
 
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.GetAllBlogsHandler)).Methods("GET")
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.CreateBlogHandler)).Methods("POST")
