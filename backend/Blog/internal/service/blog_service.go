@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
@@ -88,12 +89,21 @@ func (s *BlogService) CreateComment(ctx context.Context, comment *model.Comment)
 	return createdComment, nil
 }
 
-func (s *BlogService) UpdateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
-	comment.LastModified = time.Now()
-
-	updatedComment, err := s.repoComment.Update(ctx, comment)
+func (s *BlogService) UpdateComment(ctx context.Context, commentId string, userId string, content string) (*model.Comment, error) {
+	comment, err := s.repoComment.GetById(ctx, commentId)
 	if err != nil {
 		return nil, err
 	}
-	return updatedComment, nil
+
+	if comment.UserID != userId {
+		return nil, errors.New("user is not the author of the comment")
+	}
+
+	comment.Content = content
+	comment.LastModified = time.Now()
+	comment, err = s.repoComment.Update(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	return comment, nil
 }

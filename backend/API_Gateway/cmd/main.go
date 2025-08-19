@@ -94,6 +94,7 @@ func main() {
 	router.Handle("/api/blogs/{blogId}/like/{userId}", http.HandlerFunc(blogHandler.LikeBlogHandler)).Methods("PUT")
 	router.Handle("/api/blogs/{blogId}/unlike/{userId}", http.HandlerFunc(blogHandler.UnlikeBlogHandler)).Methods("DELETE")
 	router.Handle("/api/comments", http.HandlerFunc(blogHandler.CreateCommentHandler)).Methods("POST")
+	router.Handle("/api/comments/update", http.HandlerFunc(blogHandler.UpdateCommentHandler)).Methods("POST")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

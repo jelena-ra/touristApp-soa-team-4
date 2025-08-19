@@ -180,3 +180,29 @@ func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateC
 		Comment: protoCommentRes,
 	}, nil
 }
+
+func (h *BlogHandler) UpdateComment(ctx context.Context, req *blog_proto.UpdateCommentRequest) (*blog_proto.UpdateCommentResponse, error) {
+	updateReq := req.GetCommentInput()
+	if updateReq == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "comment update input cannot be empty")
+	}
+
+	updatedComment, err := h.service.UpdateComment(ctx, updateReq.CommentId, updateReq.UserId, updateReq.Content)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update comment: %v", err)
+	}
+
+	protoCommentRes := &blog_proto.Comment{
+		Id:      updatedComment.ID.Hex(),
+		UserId:  updatedComment.UserID,
+		Content: updatedComment.Content,
+
+		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
+		CreatedAt:    timestamppb.New(updatedComment.CreatedAt),
+		LastModified: timestamppb.New(updatedComment.LastModified),
+	}
+
+	return &blog_proto.UpdateCommentResponse{
+		Comment: protoCommentRes,
+	}, nil
+}

@@ -12,6 +12,7 @@ import (
 type CommentRepository interface {
 	CreateComment(ctx context.Context, blog *model.Comment) (*model.Comment, error)
 	Update(ctx context.Context, comment *model.Comment) (*model.Comment, error)
+	GetById(ctx context.Context, id string) (*model.Comment, error)
 }
 
 type CommentRepositoryMongo struct {
@@ -26,6 +27,25 @@ func NewCommentRepository(client *mongo.Client, dbName, collectionName string) C
 		dbName:         dbName,
 		collectionName: collectionName,
 	}
+}
+
+func (r *CommentRepositoryMongo) GetById(ctx context.Context, id string) (*model.Comment, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{"_id": objID}
+	var comment model.Comment
+	err = r.client.Database(r.dbName).Collection(r.collectionName).FindOne(ctx, filter).Decode(&comment)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &comment, nil
 }
 
 func (r *CommentRepositoryMongo) CreateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {

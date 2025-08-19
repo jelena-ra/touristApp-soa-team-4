@@ -189,3 +189,46 @@ func (h *BlogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *BlogHandler) UpdateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	var reqBody struct {
+		CommentInput map[string]interface{} `json:"commentInput"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		log.Printf("Failed to decode request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if reqBody.CommentInput == nil {
+		log.Println("commentInput is missing from the request body")
+		http.Error(w, "Required fields are missing", http.StatusBadRequest)
+		return
+	}
+
+	commentInput := &blog_proto.UpdateCommentInput{
+		CommentId: reqBody.CommentInput["commentId"].(string),
+		UserId:    reqBody.CommentInput["userId"].(string),
+		Content:   reqBody.CommentInput["content"].(string),
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.UpdateComment(ctx, &blog_proto.UpdateCommentRequest{
+		CommentInput: commentInput,
+	})
+	if err != nil {
+		log.Printf("Failed to create comment via gRPC: %v", err)
+		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(resp.GetComment()); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
