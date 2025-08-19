@@ -33,14 +33,14 @@ func (service *UserService) Block(id string) (*model.User, error) {
 		return nil, errors.New("korisnik nije pronađen")
 	}
 
-	log.Printf("Blocking user: %s", user.ID)
+	//log.Printf("Blocking user: %s", user.ID)
 
 	user.Blocked = true
 
 
 	updatedUser, err := service.repo.Update(user)
 	if err != nil {
-		log.Printf("Error updating user: %v", err)
+		//log.Printf("Error updating user: %v", err)
 		return nil, errors.New("greška prilikom ažuriranja korisnika")
 	}
 
