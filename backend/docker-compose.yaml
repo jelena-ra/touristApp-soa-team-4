@@ -42,6 +42,8 @@ services:
       - ./Blog/.env
     depends_on:
       - blog-db
+    environment:
+      - FOLLOWING_SERVICE_ADDRESS=host.docker.internal:8085
 
   blog-db:
     image: mongo:latest

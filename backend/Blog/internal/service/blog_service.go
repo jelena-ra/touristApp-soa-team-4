@@ -82,12 +82,12 @@ func (s *BlogService) GetAllBlogs(ctx context.Context) ([]model.Blog, error) {
 }
 
 func (s *BlogService) GetFeedForUser(ctx context.Context, userId string) ([]model.Blog, error) {
-	followedResponse, err := s.followingClient.GetFollowedUsers(ctx, &following_proto.GetFollowedUsersRequest{UserId: userId})
+	followedResponse, err := s.followingClient.GetFollowingsForUser(ctx, &following_proto.GetFollowingsForUserRequest{Id: userId})
 	if err != nil {
 		return nil, err
 	}
 
-	followedUserIds := followedResponse.GetUserIds()
+	followedUserIds := followedResponse.GetIds()
 
 	if len(followedUserIds) == 0 {
 		return []model.Blog{}, nil

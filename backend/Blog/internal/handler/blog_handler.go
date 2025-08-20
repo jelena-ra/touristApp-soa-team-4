@@ -158,7 +158,7 @@ func (h *BlogHandler) GetFeedForUser(ctx context.Context, req *blog_proto.GetFee
 		return &pb.GetAllBlogsResponse{Blogs: []*pb.Blog{}}, nil
 	}
 
-	blogs, err := h.service.GetAllBlogsForUsers(ctx, userIds)
+	blogs, err := h.service.GetFeedForUser(ctx, userIds)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to get blogs: %v", err)
 	}

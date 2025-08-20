@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package following;
+option go_package = "github.com/jelena-ra/touristApp/soa-team-4/Following/proto";
 
 service FollowingService {
   rpc FollowUser(FollowRequest) returns (FollowResponse) {}
