@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { TokenStorage } from '../auth/jwt/token.service'; 
 import { CommonModule } from '@angular/common';
 import { User } from '../auth/model/user.model';
+import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-user-list',
    standalone: true, 
@@ -14,16 +15,29 @@ import { User } from '../auth/model/user.model';
 })
 export class UsersList implements OnInit {
 
+
+  currentUser: User = {
+    id: "",
+    username: "",
+    role: "",
+    isBlocked: false
+  };
+
   users: any[] = []; 
   selectedUser: User =  {
     id: "",
     username: "",
-    role: ""
+    role: "",
+    isBlocked: false
 };
-  constructor(private http: HttpClient, private authService: TokenStorage) { }
+  constructor(private http: HttpClient, private authService: TokenStorage, private userService: AuthService) { }
 
   ngOnInit(): void {
     this.fetchUsers();
+    this.userService.getUser().subscribe(user => {
+      this.currentUser = user;
+      console.log('Trenutni korisnik:', this.currentUser);
+    });
   }
   onSelectUser(user: any): void {
     this.selectedUser = user;
@@ -66,12 +80,14 @@ export class UsersList implements OnInit {
     }
   }).subscribe({
     next: () => {
-        console.log(`Korisnik ${user.username} je blokiran.`);
-        this.fetchUsers();
-      },
-      error: (error) => {
-        console.error('Greška pri blokiranju korisnika', error);
-      }
-    });
-  }
+      console.log(`Korisnik ${user.username} je blokiran.`);
+      
+      this.fetchUsers();
+    },
+    error: (error) => {
+      console.error('Greška pri blokiranju korisnika', error);
+    }
+  });
+}
+
 }

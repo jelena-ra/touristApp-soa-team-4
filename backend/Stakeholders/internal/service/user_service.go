@@ -25,6 +25,14 @@ func (service *UserService) GetAllUsers(ctx context.Context) ([]model.User, erro
 	return users, nil
 }
 
+func (service *UserService) GetUser(ctx context.Context, id string) (*model.User, error) {
+
+	user, err := service.repo.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
+	}
+	return user, nil
+}
 
 func (service *UserService) Block(id string) (*model.User, error) {
 

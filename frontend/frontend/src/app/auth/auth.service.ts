@@ -73,6 +73,20 @@ export class AuthService {
     this.user$.next(user);
   }
 
+  public getUser(): Observable<User> {
+    const jwtHelperService = new JwtHelperService();
+    const accessToken = this.tokenStorage.getAccessToken() || "";
+    const user: User = {
+      id: jwtHelperService.decodeToken(accessToken).id,
+      username: jwtHelperService.decodeToken(accessToken).username,
+      role: jwtHelperService.decodeToken(accessToken)[
+        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+      ],
+    };
+     this.user$.next(user);
+    return this.user$;
+  }
+
   login(login: Login): Observable<AuthenticationResponse> {
     return this.http
       .post<AuthenticationResponse>(`http://localhost:8000/api/users/login`, login)

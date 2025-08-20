@@ -38,6 +38,22 @@ func (h *UserHandler) GetAllUsers(writer http.ResponseWriter, req *http.Request)
 	}
 }
 
+func (h *UserHandler) GetUser(writer http.ResponseWriter, req *http.Request) {
+
+	user, err := h.service.GetUser(req.Context(), mux.Vars(req)["id"])
+
+	if err != nil {
+		http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(writer).Encode(users); err != nil {
+		log.Printf("Error encoding response: %v", err)
+	}
+}
+
 
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
