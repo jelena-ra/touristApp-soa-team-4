@@ -33,6 +33,23 @@ const followingHandler = {
         message: error.message
       }, null);
     }
+  },
+
+  GetFollowingsForUser: async (call, callback) => {
+    try {
+      const { id } = call.request;
+
+      const followingIds = await followingService.getFollowingsForUser(id);
+
+      callback(null, { ids: followingIds });
+
+    } catch (error) {
+      console.error("Greška u handleru prilikom dohvatanja preporuka:", error.message);
+      callback({
+        code: 5,
+        message: error.message
+      }, null);
+    }
   }
 
 };

@@ -47,6 +47,19 @@ class FollowingService {
     const finalProfiles = recommendedProfiles.filter(profile => profile !== null);
     return finalProfiles;
   }
+
+  async getFollowingsForUser(userId){
+    const userExists = await stakeholdersClient.checkUserExistence(userId);
+    if (!userExists) {
+      throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
+    }
+
+    const followingIds = await followingRepository.getFollowing(userId);
+    if (!followingIds || followingIds.length === 0) {
+      return [];
+    }
+    return followingIds;
+  }
 }
 
 module.exports = new FollowingService();

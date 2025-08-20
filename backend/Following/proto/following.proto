@@ -5,8 +5,9 @@ package following;
 service FollowingService {
   rpc FollowUser(FollowRequest) returns (FollowResponse) {}
   rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse){}
+  rpc GetFollowingsForUser(GetFollowingsForUserRequest) returns (GetFollowingsForUserResponse){}
 }
-
+ 
 message FollowRequest {
   string followerId = 1; // ID korisnika koji prati
   string followedId = 2; // ID korisnika koji je praćen
@@ -32,4 +33,12 @@ message GetRecommendationsRequest {
 
 message GetRecommendationsResponse {
   repeated Profile profiles = 1;
+}
+
+message GetFollowingsForUserRequest {
+  string id = 1;
+}
+
+message GetFollowingsForUserResponse{
+  repeated string ids = 1;
 }
