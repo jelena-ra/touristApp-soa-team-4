@@ -3,13 +3,14 @@ package handler
 import (
 	"context"
 
+	pb "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
+	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
-	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
 
 type BlogHandler struct {
@@ -127,6 +128,37 @@ func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRe
 
 func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlogsRequest) (*blog_proto.GetAllBlogsResponse, error) {
 	blogs, err := h.service.GetAllBlogs(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get blogs: %v", err)
+	}
+
+	protoBlogs := make([]*blog_proto.Blog, 0)
+
+	for _, blog := range blogs {
+		protoBlog := &blog_proto.Blog{
+			Id:            blog.ID.Hex(),
+			Title:         blog.Title,
+			Content:       blog.Content,
+			AuthorId:      blog.AuthorID,
+			Images:        blog.Images,
+			NumberOfLikes: int32(len(blog.Likes)),
+		}
+		protoBlogs = append(protoBlogs, protoBlog)
+	}
+
+	return &blog_proto.GetAllBlogsResponse{
+		Blogs: protoBlogs,
+	}, nil
+}
+
+func (h *BlogHandler) GetFeedForUser(ctx context.Context, req *blog_proto.GetFeedForUserRequest) (*blog_proto.GetAllBlogsResponse, error) {
+	userIds := req.GetUserId()
+
+	if len(userIds) == 0 {
+		return &pb.GetAllBlogsResponse{Blogs: []*pb.Blog{}}, nil
+	}
+
+	blogs, err := h.service.GetAllBlogsForUsers(ctx, userIds)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to get blogs: %v", err)
 	}
