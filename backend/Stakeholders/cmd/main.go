@@ -37,9 +37,9 @@ func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHa
 
     router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
     router.HandleFunc("/image/{id}", imageHandler.GetImageHandler).Methods("GET")
-	 router.HandleFunc("/image/filename/{filename}", imageHandler.GetImageHandlerFilename).Methods("GET")
-
-	
+	router.HandleFunc("/image/filename/{filename}", imageHandler.GetImageHandlerFilename).Methods("GET")
+	router.HandleFunc("/users/{id}/block", userHandler.BlockUser).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET", "OPTIONS")
 
     log.Println("Server starting on port :8081...")
 	log.Fatal(http.ListenAndServe(":8081", router))
@@ -138,10 +138,10 @@ func main() {
 
 	//router.Handle("/api/users", handler.AuthMiddleware(userHandler.FindAll)).Methods("GET")
 	// Lančano povezivanje middleware-a za zaštićene rute
-	router.Handle(
-		"/api/users/{id}/block", 
-		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.HandlerFunc(userHandler.BlockUser))),
-	).Methods("PUT")
+	// router.Handle(
+	// 	"/api/users/{id}/block", 
+	// 	authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.HandlerFunc(userHandler.BlockUser))),
+	// ).Methods("PUT","OPTIONS")
 
 	
 	authenticationHandler.RegisterRoutes(router)

@@ -69,6 +69,10 @@ func main() {
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
+	router.Handle(
+        "/api/users/{id}/block",
+        authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
+    ).Methods("PUT", "OPTIONS")
 	router.Handle("/api/image", (http.StripPrefix("/api", stakeholdersProxy))).Methods("POST")
 	router.Handle("/api/image/{id}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
 	router.Handle("/api/image/filename/{filename}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
@@ -86,10 +90,10 @@ func main() {
 		"/api/profile",
 		authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
 	).Methods("POST", "OPTIONS")
-    router.Handle(
-        "/api/users/{id}/block",
-        authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
-    ).Methods("PUT", "OPTIONS")
+	router.Handle(
+		"/api/users/{id}",
+		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
+	).Methods("GET", "OPTIONS")
 
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.GetAllBlogsHandler)).Methods("GET")
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.CreateBlogHandler)).Methods("POST")
