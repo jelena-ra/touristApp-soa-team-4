@@ -91,7 +91,7 @@ func (r *BlogRepositoryMongo) GetAll(ctx context.Context) ([]model.Blog, error) 
 func (r *BlogRepositoryMongo) GetAllBlogsForUsers(ctx context.Context, userIds []string) ([]model.Blog, error) {
 	collection := r.client.Database(r.dbName).Collection(r.collectionName)
 
-	filter := bson.M{"authorID": bson.M{"$in": userIds}}
+	filter := bson.M{"authorId": bson.M{"$in": userIds}}
 
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {

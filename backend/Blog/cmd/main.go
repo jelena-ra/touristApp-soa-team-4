@@ -58,15 +58,16 @@ func main() {
 		collectionName = "blogs"
 	}
 
-	// Ova linija sada radi jer nema kolizije imena
-	followingClient, err := client.NewFollowingClient("localhost:8083")
+	followingServiceAddr := os.Getenv("FOLLOWING_SERVICE_ADDR")
+	if followingServiceAddr == "" {
+		followingServiceAddr = "localhost:8083"
+	}
+	followingClient, err := client.NewFollowingClient(followingServiceAddr)
 	if err != nil {
 		log.Fatalf("Nije moguće povezati se sa Following servisom: %v", err)
 	}
 
-	// ISPRAVKA #1 (nastavak): Prosleđujemo ispravnu promenljivu
 	blogRepo := repository.NewBlogRepository(mongoClient, dbName, collectionName)
-	// ISPRAVKA #2: Prosleđujemo i gRPC klijenta
 	blogService := service.NewBlogService(blogRepo, followingClient)
 	blogHandler := handler.NewBlogHandler(blogService)
 
