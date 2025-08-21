@@ -203,7 +203,6 @@ func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateC
 		UserId:  createdComment.UserID,
 		Content: createdComment.Content,
 
-		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
 		CreatedAt:    timestamppb.New(createdComment.CreatedAt),
 		LastModified: timestamppb.New(createdComment.LastModified),
 	}

@@ -17,7 +17,7 @@ import (
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
-	blog_proto "github.comcom/jelena-ra/touristApp/soa-team-4/Blog/proto"
+	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
 
 func main() {
