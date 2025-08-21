@@ -60,6 +60,27 @@ class FollowingService {
     }
     return followingIds;
   }
+
+  async followExists(followerId, followedId){
+    if (followerId === followedId) {
+      throw new Error('Korisnik ne može sam sebe da prati.');
+    }
+
+    const [followerExists, followedExists] = await Promise.all([
+      stakeholdersClient.checkUserExistence(followerId),   
+      stakeholdersClient.checkUserExistence(followedId)    
+    ]);
+
+    if (!followerExists) {
+      throw new Error(`Korisnik koji treba da prati (ID: ${followerId}) ne postoji.`);
+    }
+    if (!followedExists) {
+      throw new Error(`Korisnik koji treba da je zapraćen (ID: ${followedId}) ne postoji.`);
+    }
+
+    const res = followingRepository.checkIfFollows(followerId, followedId)
+    return res
+  }
 }
 
 module.exports = new FollowingService();

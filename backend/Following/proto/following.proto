@@ -7,6 +7,7 @@ service FollowingService {
   rpc FollowUser(FollowRequest) returns (FollowResponse) {}
   rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse){}
   rpc GetFollowingsForUser(GetFollowingsForUserRequest) returns (GetFollowingsForUserResponse){}
+  rpc FollowExists(FollowExistsRequest) returns (FollowExistsResponse){}
 }
  
 message FollowRequest {
@@ -42,4 +43,13 @@ message GetFollowingsForUserRequest {
 
 message GetFollowingsForUserResponse{
   repeated string ids = 1;
+}
+
+message FollowExistsRequest {
+  string followerId = 1;
+  string followedId = 2;
+}
+
+message FollowExistsResponse {
+  bool exists = 1; // Ovo polje će nositi true ili false
 }

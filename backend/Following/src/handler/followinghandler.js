@@ -18,6 +18,23 @@ const followingHandler = {
     }
   },
 
+  followExists: async (call, callback) => {
+    try {
+      const { followerId, followedId } = call.request;
+      
+      const doesExist = await followingService.followExists(followerId, followedId);
+      
+      callback(null, { exists: doesExist });
+
+    } catch (error) {
+      console.error("Greška u handleru:", error.message);
+      callback({
+        code: 13, 
+        message: `Došlo je do greške prilikom provere veze: ${error.message}`
+      }, null);
+    }
+  },
+
   getRecommendations: async (call, callback) => {
     try {
       const { userId } = call.request;

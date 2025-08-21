@@ -62,6 +62,24 @@ class FollowingRepository {
     }
   }
 
+  async checkIfFollows(userId, followedId) {
+  const session = driver.session();
+  try {
+    const result = await session.run(
+      'MATCH (:User {id: $userId})-[:FOLLOWS]->(:User {id: $followedId}) RETURN COUNT(*) as count',
+      { userId: userId, followedId: followedId }
+    );
+
+    const count = result.records[0].get('count').toNumber();
+    return count > 0;
+  } catch (error) {
+    console.error('Greška pri proveri veze u bazi:', error);
+    throw error;
+  } finally {
+    await session.close();
+  }
+}
+
 
 }
 
