@@ -22,8 +22,8 @@ services:
     environment:
       NEO4J_AUTH: "neo4j/mojalutka123"
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7475:7474"
+      - "7688:7687"
     volumes:
       - stakeholders_db_data:/data
     networks:
@@ -43,7 +43,7 @@ services:
     depends_on:
       - blog-db
     environment:
-      - FOLLOWING_SERVICE_ADDRESS=host.docker.internal:8085
+      - FOLLOWING_SERVICE_ADDR=host.docker.internal:8083
 
   blog-db:
     image: mongo:latest
