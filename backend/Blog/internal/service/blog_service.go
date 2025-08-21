@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
@@ -11,12 +12,14 @@ import (
 
 type BlogService struct {
 	repo            repository.BlogRepository
+	repoComment     repository.CommentRepository
 	followingClient following_proto.FollowingServiceClient
 }
 
-func NewBlogService(repo repository.BlogRepository, followingClient following_proto.FollowingServiceClient) *BlogService {
+func NewBlogService(repo repository.BlogRepository, repoComment repository.CommentRepository, followingClient following_proto.FollowingServiceClient) *BlogService {
 	return &BlogService{
 		repo:            repo,
+		repoComment:     repoComment,
 		followingClient: followingClient,
 	}
 }
@@ -99,4 +102,34 @@ func (s *BlogService) GetFeedForUser(ctx context.Context, userId string) ([]mode
 	}
 
 	return blogs, nil
+}
+
+func (s *BlogService) CreateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
+	comment.CreatedAt = time.Now()
+	comment.LastModified = time.Now()
+
+	createdComment, err := s.repoComment.CreateComment(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	return createdComment, nil
+}
+
+func (s *BlogService) UpdateComment(ctx context.Context, commentId string, userId string, content string) (*model.Comment, error) {
+	comment, err := s.repoComment.GetById(ctx, commentId)
+	if err != nil {
+		return nil, err
+	}
+
+	if comment.UserID != userId {
+		return nil, errors.New("user is not the author of the comment")
+	}
+
+	comment.Content = content
+	comment.LastModified = time.Now()
+	comment, err = s.repoComment.Update(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	return comment, nil
 }

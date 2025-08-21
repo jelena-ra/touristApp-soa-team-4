@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { MapComponent } from '../shared/map/map.component';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [MapComponent],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
@@ -23,6 +24,9 @@ export class Home {
   }
   login(): void {
     this.router.navigate(['login']);
+  }
+  simulator(): void {
+    this.router.navigate(['tourist-location']);
   }
    seeUsers(): void {
     this.router.navigate(['usersList']);

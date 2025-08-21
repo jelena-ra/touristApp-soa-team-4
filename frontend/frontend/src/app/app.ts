@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { TourExecutionModule } from './tour-execution/tour-execution.module';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, TourExecutionModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

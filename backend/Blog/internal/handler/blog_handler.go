@@ -181,3 +181,60 @@ func (h *BlogHandler) GetFeedForUser(ctx context.Context, req *blog_proto.GetFee
 		Blogs: protoBlogs,
 	}, nil
 }
+
+func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateCommentRequest) (*blog_proto.CreateCommentResponse, error) {
+	commentReq := req.GetCommentInput()
+	if commentReq == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "comment input cannot be empty")
+	}
+
+	comment := &model.Comment{
+		UserID:  commentReq.GetUserId(),
+		Content: commentReq.Content,
+	}
+
+	createdComment, err := h.service.CreateComment(ctx, comment)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create comment: %v", err)
+	}
+
+	protoCommentRes := &blog_proto.Comment{
+		Id:      createdComment.ID.Hex(),
+		UserId:  createdComment.UserID,
+		Content: createdComment.Content,
+
+		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
+		CreatedAt:    timestamppb.New(createdComment.CreatedAt),
+		LastModified: timestamppb.New(createdComment.LastModified),
+	}
+
+	return &blog_proto.CreateCommentResponse{
+		Comment: protoCommentRes,
+	}, nil
+}
+
+func (h *BlogHandler) UpdateComment(ctx context.Context, req *blog_proto.UpdateCommentRequest) (*blog_proto.UpdateCommentResponse, error) {
+	updateReq := req.GetCommentInput()
+	if updateReq == nil {
+		return nil, status.Errorf(codes.InvalidArgument, "comment update input cannot be empty")
+	}
+
+	updatedComment, err := h.service.UpdateComment(ctx, updateReq.CommentId, updateReq.UserId, updateReq.Content)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update comment: %v", err)
+	}
+
+	protoCommentRes := &blog_proto.Comment{
+		Id:      updatedComment.ID.Hex(),
+		UserId:  updatedComment.UserID,
+		Content: updatedComment.Content,
+
+		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
+		CreatedAt:    timestamppb.New(updatedComment.CreatedAt),
+		LastModified: timestamppb.New(updatedComment.LastModified),
+	}
+
+	return &blog_proto.UpdateCommentResponse{
+		Comment: protoCommentRes,
+	}, nil
+}

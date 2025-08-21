@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "./proto";
+option go_package = "../proto";
 
 package blog;
 
@@ -39,12 +39,39 @@ message CreateBlogInput {
   repeated string images = 4;
 }
 
+message CreateCommentInput {
+  string user_id = 1;
+  string content = 2;
+}
+
+message UpdateCommentInput {
+  string user_id = 1;
+  string comment_id = 2;
+  string content = 3;
+}
+
 message CreateBlogRequest {
   CreateBlogInput blog_input = 1;
 }
 
+message CreateCommentRequest {
+  CreateCommentInput comment_input = 1;
+}
+
+message UpdateCommentRequest {
+  UpdateCommentInput comment_input = 1;
+}
+
 message CreateBlogResponse {
   BlogFull blog_post = 1;
+}
+
+message CreateCommentResponse {
+  Comment comment = 1;
+}
+
+message UpdateCommentResponse {
+  Comment comment = 1;
 }
 
 message GetBlogRequest {
@@ -88,6 +115,8 @@ service BlogService {
   rpc UnlikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
   rpc GetAllBlogs (GetAllBlogsRequest) returns (GetAllBlogsResponse);
   rpc GetFeedForUser (GetFeedForUserRequest) returns (GetAllBlogsResponse);
+  rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
+  rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
 }
 
 message LikeBlogRequest {

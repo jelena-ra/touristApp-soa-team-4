@@ -17,7 +17,7 @@ import (
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
-	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+	blog_proto "github.comcom/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
 
 func main() {
@@ -35,7 +35,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// ISPRAVKA #1: Promenjeno ime promenljive
 	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
@@ -68,7 +67,9 @@ func main() {
 	}
 
 	blogRepo := repository.NewBlogRepository(mongoClient, dbName, collectionName)
-	blogService := service.NewBlogService(blogRepo, followingClient)
+	commentRepo := repository.NewCommentRepository(mongoClient, dbName, "comments")
+	blogService := service.NewBlogService(blogRepo, commentRepo, followingClient)
+
 	blogHandler := handler.NewBlogHandler(blogService)
 
 	port := os.Getenv("MONGO_PORT")
