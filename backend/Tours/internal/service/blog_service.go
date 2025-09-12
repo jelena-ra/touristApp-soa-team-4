@@ -1,9 +1,10 @@
 package service
 
 import (
-	"Tours/internal/model"
-	"Tours/internal/repository"
 	"context"
+
+	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
+	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/repository"
 )
 
 type TourService struct {

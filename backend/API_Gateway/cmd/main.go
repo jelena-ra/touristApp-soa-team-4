@@ -22,6 +22,7 @@ import (
 	"github.com/joho/godotenv"
 
 	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
 )
 
 var (
@@ -39,8 +40,8 @@ func main() {
 		log.Println("Error loading .env file")
 	}
 
-	//blogGRPCAddr := "localhost:8082" 
-	blogGRPCAddr := "blog-service:8082" 
+	//blogGRPCAddr := "localhost:8082"
+	blogGRPCAddr := "blog-service:8082"
 	blogGRPCConn, err := grpc.Dial(blogGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect to blog service: %v", err)
@@ -48,6 +49,15 @@ func main() {
 	defer blogGRPCConn.Close()
 	blogGRPCClient := blog_proto.NewBlogServiceClient(blogGRPCConn)
 	blogHandler := handler.NewBlogHandler(blogGRPCClient)
+
+	tourGRPCAddr := "tour-service:8083"
+	tourGRPCConn, err := grpc.Dial(tourGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect to tour service: %v", err)
+	}
+	defer tourGRPCConn.Close()
+	tourGRPCClient := tourProto.NewTourServiceClient(tourGRPCConn)
+	tourHandler := handler.NewTourHandler(tourGRPCClient)
 
 	router := mux.NewRouter()
 
@@ -70,9 +80,9 @@ func main() {
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
 	router.Handle(
-        "/api/users/{id}/block",
-        authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
-    ).Methods("PUT", "OPTIONS")
+		"/api/users/{id}/block",
+		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
+	).Methods("PUT", "OPTIONS")
 	router.Handle("/api/image", (http.StripPrefix("/api", stakeholdersProxy))).Methods("POST")
 	router.Handle("/api/image/{id}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
 	router.Handle("/api/image/filename/{filename}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
@@ -101,6 +111,10 @@ func main() {
 	router.Handle("/api/blogs/{blogId}/unlike/{userId}", http.HandlerFunc(blogHandler.UnlikeBlogHandler)).Methods("DELETE")
 	router.Handle("/api/comments", http.HandlerFunc(blogHandler.CreateCommentHandler)).Methods("POST")
 	router.Handle("/api/comments/update", http.HandlerFunc(blogHandler.UpdateCommentHandler)).Methods("POST")
+
+	router.Handle("/api/tours", http.HandlerFunc(tourHandler.GetAllToursHandle)).Methods("GET")
+	router.Handle("/api/tours/{tourId}", http.HandlerFunc(tourHandler.GetByIdHandle)).Methods("GET")
+	router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

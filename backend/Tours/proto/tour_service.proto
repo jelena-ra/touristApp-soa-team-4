@@ -12,6 +12,7 @@ message Tour {
   TourDifficulty difficulty = 5;
   repeated TourTag tags = 6;
   TourStatus status = 7;
+  float price = 8;
 }
 
 enum TourDifficulty {

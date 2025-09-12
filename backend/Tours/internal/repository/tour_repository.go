@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"Tours/internal/model"
 	"context"
 	"log"
 
+	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

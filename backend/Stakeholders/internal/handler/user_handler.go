@@ -1,16 +1,15 @@
 package handler
 
 import (
+	"encoding/json"
 	//"context"
 	"log"
 	"net/http"
-	"encoding/json"
 	//"github.com/gorilla/mux"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
 	//stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/gorilla/mux"
 )
-
 
 type UserHandler struct {
 	//stakeholder_proto.UnimplementedStakeholderServiceServer
@@ -49,11 +48,10 @@ func (h *UserHandler) GetUser(writer http.ResponseWriter, req *http.Request) {
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(writer).Encode(users); err != nil {
+	if err := json.NewEncoder(writer).Encode(user); err != nil {
 		log.Printf("Error encoding response: %v", err)
 	}
 }
-
 
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

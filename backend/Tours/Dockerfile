@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM golang:latest AS builder
 
 # DODAJ OVDE SVOJE IME
 #LABEL authors="radoj"
@@ -20,4 +20,4 @@ COPY --from=builder /tour-service /tour-service
 COPY --from=builder /app/.env .env
 EXPOSE 8083
 
-ENTRYPOINT ["top", "-b"]
+CMD ["/tour-service"]

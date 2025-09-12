@@ -189,6 +189,7 @@ type Tour struct {
 	Difficulty    TourDifficulty         `protobuf:"varint,5,opt,name=difficulty,proto3,enum=tour.TourDifficulty" json:"difficulty,omitempty"`
 	Tags          []TourTag              `protobuf:"varint,6,rep,packed,name=tags,proto3,enum=tour.TourTag" json:"tags,omitempty"`
 	Status        TourStatus             `protobuf:"varint,7,opt,name=status,proto3,enum=tour.TourStatus" json:"status,omitempty"`
+	Price         float32                `protobuf:"fixed32,8,opt,name=price,proto3" json:"price,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -270,6 +271,13 @@ func (x *Tour) GetStatus() TourStatus {
 		return x.Status
 	}
 	return TourStatus_DRAFT
+}
+
+func (x *Tour) GetPrice() float32 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
 }
 
 type Empty struct {
@@ -488,7 +496,7 @@ var File_Tours_proto_tour_service_proto protoreflect.FileDescriptor
 
 const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1eTours/proto/tour_service.proto\x12\x04tour\"\xeb\x01\n" +
+	"\x1eTours/proto/tour_service.proto\x12\x04tour\"\x81\x02\n" +
 	"\x04Tour\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bauthorId\x18\x02 \x01(\tR\bauthorId\x12\x12\n" +
@@ -498,7 +506,8 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"difficulty\x18\x05 \x01(\x0e2\x14.tour.TourDifficultyR\n" +
 	"difficulty\x12!\n" +
 	"\x04tags\x18\x06 \x03(\x0e2\r.tour.TourTagR\x04tags\x12(\n" +
-	"\x06status\x18\a \x01(\x0e2\x10.tour.TourStatusR\x06status\"\a\n" +
+	"\x06status\x18\a \x01(\x0e2\x10.tour.TourStatusR\x06status\x12\x14\n" +
+	"\x05price\x18\b \x01(\x02R\x05price\"\a\n" +
 	"\x05Empty\"4\n" +
 	"\x10TourListResponse\x12 \n" +
 	"\x05tours\x18\x01 \x03(\v2\n" +
