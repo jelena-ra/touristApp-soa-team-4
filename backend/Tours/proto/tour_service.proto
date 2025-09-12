@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+option go_package = "./Tours/proto";
+
+package tour;
+
+message Tour {
+  string id = 1;
+  string authorId = 2;
+  string name = 3;
+  string description = 4;
+  TourDifficulty difficulty = 5;
+  repeated TourTag tags = 6;
+  TourStatus status = 7;
+}
+
+enum TourDifficulty {
+  EASY = 0;
+  MEDIUM = 1;
+  HARD = 2;
+}
+
+enum TourTag {
+  NATURE = 0;
+  HISTORICAL = 1;
+  ADVENTURE = 2;
+  CULTURAL = 3;
+  WILDLIFE = 4;
+  RELAXATION = 5;
+  BEACH = 6;
+  MOUNTAIN = 7;
+  URBAN = 8;
+}
+
+enum TourStatus {
+  DRAFT = 0;
+}
+
+service TourService {
+  rpc GetAllTours(Empty) returns (TourListResponse);
+  rpc GetTourByID(TourIDRequest) returns (TourResponse);
+  rpc CreateTour(CreateTourRequest) returns (TourResponse);
+}
+
+message Empty {
+
+}
+
+message TourListResponse {
+  repeated Tour tours = 1;
+}
+
+message TourIDRequest {
+  string id = 1;
+}
+
+message  TourResponse {
+  Tour tour = 1;
+}
+
+message CreateTourRequest {
+  Tour tour = 1;
+}
