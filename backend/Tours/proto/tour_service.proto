@@ -37,10 +37,21 @@ enum TourStatus {
   DRAFT = 0;
 }
 
+message KeyPoint {
+  string id = 1;
+  string tourId = 2;
+  float longitude = 3;
+  float latitude = 4;
+  string name = 5;
+  string description = 6;
+  string imageId = 7;
+}
+
 service TourService {
   rpc GetAllTours(Empty) returns (TourListResponse);
-  rpc GetTourByID(TourIDRequest) returns (TourResponse);
+  rpc GetTourByID(TourIDRequest) returns (DetailedTourResponse);
   rpc CreateTour(CreateTourRequest) returns (TourResponse);
+  rpc CreateKeyPoint(CreateKeyPointRequest) returns (CreateKeyPointResponse);
 }
 
 message Empty {
@@ -55,10 +66,23 @@ message TourIDRequest {
   string id = 1;
 }
 
+message DetailedTourResponse {
+  Tour tour = 1;
+  repeated KeyPoint keyPoints = 2;
+}
+
 message  TourResponse {
   Tour tour = 1;
 }
 
 message CreateTourRequest {
   Tour tour = 1;
+}
+
+message CreateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+}
+
+message CreateKeyPointResponse {
+  KeyPoint keyPoint = 1;
 }

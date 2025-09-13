@@ -24,13 +24,13 @@ func (h *TourHandler) GetAllTours(ctx context.Context, req *tourProto.Empty) (*t
 
 	protoTours := make([]*tourProto.Tour, len(allTours))
 	for i, mt := range allTours {
-		protoTours[i] = mapper.ModelToProto(mt)
+		protoTours[i] = mapper.TourModelToProto(mt)
 	}
 
 	return &tourProto.TourListResponse{Tours: protoTours}, nil
 }
 
-func (h *TourHandler) GetTourByID(ctx context.Context, req *tourProto.TourIDRequest) (*tourProto.TourResponse, error) {
+func (h *TourHandler) GetTourByID(ctx context.Context, req *tourProto.TourIDRequest) (*tourProto.DetailedTourResponse, error) {
 	id := req.GetId()
 
 	if id == "" {
@@ -38,8 +38,18 @@ func (h *TourHandler) GetTourByID(ctx context.Context, req *tourProto.TourIDRequ
 	}
 
 	tour := must(h.server.GetByID(ctx, id))
-	protoTour := mapper.ModelToProto(tour)
-	return &tourProto.TourResponse{Tour: protoTour}, nil
+	protoTour := mapper.TourModelToProto(tour)
+
+	keyPoints := must(h.server.GetKeyPoints(ctx, id))
+	protoKeyPoints := make([]*tourProto.KeyPoint, len(keyPoints))
+	for i, point := range keyPoints {
+		protoKeyPoints[i] = mapper.KeyPointModelToProto(point)
+	}
+
+	return &tourProto.DetailedTourResponse{
+		Tour:      protoTour,
+		KeyPoints: protoKeyPoints,
+	}, nil
 }
 
 func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourRequest) (*tourProto.TourResponse, error) {
@@ -48,11 +58,24 @@ func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourR
 		return nil, status.Error(codes.InvalidArgument, "Tour information is required")
 	}
 
-	modelCreateTour := mapper.ProtoToModel(crateInfo)
+	modelCreateTour := mapper.TourProtoToModel(crateInfo)
 	newTour := must(h.server.Create(ctx, modelCreateTour))
-	protoTour := mapper.ModelToProto(newTour)
+	protoTour := mapper.TourModelToProto(newTour)
 
 	return &tourProto.TourResponse{Tour: protoTour}, nil
+}
+
+func (h *TourHandler) CreateKeyPoint(ctx context.Context, req *tourProto.CreateKeyPointRequest) (*tourProto.CreateKeyPointResponse, error) {
+	createInfo := req.GetKeyPoint()
+	if createInfo == nil {
+		return nil, status.Error(codes.InvalidArgument, "KeyPoint information is required")
+	}
+
+	modelCreateInfo := must(mapper.KeyPointProtoToModel(createInfo))
+	newKeyPoint := must(h.server.CreateKeyPoint(ctx, modelCreateInfo))
+	protoKeyPoint := mapper.KeyPointModelToProto(newKeyPoint)
+
+	return &tourProto.CreateKeyPointResponse{KeyPoint: protoKeyPoint}, nil
 }
 
 func must[T any](val T, err error) T {

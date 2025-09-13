@@ -111,3 +111,38 @@ func (h *TourHandler) CreateTourHandle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonData)
 }
+
+func (h *TourHandler) CreateKeyPointHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	var keyPointReq tourProto.CreateKeyPointRequest
+	if err := json.NewDecoder(r.Body).Decode(&keyPointReq); err != nil {
+		log.Printf("Failed to decode request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.client.CreateKeyPoint(ctx, &keyPointReq)
+	if err != nil {
+		log.Printf("Failed to create key point: %v", err)
+		http.Error(w, "Failed to create key point", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{
+		UseEnumNumbers:  false,
+		EmitUnpopulated: true,
+	}
+
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal proto to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}

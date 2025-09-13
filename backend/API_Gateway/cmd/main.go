@@ -115,6 +115,7 @@ func main() {
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.GetAllToursHandle)).Methods("GET")
 	router.Handle("/api/tours/{tourId}", http.HandlerFunc(tourHandler.GetByIdHandle)).Methods("GET")
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")
+	router.Handle("/api/key-point", http.HandlerFunc(tourHandler.CreateKeyPointHandle)).Methods("POST")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

@@ -66,7 +66,7 @@ func convertTagsProtoToModel(tags []tourProto.TourTag) []model.TourTag {
 	return out
 }
 
-func ModelToProto(t *model.Tour) *tourProto.Tour {
+func TourModelToProto(t *model.Tour) *tourProto.Tour {
 	return &tourProto.Tour{
 		Id:          t.ID.Hex(),
 		AuthorId:    t.AuthorId.Hex(),
@@ -79,7 +79,7 @@ func ModelToProto(t *model.Tour) *tourProto.Tour {
 	}
 }
 
-func ProtoToModel(t *tourProto.Tour) *model.Tour {
+func TourProtoToModel(t *tourProto.Tour) *model.Tour {
 	id := primitive.NilObjectID
 	if t.GetId() != "" {
 		parsed, err := primitive.ObjectIDFromHex(t.GetId())

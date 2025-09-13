@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TourService_GetAllTours_FullMethodName = "/tour.TourService/GetAllTours"
-	TourService_GetTourByID_FullMethodName = "/tour.TourService/GetTourByID"
-	TourService_CreateTour_FullMethodName  = "/tour.TourService/CreateTour"
+	TourService_GetAllTours_FullMethodName    = "/tour.TourService/GetAllTours"
+	TourService_GetTourByID_FullMethodName    = "/tour.TourService/GetTourByID"
+	TourService_CreateTour_FullMethodName     = "/tour.TourService/CreateTour"
+	TourService_CreateKeyPoint_FullMethodName = "/tour.TourService/CreateKeyPoint"
 )
 
 // TourServiceClient is the client API for TourService service.
@@ -29,8 +30,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TourServiceClient interface {
 	GetAllTours(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TourListResponse, error)
-	GetTourByID(ctx context.Context, in *TourIDRequest, opts ...grpc.CallOption) (*TourResponse, error)
+	GetTourByID(ctx context.Context, in *TourIDRequest, opts ...grpc.CallOption) (*DetailedTourResponse, error)
 	CreateTour(ctx context.Context, in *CreateTourRequest, opts ...grpc.CallOption) (*TourResponse, error)
+	CreateKeyPoint(ctx context.Context, in *CreateKeyPointRequest, opts ...grpc.CallOption) (*CreateKeyPointResponse, error)
 }
 
 type tourServiceClient struct {
@@ -51,9 +53,9 @@ func (c *tourServiceClient) GetAllTours(ctx context.Context, in *Empty, opts ...
 	return out, nil
 }
 
-func (c *tourServiceClient) GetTourByID(ctx context.Context, in *TourIDRequest, opts ...grpc.CallOption) (*TourResponse, error) {
+func (c *tourServiceClient) GetTourByID(ctx context.Context, in *TourIDRequest, opts ...grpc.CallOption) (*DetailedTourResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TourResponse)
+	out := new(DetailedTourResponse)
 	err := c.cc.Invoke(ctx, TourService_GetTourByID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -71,13 +73,24 @@ func (c *tourServiceClient) CreateTour(ctx context.Context, in *CreateTourReques
 	return out, nil
 }
 
+func (c *tourServiceClient) CreateKeyPoint(ctx context.Context, in *CreateKeyPointRequest, opts ...grpc.CallOption) (*CreateKeyPointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateKeyPointResponse)
+	err := c.cc.Invoke(ctx, TourService_CreateKeyPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TourServiceServer is the server API for TourService service.
 // All implementations must embed UnimplementedTourServiceServer
 // for forward compatibility.
 type TourServiceServer interface {
 	GetAllTours(context.Context, *Empty) (*TourListResponse, error)
-	GetTourByID(context.Context, *TourIDRequest) (*TourResponse, error)
+	GetTourByID(context.Context, *TourIDRequest) (*DetailedTourResponse, error)
 	CreateTour(context.Context, *CreateTourRequest) (*TourResponse, error)
+	CreateKeyPoint(context.Context, *CreateKeyPointRequest) (*CreateKeyPointResponse, error)
 	mustEmbedUnimplementedTourServiceServer()
 }
 
@@ -91,11 +104,14 @@ type UnimplementedTourServiceServer struct{}
 func (UnimplementedTourServiceServer) GetAllTours(context.Context, *Empty) (*TourListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllTours not implemented")
 }
-func (UnimplementedTourServiceServer) GetTourByID(context.Context, *TourIDRequest) (*TourResponse, error) {
+func (UnimplementedTourServiceServer) GetTourByID(context.Context, *TourIDRequest) (*DetailedTourResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTourByID not implemented")
 }
 func (UnimplementedTourServiceServer) CreateTour(context.Context, *CreateTourRequest) (*TourResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTour not implemented")
+}
+func (UnimplementedTourServiceServer) CreateKeyPoint(context.Context, *CreateKeyPointRequest) (*CreateKeyPointResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateKeyPoint not implemented")
 }
 func (UnimplementedTourServiceServer) mustEmbedUnimplementedTourServiceServer() {}
 func (UnimplementedTourServiceServer) testEmbeddedByValue()                     {}
@@ -172,6 +188,24 @@ func _TourService_CreateTour_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TourService_CreateKeyPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateKeyPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TourServiceServer).CreateKeyPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TourService_CreateKeyPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TourServiceServer).CreateKeyPoint(ctx, req.(*CreateKeyPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TourService_ServiceDesc is the grpc.ServiceDesc for TourService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var TourService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateTour",
 			Handler:    _TourService_CreateTour_Handler,
+		},
+		{
+			MethodName: "CreateKeyPoint",
+			Handler:    _TourService_CreateKeyPoint_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

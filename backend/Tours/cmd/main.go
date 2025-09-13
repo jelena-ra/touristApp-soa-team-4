@@ -53,14 +53,19 @@ func main() {
 	if dbName == "" {
 		dbName = "tour_db"
 	}
-	collectionName := os.Getenv("MONGO_COLLECTION_NAME")
-	if collectionName == "" {
-		collectionName = "tours"
+	tourCollectionName := os.Getenv("MONGO_COLLECTION_NAME")
+	if tourCollectionName == "" {
+		tourCollectionName = "tours"
+	}
+	keyPointCollectionName := os.Getenv("MONGO_KEYPOINT_COLLECTION_NAME")
+	if keyPointCollectionName == "" {
+		keyPointCollectionName = "key_points"
 	}
 
-	tourRepo := repository.NewTourRepository(client, dbName, collectionName)
-	tourService := service.NewTourService(tourRepo)
-	blogHandler := handler.NewTourHandler(tourService)
+	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
+	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
+	tourService := service.NewTourService(tourRepo, keyPointRepo)
+	tourHandler := handler.NewTourHandler(tourService)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -74,7 +79,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	tourProto.RegisterTourServiceServer(grpcServer, blogHandler)
+	tourProto.RegisterTourServiceServer(grpcServer, tourHandler)
 
 	log.Println("Tour gRPC service is running on port 8083...")
 	log.Fatal(grpcServer.Serve(listen))
