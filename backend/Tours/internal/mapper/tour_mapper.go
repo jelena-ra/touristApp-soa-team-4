@@ -19,27 +19,27 @@ var protoToModelDifficulty = map[tourProto.TourDifficulty]model.TourDifficulty{
 }
 
 var modelToProtoTag = map[model.TourTag]tourProto.TourTag{
-	model.Nature:     tourProto.TourTag_NATURE,
-	model.Historical: tourProto.TourTag_HISTORICAL,
-	model.Adventure:  tourProto.TourTag_ADVENTURE,
-	model.Cultural:   tourProto.TourTag_CULTURAL,
-	model.Wildlife:   tourProto.TourTag_WILDLIFE,
-	model.Relaxation: tourProto.TourTag_RELAXATION,
-	model.Beach:      tourProto.TourTag_BEACH,
-	model.Mountain:   tourProto.TourTag_MOUNTAIN,
-	model.Urban:      tourProto.TourTag_URBAN,
+	model.Nature:     tourProto.TourTag_Nature,
+	model.Historical: tourProto.TourTag_Historical,
+	model.Adventure:  tourProto.TourTag_Adventure,
+	model.Cultural:   tourProto.TourTag_Cultural,
+	model.Wildlife:   tourProto.TourTag_Wildlife,
+	model.Relaxation: tourProto.TourTag_Relaxation,
+	model.Beach:      tourProto.TourTag_Beach,
+	model.Mountain:   tourProto.TourTag_Mountain,
+	model.Urban:      tourProto.TourTag_Urban,
 }
 
 var protoToModelTag = map[tourProto.TourTag]model.TourTag{
-	tourProto.TourTag_NATURE:     model.Nature,
-	tourProto.TourTag_HISTORICAL: model.Historical,
-	tourProto.TourTag_ADVENTURE:  model.Adventure,
-	tourProto.TourTag_CULTURAL:   model.Cultural,
-	tourProto.TourTag_WILDLIFE:   model.Wildlife,
-	tourProto.TourTag_RELAXATION: model.Relaxation,
-	tourProto.TourTag_BEACH:      model.Beach,
-	tourProto.TourTag_MOUNTAIN:   model.Mountain,
-	tourProto.TourTag_URBAN:      model.Urban,
+	tourProto.TourTag_Nature:     model.Nature,
+	tourProto.TourTag_Historical: model.Historical,
+	tourProto.TourTag_Adventure:  model.Adventure,
+	tourProto.TourTag_Cultural:   model.Cultural,
+	tourProto.TourTag_Wildlife:   model.Wildlife,
+	tourProto.TourTag_Relaxation: model.Relaxation,
+	tourProto.TourTag_Beach:      model.Beach,
+	tourProto.TourTag_Mountain:   model.Mountain,
+	tourProto.TourTag_Urban:      model.Urban,
 }
 
 var modelToProtoStatus = map[model.TourStatus]tourProto.TourStatus{

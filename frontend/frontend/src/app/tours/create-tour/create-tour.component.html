@@ -1,0 +1,30 @@
+<div class="container">
+    <h1>Create Tour</h1>
+    <div class="new-tour-fields">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input type="text" matInput [(ngModel)]="newTour.name">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="newTour.description"></textarea>
+        </mat-form-field>
+
+        <mat-radio-group [(ngModel)]="newTour.difficulty" aria-label="Select tour difficulty">
+            <mat-radio-button *ngFor="let diff of difficulties" [value]="diff">
+                {{ diff }}
+            </mat-radio-button>
+        </mat-radio-group>
+
+        <mat-chip-listbox [(ngModel)]="newTour.tags" multiple>
+            <mat-chip-option *ngFor="let tag of tags" [value]="tag">
+                {{ tag }}
+            </mat-chip-option>
+        </mat-chip-listbox>
+
+        <div>
+            <button mat-flat-button (click)="createTour()">Create</button>
+            <button mat-flat-button (click)="onNoClick()">Cancel</button>
+        </div>
+    </div>
+</div>

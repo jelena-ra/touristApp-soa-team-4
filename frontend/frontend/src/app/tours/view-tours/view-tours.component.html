@@ -1,6 +1,6 @@
 <div class="container">
     <h1>All tours</h1>
-    <button mat-flat-button>Add Tour</button>
+    <button mat-flat-button (click)="openCreateTour()">Add Tour</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
             <mat-card class="tour">

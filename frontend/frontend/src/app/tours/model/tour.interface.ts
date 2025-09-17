@@ -13,9 +13,9 @@ export interface TourInterface {
 }
 
 export type TourDifficulty = 
-    'Easy' 
-    | 'Medium' 
-    | 'Hard';
+    'EASY' 
+    | 'MEDIUM' 
+    | 'HARD';
 
 export type TourTag =
   'Nature'
@@ -28,4 +28,4 @@ export type TourTag =
   | 'Mountain'
   | 'Urban';
 
-export type TourStatus = 'Draft';
+export type TourStatus = 'DRAFT';

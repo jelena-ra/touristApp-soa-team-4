@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"log"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/mapper"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/service"
@@ -54,6 +55,7 @@ func (h *TourHandler) GetTourByID(ctx context.Context, req *tourProto.TourIDRequ
 
 func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourRequest) (*tourProto.TourResponse, error) {
 	crateInfo := req.GetTour()
+	log.Printf("crateInfo: %v", crateInfo)
 	if crateInfo == nil {
 		return nil, status.Error(codes.InvalidArgument, "Tour information is required")
 	}

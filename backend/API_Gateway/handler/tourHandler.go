@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -82,17 +83,32 @@ func (h *TourHandler) CreateTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	var tourReq tourProto.Tour
-	if err := json.NewDecoder(r.Body).Decode(&tourReq); err != nil {
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Failed to read request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var tourReq tourProto.CreateTourRequest
+	unmarshaler := protojson.UnmarshalOptions{
+		AllowPartial:   true,
+		DiscardUnknown: true,
+	}
+
+	if err := unmarshaler.Unmarshal(bodyBytes, &tourReq); err != nil {
 		log.Printf("Failed to decode request body: %v", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	resp, err := h.client.CreateTour(ctx, &tourProto.CreateTourRequest{Tour: &tourReq})
+	log.Printf("Create tour via gRPC: %+v", &tourReq)
+
+	resp, err := h.client.CreateTour(ctx, &tourReq)
 	if err != nil {
 		log.Printf("Failed to create tour: %v", err)
 		http.Error(w, "Failed to create tour", http.StatusInternalServerError)
+		return
 	}
 
 	marshaler := protojson.MarshalOptions{

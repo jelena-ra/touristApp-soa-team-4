@@ -22,15 +22,15 @@ enum TourDifficulty {
 }
 
 enum TourTag {
-  NATURE = 0;
-  HISTORICAL = 1;
-  ADVENTURE = 2;
-  CULTURAL = 3;
-  WILDLIFE = 4;
-  RELAXATION = 5;
-  BEACH = 6;
-  MOUNTAIN = 7;
-  URBAN = 8;
+  Nature = 0;
+  Historical = 1;
+  Adventure = 2;
+  Cultural = 3;
+  Wildlife = 4;
+  Relaxation = 5;
+  Beach = 6;
+  Mountain = 7;
+  Urban = 8;
 }
 
 enum TourStatus {

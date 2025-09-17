@@ -32,6 +32,9 @@ export class TourService {
     }
 
     createTour(newTour: TourInterface) : Observable<TourInterface> {
-        return this.http.post<TourInterface>(this.url, newTour);
+        return this.http.post<{ tour:TourInterface }>(this.url, { tour:newTour})
+            .pipe(
+                map(response => response.tour)
+            )
     }
 }

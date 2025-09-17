@@ -73,40 +73,40 @@ func (TourDifficulty) EnumDescriptor() ([]byte, []int) {
 type TourTag int32
 
 const (
-	TourTag_NATURE     TourTag = 0
-	TourTag_HISTORICAL TourTag = 1
-	TourTag_ADVENTURE  TourTag = 2
-	TourTag_CULTURAL   TourTag = 3
-	TourTag_WILDLIFE   TourTag = 4
-	TourTag_RELAXATION TourTag = 5
-	TourTag_BEACH      TourTag = 6
-	TourTag_MOUNTAIN   TourTag = 7
-	TourTag_URBAN      TourTag = 8
+	TourTag_Nature     TourTag = 0
+	TourTag_Historical TourTag = 1
+	TourTag_Adventure  TourTag = 2
+	TourTag_Cultural   TourTag = 3
+	TourTag_Wildlife   TourTag = 4
+	TourTag_Relaxation TourTag = 5
+	TourTag_Beach      TourTag = 6
+	TourTag_Mountain   TourTag = 7
+	TourTag_Urban      TourTag = 8
 )
 
 // Enum value maps for TourTag.
 var (
 	TourTag_name = map[int32]string{
-		0: "NATURE",
-		1: "HISTORICAL",
-		2: "ADVENTURE",
-		3: "CULTURAL",
-		4: "WILDLIFE",
-		5: "RELAXATION",
-		6: "BEACH",
-		7: "MOUNTAIN",
-		8: "URBAN",
+		0: "Nature",
+		1: "Historical",
+		2: "Adventure",
+		3: "Cultural",
+		4: "Wildlife",
+		5: "Relaxation",
+		6: "Beach",
+		7: "Mountain",
+		8: "Urban",
 	}
 	TourTag_value = map[string]int32{
-		"NATURE":     0,
-		"HISTORICAL": 1,
-		"ADVENTURE":  2,
-		"CULTURAL":   3,
-		"WILDLIFE":   4,
-		"RELAXATION": 5,
-		"BEACH":      6,
-		"MOUNTAIN":   7,
-		"URBAN":      8,
+		"Nature":     0,
+		"Historical": 1,
+		"Adventure":  2,
+		"Cultural":   3,
+		"Wildlife":   4,
+		"Relaxation": 5,
+		"Beach":      6,
+		"Mountain":   7,
+		"Urban":      8,
 	}
 )
 
@@ -784,17 +784,17 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\x04HARD\x10\x02*\x84\x01\n" +
 	"\aTourTag\x12\n" +
 	"\n" +
-	"\x06NATURE\x10\x00\x12\x0e\n" +
+	"\x06Nature\x10\x00\x12\x0e\n" +
 	"\n" +
-	"HISTORICAL\x10\x01\x12\r\n" +
-	"\tADVENTURE\x10\x02\x12\f\n" +
-	"\bCULTURAL\x10\x03\x12\f\n" +
-	"\bWILDLIFE\x10\x04\x12\x0e\n" +
+	"Historical\x10\x01\x12\r\n" +
+	"\tAdventure\x10\x02\x12\f\n" +
+	"\bCultural\x10\x03\x12\f\n" +
+	"\bWildlife\x10\x04\x12\x0e\n" +
 	"\n" +
-	"RELAXATION\x10\x05\x12\t\n" +
-	"\x05BEACH\x10\x06\x12\f\n" +
-	"\bMOUNTAIN\x10\a\x12\t\n" +
-	"\x05URBAN\x10\b*\x17\n" +
+	"Relaxation\x10\x05\x12\t\n" +
+	"\x05Beach\x10\x06\x12\f\n" +
+	"\bMountain\x10\a\x12\t\n" +
+	"\x05Urban\x10\b*\x17\n" +
 	"\n" +
 	"TourStatus\x12\t\n" +
 	"\x05DRAFT\x10\x002\x89\x02\n" +

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TourService } from "../services/tour.service";
 import { TourInterface } from "../model/tour.interface";
@@ -16,12 +16,13 @@ import { FormsModule } from "@angular/forms";
     templateUrl: './tour-details.component.html',
     styleUrl: './tour-details.component.scss',
     imports: [
-    CommonModule,
-    TourExecutionModule,
-    MapComponent,
-    MaterialModule,
-    FormsModule,
-]
+        CommonModule,
+        TourExecutionModule,
+        MapComponent,
+        MaterialModule,
+        FormsModule,
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TourDetailsPage implements OnInit{
     tour!: TourInterface;
@@ -32,7 +33,8 @@ export class TourDetailsPage implements OnInit{
         description: '',
         latitude: 0,
         longitude: 0,
-        imageID: ''
+        imageID: '',
+        order: 0
     }
 
     constructor(
@@ -77,7 +79,8 @@ export class TourDetailsPage implements OnInit{
                 description: '',
                 latitude: 0,
                 longitude: 0,
-                imageID: ''
+                imageID: '',
+                order: 0
             }
         })
     }
@@ -90,7 +93,8 @@ export class TourDetailsPage implements OnInit{
             description: '',
             latitude: 0,
             longitude: 0,
-            imageID: ''
+            imageID: '',
+            order: 0
         }
     }
 }
