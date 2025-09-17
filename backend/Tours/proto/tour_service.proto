@@ -45,6 +45,7 @@ message KeyPoint {
   string name = 5;
   string description = 6;
   string imageId = 7;
+  int64 order = 8;
 }
 
 service TourService {

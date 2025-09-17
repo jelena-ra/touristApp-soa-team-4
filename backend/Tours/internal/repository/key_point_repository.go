@@ -2,12 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type KeyPointRepository interface {
@@ -31,6 +33,19 @@ func NewKeyPointRepositoryMongo(client *mongo.Client, dbName string, collectionN
 
 func (r *KeyPointRepositoryMongo) CreateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error) {
 	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+
+	var lastKP model.KeyPoint
+	opts := options.FindOne().SetSort(bson.M{"order": -1}) // descending
+	err := collection.FindOne(ctx, bson.M{"tour_id": keyPoint.TourID}, opts).Decode(&lastKP)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, err
+	}
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		keyPoint.Order = 1
+	} else {
+		keyPoint.Order = lastKP.Order + 1
+	}
+
 	newKeyPoint, err := collection.InsertOne(ctx, keyPoint)
 	if err != nil {
 		return nil, err
@@ -46,7 +61,8 @@ func (r *KeyPointRepositoryMongo) GetKeyPointByTourId(ctx context.Context, tourI
 	}
 
 	collection := r.client.Database(r.dbName).Collection(r.collectionName)
-	cursor, err := collection.Find(ctx, bson.M{"tour_id": oid})
+	opts := options.Find().SetSort(bson.M{"order": 1})
+	cursor, err := collection.Find(ctx, bson.M{"tour_id": oid}, opts)
 	if err != nil {
 		return nil, err
 	}

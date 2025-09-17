@@ -10,4 +10,5 @@ type KeyPoint struct {
 	Name        string             `bson:"name"`
 	Description string             `bson:"description"`
 	ImageID     primitive.ObjectID `bson:"image_id,omitempty"`
+	Order       int                `bson:"order"`
 }

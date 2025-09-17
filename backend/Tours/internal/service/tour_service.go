@@ -43,5 +43,6 @@ func (s *TourService) CreateKeyPoint(ctx context.Context, keyPoint *model.KeyPoi
 	if err != nil {
 		return nil, err
 	}
+
 	return s.keyPointRepo.CreateKeyPoint(ctx, keyPoint)
 }

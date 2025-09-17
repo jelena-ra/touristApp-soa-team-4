@@ -289,6 +289,7 @@ type KeyPoint struct {
 	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	ImageId       string                 `protobuf:"bytes,7,opt,name=imageId,proto3" json:"imageId,omitempty"`
+	Order         int64                  `protobuf:"varint,8,opt,name=order,proto3" json:"order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -370,6 +371,13 @@ func (x *KeyPoint) GetImageId() string {
 		return x.ImageId
 	}
 	return ""
+}
+
+func (x *KeyPoint) GetOrder() int64 {
+	if x != nil {
+		return x.Order
+	}
+	return 0
 }
 
 type Empty struct {
@@ -739,7 +747,7 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"difficulty\x12!\n" +
 	"\x04tags\x18\x06 \x03(\x0e2\r.tour.TourTagR\x04tags\x12(\n" +
 	"\x06status\x18\a \x01(\x0e2\x10.tour.TourStatusR\x06status\x12\x14\n" +
-	"\x05price\x18\b \x01(\x02R\x05price\"\xbc\x01\n" +
+	"\x05price\x18\b \x01(\x02R\x05price\"\xd2\x01\n" +
 	"\bKeyPoint\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06tourId\x18\x02 \x01(\tR\x06tourId\x12\x1c\n" +
@@ -747,7 +755,8 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\blatitude\x18\x04 \x01(\x02R\blatitude\x12\x12\n" +
 	"\x04name\x18\x05 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x18\n" +
-	"\aimageId\x18\a \x01(\tR\aimageId\"\a\n" +
+	"\aimageId\x18\a \x01(\tR\aimageId\x12\x14\n" +
+	"\x05order\x18\b \x01(\x03R\x05order\"\a\n" +
 	"\x05Empty\"4\n" +
 	"\x10TourListResponse\x12 \n" +
 	"\x05tours\x18\x01 \x03(\v2\n" +
