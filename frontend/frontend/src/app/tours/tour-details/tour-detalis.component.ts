@@ -21,8 +21,7 @@ import { FormsModule } from "@angular/forms";
         MapComponent,
         MaterialModule,
         FormsModule,
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    ]
 })
 export class TourDetailsPage implements OnInit{
     tour!: TourInterface;
