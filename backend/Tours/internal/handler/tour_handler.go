@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	stakeholdersProto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/mapper"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/service"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
@@ -13,11 +14,15 @@ import (
 
 type TourHandler struct {
 	tourProto.UnimplementedTourServiceServer
-	server *service.TourService
+	server             *service.TourService
+	stakeholdersClient stakeholdersProto.StakeholderServiceClient
 }
 
-func NewTourHandler(service *service.TourService) *TourHandler {
-	return &TourHandler{server: service}
+func NewTourHandler(service *service.TourService, stakeholdersClient stakeholdersProto.StakeholderServiceClient) *TourHandler {
+	return &TourHandler{
+		server:             service,
+		stakeholdersClient: stakeholdersClient,
+	}
 }
 
 func (h *TourHandler) GetAllTours(ctx context.Context, req *tourProto.Empty) (*tourProto.TourListResponse, error) {
@@ -59,6 +64,8 @@ func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourR
 	if crateInfo == nil {
 		return nil, status.Error(codes.InvalidArgument, "Tour information is required")
 	}
+
+	//TODO check user exists and is author
 
 	modelCreateTour := mapper.TourProtoToModel(crateInfo)
 	newTour := must(h.server.Create(ctx, modelCreateTour))

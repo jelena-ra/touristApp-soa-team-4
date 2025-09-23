@@ -66,8 +66,8 @@ services:
   tour-service:
     image: tour-service:compose_build
     build:
-      context: ./Tours
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Tours/Dockerfile
     networks:
       - backend
     ports:

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	stakeholdersProto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/service"
@@ -62,10 +63,29 @@ func main() {
 		keyPointCollectionName = "key_points"
 	}
 
+	stakeholdersPort := os.Getenv("STAKEHOLDERS_PORT")
+	if stakeholdersPort == "" {
+		stakeholdersPort = "8081"
+	}
+	stakeholdersAddress := "localhost:" + stakeholdersPort
+
+	stakeholdersConn, err := grpc.Dial(stakeholdersAddress, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Failed to connect to Stakeholders service: %v", err)
+	}
+	defer func(stakeholdersConn *grpc.ClientConn) {
+		err := stakeholdersConn.Close()
+		if err != nil {
+			log.Fatalf("Failed to close connection to Stakeholders service: %v", err)
+		}
+	}(stakeholdersConn)
+
+	stakeholdersClient := stakeholdersProto.NewStakeholderServiceClient(stakeholdersConn)
+
 	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
 	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
 	tourService := service.NewTourService(tourRepo, keyPointRepo)
-	tourHandler := handler.NewTourHandler(tourService)
+	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient)
 
 	port := os.Getenv("PORT")
 	if port == "" {
