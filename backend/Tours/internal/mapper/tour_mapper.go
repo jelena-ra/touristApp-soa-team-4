@@ -43,11 +43,15 @@ var protoToModelTag = map[tourProto.TourTag]model.TourTag{
 }
 
 var modelToProtoStatus = map[model.TourStatus]tourProto.TourStatus{
-	model.Draft: tourProto.TourStatus_DRAFT,
+	model.Draft:     tourProto.TourStatus_DRAFT,
+	model.Published: tourProto.TourStatus_PUBLISHED,
+	model.Archived:  tourProto.TourStatus_ARCHIVED,
 }
 
 var protoToModelStatus = map[tourProto.TourStatus]model.TourStatus{
-	tourProto.TourStatus_DRAFT: model.Draft,
+	tourProto.TourStatus_DRAFT:     model.Draft,
+	tourProto.TourStatus_PUBLISHED: model.Published,
+	tourProto.TourStatus_ARCHIVED:  model.Archived,
 }
 
 func convertTagsModelToProto(tags []model.TourTag) []tourProto.TourTag {
@@ -66,6 +70,22 @@ func convertTagsProtoToModel(tags []tourProto.TourTag) []model.TourTag {
 	return out
 }
 
+func convertTravelTimesModelToProto(times map[model.Transport]float64) map[string]float32 {
+	out := make(map[string]float32, len(times))
+	for k, v := range times {
+		out[string(k)] = float32(v)
+	}
+	return out
+}
+
+func convertTravelTimesProtoToModel(times map[string]float32) map[model.Transport]float64 {
+	out := make(map[model.Transport]float64, len(times))
+	for k, v := range times {
+		out[model.Transport(k)] = float64(v)
+	}
+	return out
+}
+
 func TourModelToProto(t *model.Tour) *tourProto.Tour {
 	return &tourProto.Tour{
 		Id:          t.ID.Hex(),
@@ -76,6 +96,7 @@ func TourModelToProto(t *model.Tour) *tourProto.Tour {
 		Tags:        convertTagsModelToProto(t.Tags),
 		Status:      modelToProtoStatus[t.Status],
 		Price:       float32(t.Price),
+		TravelTimes: convertTravelTimesModelToProto(t.TravelTimes),
 	}
 }
 
@@ -104,5 +125,6 @@ func TourProtoToModel(t *tourProto.Tour) *model.Tour {
 		Tags:        convertTagsProtoToModel(t.GetTags()),
 		Status:      protoToModelStatus[t.GetStatus()],
 		Price:       float64(t.GetPrice()),
+		TravelTimes: convertTravelTimesProtoToModel(t.GetTravelTimes()),
 	}
 }

@@ -13,6 +13,7 @@ message Tour {
   repeated TourTag tags = 6;
   TourStatus status = 7;
   float price = 8;
+  map<string, float> travelTimes = 9;
 }
 
 enum TourDifficulty {
@@ -35,6 +36,8 @@ enum TourTag {
 
 enum TourStatus {
   DRAFT = 0;
+  PUBLISHED = 1;
+  ARCHIVED = 2;
 }
 
 message KeyPoint {
@@ -52,7 +55,10 @@ service TourService {
   rpc GetAllTours(Empty) returns (TourListResponse);
   rpc GetTourByID(TourIDRequest) returns (DetailedTourResponse);
   rpc CreateTour(CreateTourRequest) returns (TourResponse);
+  rpc UpdateTour(UpdateTourRequest) returns (UpdateTourResponse);
   rpc CreateKeyPoint(CreateKeyPointRequest) returns (CreateKeyPointResponse);
+  rpc UpdateKeyPoint(UpdateKeyPointRequest) returns (UpdateKeyPointResponse);
+  rpc DeleteKeyPoint(DeleteKeyPointRequest) returns (DeleteKeyPointResponse);
 }
 
 message Empty {
@@ -80,10 +86,34 @@ message CreateTourRequest {
   Tour tour = 1;
 }
 
+message UpdateTourRequest {
+  Tour tour = 1;
+}
+
+message UpdateTourResponse {
+  Tour tour = 1;
+}
+
 message CreateKeyPointRequest {
   KeyPoint keyPoint = 1;
 }
 
 message CreateKeyPointResponse {
   KeyPoint keyPoint = 1;
+}
+
+message UpdateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+}
+
+message UpdateKeyPointResponse {
+  KeyPoint keyPoint = 1;
+}
+
+message DeleteKeyPointRequest {
+  int64 keyPointId = 1;
+}
+
+message DeleteKeyPointResponse {
+  string message = 1;
 }

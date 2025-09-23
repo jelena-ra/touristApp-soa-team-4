@@ -14,6 +14,7 @@ type TourRepository interface {
 	GetAll(ctx context.Context) ([]*model.Tour, error)
 	GetByID(ctx context.Context, id string) (*model.Tour, error)
 	CreateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
+	UpdateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
 }
 
 type TourRepositoryMongo struct {
@@ -74,4 +75,18 @@ func (t TourRepositoryMongo) GetByID(ctx context.Context, id string) (*model.Tou
 	}
 
 	return &tour, nil
+}
+
+func (t TourRepositoryMongo) UpdateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error) {
+	oid, err := primitive.ObjectIDFromHex(tour.ID.Hex())
+	if err != nil {
+		return nil, err
+	}
+
+	collection := t.client.Database(t.dbName).Collection(t.collectionName)
+	if _, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, tour); err != nil {
+		return nil, err
+	}
+
+	return tour, nil
 }

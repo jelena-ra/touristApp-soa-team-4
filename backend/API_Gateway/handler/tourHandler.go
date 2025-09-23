@@ -128,6 +128,13 @@ func (h *TourHandler) CreateTourHandle(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
+func (h *TourHandler) UpdateTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	var updateTourRequest tourProto.
+}
+
 func (h *TourHandler) CreateKeyPointHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()

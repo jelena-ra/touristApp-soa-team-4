@@ -74,6 +74,21 @@ func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourR
 	return &tourProto.TourResponse{Tour: protoTour}, nil
 }
 
+func (h *TourHandler) UpdateTour(ctx context.Context, req *tourProto.UpdateTourRequest) (*tourProto.UpdateTourResponse, error) {
+	updateInfo := req.GetTour()
+	if updateInfo == nil {
+		return nil, status.Error(codes.InvalidArgument, "Tour information is required")
+	}
+
+	//TODO check user exists and is author
+
+	modelUpdateTour := mapper.TourProtoToModel(updateInfo)
+	updatedTour := must(h.server.Update(ctx, modelUpdateTour))
+	protoTour := mapper.TourModelToProto(updatedTour)
+
+	return &tourProto.UpdateTourResponse{Tour: protoTour}, nil
+}
+
 func (h *TourHandler) CreateKeyPoint(ctx context.Context, req *tourProto.CreateKeyPointRequest) (*tourProto.CreateKeyPointResponse, error) {
 	createInfo := req.GetKeyPoint()
 	if createInfo == nil {
