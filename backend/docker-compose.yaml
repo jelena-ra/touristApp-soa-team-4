@@ -16,7 +16,6 @@ services:
     depends_on:
       stakeholders-db:
         condition: service_healthy
-    restart: on-failure
 
   stakeholders-db:
     image: neo4j:4.4
@@ -31,10 +30,11 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD} -a neo4j://localhost:7687 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   blog-service:
     image: blog-service:compose_build
@@ -79,6 +79,69 @@ services:
     depends_on:
       - blog-service
       - stakeholder-service
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - backend
+  
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - backend
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true 
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    networks:
+      - backend
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - backend
+    depends_on:
+      - prometheus
+    restart: unless-stopped
 
 networks:
   backend:
@@ -87,3 +150,4 @@ networks:
 volumes:
   blog_db_data:
   stakeholders_db_data:
+  grafana_data:

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
-	"github.comcom/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
 )
 
 type UserService struct {
