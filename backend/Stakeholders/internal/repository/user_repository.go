@@ -3,12 +3,12 @@ package repository
 import (
 	"context"
 	"errors"
+
 	"github.com/google/uuid"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
-
 
 type UserRepository struct {
 	dbDriver neo4j.DriverWithContext
@@ -17,7 +17,6 @@ type UserRepository struct {
 func NewUserRepository(driver neo4j.DriverWithContext) *UserRepository {
 	return &UserRepository{dbDriver: driver}
 }
-
 
 func (repo *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 	var users []model.User
@@ -63,7 +62,6 @@ func (repo *UserRepository) FindAll(ctx context.Context) ([]model.User, error) {
 	return users, nil
 }
 
-
 func (repo *UserRepository) GetActiveByName(username string) (*model.User, error) {
 	ctx := context.Background()
 	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
@@ -98,14 +96,13 @@ func (repo *UserRepository) GetActiveByName(username string) (*model.User, error
 			return &user, nil
 		}
 
-	
 		return nil, errors.New("user not found")
 	})
 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if result == nil {
 		return nil, errors.New("user not found")
 	}
@@ -136,7 +133,6 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 			node := record.Values[0].(neo4j.Node)
 			props := node.Props
 
-	
 			user := model.User{
 				ID:       props["id"].(string),
 				Username: props["username"].(string),
@@ -154,14 +150,13 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if result == nil {
 		return nil, errors.New("user not found")
 	}
 
 	return result.(*model.User), nil
 }
-
 
 func (repo *UserRepository) Exists(username string) (bool, error) {
 	ctx := context.Background()
@@ -192,7 +187,40 @@ func (repo *UserRepository) Exists(username string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
+	return result.(bool), nil
+}
+
+func (repo *UserRepository) ExistsById(id string) (bool, error) {
+	ctx := context.Background()
+	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	result, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `
+			MATCH (s:User)
+			WHERE s.id = $id AND s.blocked = false
+			RETURN count(s) AS count
+		`
+		params := map[string]any{"id": id}
+
+		records, err := tx.Run(ctx, query, params)
+		if err != nil {
+			return false, err
+		}
+
+		if records.Next(ctx) {
+			record := records.Record()
+			count := record.Values[0].(int64)
+			return count > 0, nil
+		}
+		return false, nil
+	})
+
+	if err != nil {
+		return false, err
+	}
+
 	return result.(bool), nil
 }
 
@@ -205,7 +233,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 
 		id := uuid.New().String()
 		user.ID = id
-		
+
 		query := `
 			CREATE (s:User {
 				id: $id,
@@ -238,7 +266,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 
 		node := record.Values[0].(neo4j.Node)
 		props := node.Props
-		
+
 		createdUser := &model.User{
 			ID:       props["id"].(string),
 			Username: props["username"].(string),
@@ -247,7 +275,7 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 			Role:     props["role"].(string),
 			Blocked:  props["blocked"].(bool),
 		}
-		
+
 		return createdUser, nil
 	})
 
@@ -258,15 +286,13 @@ func (repo *UserRepository) Create(user *model.User) (*model.User, error) {
 	return result.(*model.User), nil
 }
 
-
 func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 	ctx := context.Background()
 	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close(ctx)
 
 	result, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		
-		
+
 		query := `
 			MATCH (s:User {id: $id})
 			SET
@@ -298,7 +324,7 @@ func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 
 		node := record.Values[0].(neo4j.Node)
 		props := node.Props
-		
+
 		createdUser := &model.User{
 			ID:       props["id"].(string),
 			Username: props["username"].(string),
@@ -307,7 +333,7 @@ func (repo *UserRepository) Update(user *model.User) (*model.User, error) {
 			Role:     props["role"].(string),
 			Blocked:  props["blocked"].(bool),
 		}
-		
+
 		return createdUser, nil
 	})
 

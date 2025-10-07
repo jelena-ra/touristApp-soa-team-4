@@ -3,13 +3,14 @@ package handler
 import (
 	"context"
 
+	pb "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
+	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
-	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
 
 type BlogHandler struct {
@@ -150,6 +151,37 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 	}, nil
 }
 
+func (h *BlogHandler) GetFeedForUser(ctx context.Context, req *blog_proto.GetFeedForUserRequest) (*blog_proto.GetAllBlogsResponse, error) {
+	userIds := req.GetUserId()
+
+	if len(userIds) == 0 {
+		return &pb.GetAllBlogsResponse{Blogs: []*pb.Blog{}}, nil
+	}
+
+	blogs, err := h.service.GetFeedForUser(ctx, userIds)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get blogs: %v", err)
+	}
+
+	protoBlogs := make([]*blog_proto.Blog, 0)
+
+	for _, blog := range blogs {
+		protoBlog := &blog_proto.Blog{
+			Id:            blog.ID.Hex(),
+			Title:         blog.Title,
+			Content:       blog.Content,
+			AuthorId:      blog.AuthorID,
+			Images:        blog.Images,
+			NumberOfLikes: int32(len(blog.Likes)),
+		}
+		protoBlogs = append(protoBlogs, protoBlog)
+	}
+
+	return &blog_proto.GetAllBlogsResponse{
+		Blogs: protoBlogs,
+	}, nil
+}
+
 func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateCommentRequest) (*blog_proto.CreateCommentResponse, error) {
 	commentReq := req.GetCommentInput()
 	if commentReq == nil {
@@ -171,7 +203,6 @@ func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateC
 		UserId:  createdComment.UserID,
 		Content: createdComment.Content,
 
-		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
 		CreatedAt:    timestamppb.New(createdComment.CreatedAt),
 		LastModified: timestamppb.New(createdComment.LastModified),
 	}

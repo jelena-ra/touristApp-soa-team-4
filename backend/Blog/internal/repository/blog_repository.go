@@ -14,6 +14,7 @@ type BlogRepository interface {
 	GetById(ctx context.Context, id string) (*model.Blog, error)
 	Update(ctx context.Context, blog *model.Blog) (*model.Blog, error)
 	GetAll(ctx context.Context) ([]model.Blog, error)
+	GetAllBlogsForUsers(ctx context.Context, userIds []string) ([]model.Blog, error)
 }
 
 type BlogRepositoryMongo struct {
@@ -74,6 +75,25 @@ func (r *BlogRepositoryMongo) GetAll(ctx context.Context) ([]model.Blog, error) 
 	collection := r.client.Database(r.dbName).Collection(r.collectionName)
 
 	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var blogs []model.Blog
+	if err = cursor.All(ctx, &blogs); err != nil {
+		return nil, err
+	}
+
+	return blogs, nil
+}
+
+func (r *BlogRepositoryMongo) GetAllBlogsForUsers(ctx context.Context, userIds []string) ([]model.Blog, error) {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+
+	filter := bson.M{"authorId": bson.M{"$in": userIds}}
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

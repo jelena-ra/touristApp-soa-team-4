@@ -101,14 +101,20 @@ message DeleteBlogResponse {
 message GetAllBlogsRequest {
 }
 
+message GetFeedForUserRequest {
+  string userId = 1;
+}
+
 message GetAllBlogsResponse {
   repeated Blog blogs = 1; 
 }
+
 service BlogService {
   rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
   rpc LikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
   rpc UnlikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
   rpc GetAllBlogs (GetAllBlogsRequest) returns (GetAllBlogsResponse);
+  rpc GetFeedForUser (GetFeedForUserRequest) returns (GetAllBlogsResponse);
   rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
 }

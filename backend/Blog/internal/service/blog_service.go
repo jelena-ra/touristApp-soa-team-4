@@ -7,15 +7,21 @@ import (
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/repository"
+	following_proto "github.com/jelena-ra/touristApp/soa-team-4/Following/proto"
 )
 
 type BlogService struct {
-	repo        repository.BlogRepository
-	repoComment repository.CommentRepository
+	repo            repository.BlogRepository
+	repoComment     repository.CommentRepository
+	followingClient following_proto.FollowingServiceClient
 }
 
-func NewBlogService(repo repository.BlogRepository, repoComment repository.CommentRepository) *BlogService {
-	return &BlogService{repo: repo, repoComment: repoComment}
+func NewBlogService(repo repository.BlogRepository, repoComment repository.CommentRepository, followingClient following_proto.FollowingServiceClient) *BlogService {
+	return &BlogService{
+		repo:            repo,
+		repoComment:     repoComment,
+		followingClient: followingClient,
+	}
 }
 
 func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) (*model.Blog, error) {
@@ -75,6 +81,26 @@ func (s *BlogService) GetAllBlogs(ctx context.Context) ([]model.Blog, error) {
 	if err != nil {
 		return nil, err
 	}
+	return blogs, nil
+}
+
+func (s *BlogService) GetFeedForUser(ctx context.Context, userId string) ([]model.Blog, error) {
+	followedResponse, err := s.followingClient.GetFollowingsForUser(ctx, &following_proto.GetFollowingsForUserRequest{Id: userId})
+	if err != nil {
+		return nil, err
+	}
+
+	followedUserIds := followedResponse.GetIds()
+
+	if len(followedUserIds) == 0 {
+		return []model.Blog{}, nil
+	}
+
+	blogs, err := s.repo.GetAllBlogsForUsers(ctx, followedUserIds)
+	if err != nil {
+		return nil, err
+	}
+
 	return blogs, nil
 }
 
