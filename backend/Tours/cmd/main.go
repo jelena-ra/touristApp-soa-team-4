@@ -62,6 +62,10 @@ func main() {
 	if keyPointCollectionName == "" {
 		keyPointCollectionName = "key_points"
 	}
+	recensionCollectionName := os.Getenv("MONGO_RECENSION_COLLECTION_NAME")
+	if recensionCollectionName == "" {
+		recensionCollectionName = "recensions"
+	}
 
 	stakeholdersPort := os.Getenv("STAKEHOLDERS_PORT")
 	if stakeholdersPort == "" {
@@ -84,7 +88,8 @@ func main() {
 
 	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
 	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
-	tourService := service.NewTourService(tourRepo, keyPointRepo)
+	recensionRepo := repository.NewRecensionRepository(client, dbName, recensionCollectionName)
+	tourService := service.NewTourService(tourRepo, keyPointRepo, recensionRepo)
 	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient)
 
 	port := os.Getenv("PORT")

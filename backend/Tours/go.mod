@@ -1,12 +1,12 @@
 module github.com/jelena-ra/touristApp/soa-team-4/Tours
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/jelena-ra/touristApp/soa-team-4/Stakeholders v0.0.0
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.4
-	google.golang.org/grpc v1.75.1
+	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.9
 )
 

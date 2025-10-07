@@ -2,7 +2,9 @@ FROM golang:latest AS builder
 
 WORKDIR /app
 
-COPY . .
+# Copy both Tours and Stakeholders directories
+COPY ../Stakeholders /app/Stakeholders
+COPY . /app/Tours
 
 WORKDIR /app/Tours
 

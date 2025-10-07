@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: tours_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: tour_db
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - tours_network
+
+  stakeholders:
+    build: ../Stakeholders
+    container_name: stakeholders_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - tours_network
+    environment:
+      - PORT=8081
+
+  tours:
+    build: 
+      context: ..
+      dockerfile: Tours/Dockerfile.parent
+    container_name: tours_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mongo
+      - stakeholders
+    networks:
+      - tours_network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB_NAME=tour_db
+      - MONGO_COLLECTION_NAME=tours
+      - MONGO_KEYPOINT_COLLECTION_NAME=key_points
+      - STAKEHOLDERS_PORT=8081
+      - PORT=8083
+
+volumes:
+  mongo_data:
+
+networks:
+  tours_network:
+    driver: bridge
