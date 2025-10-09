@@ -97,6 +97,7 @@ func TourModelToProto(t *model.Tour) *tourProto.Tour {
 		Status:      modelToProtoStatus[t.Status],
 		Price:       float32(t.Price),
 		TravelTimes: convertTravelTimesModelToProto(t.TravelTimes),
+		Length:      float32(t.Length),
 	}
 }
 
@@ -126,5 +127,6 @@ func TourProtoToModel(t *tourProto.Tour) *model.Tour {
 		Status:      protoToModelStatus[t.GetStatus()],
 		Price:       float64(t.GetPrice()),
 		TravelTimes: convertTravelTimesProtoToModel(t.GetTravelTimes()),
+		Length:      float64(t.GetLength()),
 	}
 }

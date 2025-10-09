@@ -10,17 +10,17 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    justify-content: center;
+    gap: 1.5rem;
+    justify-content: flex-start;
     align-items: center;
-    padding: 0 2rem;
+    padding: 0 4rem;
 }
 
 .all-tours {
     width: 100%;
     display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem 0.8rem;
+    grid-template-columns: repeat(auto-fill, 400px);
 }
 
 .tour {
@@ -51,6 +51,7 @@
 .tour-description {
     display: -webkit-box;
     -webkit-line-clamp: 10;
+    line-clamp: 10;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;

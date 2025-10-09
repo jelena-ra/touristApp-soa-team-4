@@ -132,7 +132,35 @@ func (h *TourHandler) UpdateTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	var updateTourRequest tourProto.
+	var updateTourRequest tourProto.UpdateTourRequest
+	if err := json.NewDecoder(r.Body).Decode(&updateTourRequest); err != nil {
+		log.Printf("Failed to decode request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.client.UpdateTour(ctx, &updateTourRequest)
+	if err != nil {
+		log.Printf("Failed to update tour: %v", err)
+		http.Error(w, "Failed to update tour", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{
+		UseEnumNumbers:  false,
+		EmitUnpopulated: true,
+	}
+
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal proto to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 func (h *TourHandler) CreateKeyPointHandle(w http.ResponseWriter, r *http.Request) {

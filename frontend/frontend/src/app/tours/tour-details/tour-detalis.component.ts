@@ -10,6 +10,7 @@ import { MapComponent } from "../../shared/map/map.component";
 import { KeyPointService } from "../services/key-point.service";
 import { MaterialModule } from "../../material/material.module";
 import { FormsModule } from "@angular/forms";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
     selector: 'tour-details',
@@ -20,10 +21,12 @@ import { FormsModule } from "@angular/forms";
         TourExecutionModule,
         MapComponent,
         MaterialModule,
-        FormsModule,
+        FormsModule
     ]
 })
 export class TourDetailsPage implements OnInit{
+    _snackBar = inject(MatSnackBar)
+
     tour!: TourInterface;
     newKeyPoint: KeyPointInterface = {
         id: '',
@@ -66,6 +69,16 @@ export class TourDetailsPage implements OnInit{
     }
 
     createKeyPoint(): void {
+        if(this.newKeyPoint.latitude == 0 || this.newKeyPoint.longitude == 0) {
+            this._snackBar.open("Please select a location on the map", "OK", { duration: 2000 })
+            return
+        }
+
+        if(this.newKeyPoint.name == "" || this.newKeyPoint.description == "") {
+            this._snackBar.open("Key Point name and description are required", "OK", { duration: 2000 })
+            return
+        }
+
         this.keyPointService.createKeyPoint(this.newKeyPoint)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((response: KeyPointInterface ) => {
@@ -80,6 +93,11 @@ export class TourDetailsPage implements OnInit{
                 longitude: 0,
                 imageID: '',
                 order: 0
+            }
+
+            if(response.id) {
+                console.log(response)
+                this._snackBar.open("Key Point Created", "OK", { duration: 2000 })
             }
         })
     }

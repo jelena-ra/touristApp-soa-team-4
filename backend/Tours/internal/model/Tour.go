@@ -18,6 +18,7 @@ type Tour struct {
 	TravelTimes map[Transport]float64 `bson:"travelTimes"`
 	PublishedAt *time.Time            `bson:"publishedAt,omitempty"`
 	ArchivedAt  *time.Time            `bson:"archivedAt,omitempty"`
+	Length      float64               `bson:"length"`
 }
 
 type TourDifficulty string

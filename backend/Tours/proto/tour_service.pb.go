@@ -197,6 +197,7 @@ type Tour struct {
 	Status        TourStatus             `protobuf:"varint,7,opt,name=status,proto3,enum=tour.TourStatus" json:"status,omitempty"`
 	Price         float32                `protobuf:"fixed32,8,opt,name=price,proto3" json:"price,omitempty"`
 	TravelTimes   map[string]float32     `protobuf:"bytes,9,rep,name=travelTimes,proto3" json:"travelTimes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed32,2,opt,name=value"`
+	Length        float32                `protobuf:"fixed32,10,opt,name=length,proto3" json:"length,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -292,6 +293,13 @@ func (x *Tour) GetTravelTimes() map[string]float32 {
 		return x.TravelTimes
 	}
 	return nil
+}
+
+func (x *Tour) GetLength() float32 {
+	if x != nil {
+		return x.Length
+	}
+	return 0
 }
 
 type KeyPoint struct {
@@ -1014,7 +1022,7 @@ var File_Tours_proto_tour_service_proto protoreflect.FileDescriptor
 
 const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1eTours/proto/tour_service.proto\x12\x04tour\"\x80\x03\n" +
+	"\x1eTours/proto/tour_service.proto\x12\x04tour\"\x98\x03\n" +
 	"\x04Tour\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\bauthorId\x18\x02 \x01(\tR\bauthorId\x12\x12\n" +
@@ -1026,7 +1034,9 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\x04tags\x18\x06 \x03(\x0e2\r.tour.TourTagR\x04tags\x12(\n" +
 	"\x06status\x18\a \x01(\x0e2\x10.tour.TourStatusR\x06status\x12\x14\n" +
 	"\x05price\x18\b \x01(\x02R\x05price\x12=\n" +
-	"\vtravelTimes\x18\t \x03(\v2\x1b.tour.Tour.TravelTimesEntryR\vtravelTimes\x1a>\n" +
+	"\vtravelTimes\x18\t \x03(\v2\x1b.tour.Tour.TravelTimesEntryR\vtravelTimes\x12\x16\n" +
+	"\x06length\x18\n" +
+	" \x01(\x02R\x06length\x1a>\n" +
 	"\x10TravelTimesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01\"\xd2\x01\n" +
