@@ -1,11 +1,12 @@
 package service
 
 import (
-	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
-	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
-	"fmt"
 	"context"
 	"errors"
+	"fmt"
+
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
 )
 
 type UserService struct {
@@ -41,10 +42,7 @@ func (service *UserService) Block(id string) (*model.User, error) {
 		return nil, errors.New("korisnik nije pronađen")
 	}
 
-	//log.Printf("Blocking user: %s", user.ID)
-
 	user.Blocked = true
-
 
 	updatedUser, err := service.repo.Update(user)
 	if err != nil {
@@ -53,4 +51,8 @@ func (service *UserService) Block(id string) (*model.User, error) {
 	}
 
 	return updatedUser, nil
+}
+
+func (service *UserService) CheckIfUserExists(id string) (bool, error) {
+	return service.repo.ExistsById(id)
 }

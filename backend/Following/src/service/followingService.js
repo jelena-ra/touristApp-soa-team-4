@@ -1,25 +1,86 @@
 const followingRepository = require('../repository/followingRepo');
+const stakeholdersClient = require('../client/StakeholdersClient'); 
 
 class FollowingService {
 
   async followUser(followerId, followedId) {
-    console.log(`Servisni sloj: Provera za praćenje korisnika ${followerId} -> ${followedId}`);
 
     if (followerId === followedId) {
       throw new Error('Korisnik ne može sam sebe da prati.');
     }
 
+    const [followerExists, followedExists] = await Promise.all([
+      stakeholdersClient.checkUserExistence(followerId),   
+      stakeholdersClient.checkUserExistence(followedId)    
+    ]);
+
+    if (!followerExists) {
+      throw new Error(`Korisnik koji pokušava da prati (ID: ${followerId}) ne postoji.`);
+    }
+    if (!followedExists) {
+      throw new Error(`Korisnik koji treba da bude zapraćen (ID: ${followedId}) ne postoji.`);
+    }
+
     try {
       await followingRepository.followUser(followerId, followedId);
-
       return { success: true};
-
     } catch (error) {
-      console.error("Greška:", error);
-      throw new Error('Došlo je do greške prilikom upisa u bazu.');
+      throw new Error('Došlo je do greške prilikom upisa u bazu.' + error);
     }
   }
 
+  async getRecommendations(userId) { 
+    const userExists = await stakeholdersClient.checkUserExistence(userId);
+    if (!userExists) {
+      throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
+    }
+
+    const recommendedIds = await followingRepository.getRecommendation(userId);
+    if (!recommendedIds || recommendedIds.length === 0) {
+      return [];
+    }
+    const profilePromises = recommendedIds.map(id => {
+      return stakeholdersClient.getProfileByUserId(id);
+    });
+
+    const recommendedProfiles = await Promise.all(profilePromises);
+    const finalProfiles = recommendedProfiles.filter(profile => profile !== null);
+    return finalProfiles;
+  }
+
+  async getFollowingsForUser(userId){
+    const userExists = await stakeholdersClient.checkUserExistence(userId);
+    if (!userExists) {
+      throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
+    }
+
+    const followingIds = await followingRepository.getFollowing(userId);
+    if (!followingIds || followingIds.length === 0) {
+      return [];
+    }
+    return followingIds;
+  }
+
+  async followExists(followerId, followedId){
+    if (followerId === followedId) {
+      throw new Error('Korisnik ne može sam sebe da prati.');
+    }
+
+    const [followerExists, followedExists] = await Promise.all([
+      stakeholdersClient.checkUserExistence(followerId),   
+      stakeholdersClient.checkUserExistence(followedId)    
+    ]);
+
+    if (!followerExists) {
+      throw new Error(`Korisnik koji treba da prati (ID: ${followerId}) ne postoji.`);
+    }
+    if (!followedExists) {
+      throw new Error(`Korisnik koji treba da je zapraćen (ID: ${followedId}) ne postoji.`);
+    }
+
+    const res = followingRepository.checkIfFollows(followerId, followedId)
+    return res
+  }
 }
 
 module.exports = new FollowingService();

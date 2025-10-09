@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"log"
-	"net" // net je potreban za gRPC listen
+	"net"
 	"os"
 	"time"
 
-	"google.golang.org/grpc" // Uvozimo gRPC
+	"google.golang.org/grpc"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/client"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
@@ -34,13 +35,13 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
-	defer client.Disconnect(ctx)
+	defer mongoClient.Disconnect(ctx)
 
-	err = client.Ping(ctx, nil)
+	err = mongoClient.Ping(ctx, nil)
 	if err != nil {
 		log.Fatalf("Failed to ping MongoDB: %v", err)
 	}
@@ -56,14 +57,19 @@ func main() {
 		collectionName = "blogs"
 	}
 
-	//Obrisati
-	//log.Printf("!!! APLIKACIJA KORISTI BAZU: %s", dbName)
-	//log.Printf("!!! APLIKACIJA KORISTI KOLEKCIJU: %s", collectionName)
+	followingServiceAddr := os.Getenv("FOLLOWING_SERVICE_ADDR")
+	if followingServiceAddr == "" {
+		followingServiceAddr = "localhost:8083"
+	}
+	followingClient, err := client.NewFollowingClient(followingServiceAddr)
+	if err != nil {
+		log.Fatalf("Nije moguće povezati se sa Following servisom: %v", err)
+	}
 
-	blogRepo := repository.NewBlogRepository(client, dbName, collectionName)
-	commentRepo := repository.NewCommentRepository(client, dbName, "comments")
+	blogRepo := repository.NewBlogRepository(mongoClient, dbName, collectionName)
+	commentRepo := repository.NewCommentRepository(mongoClient, dbName, "comments")
+	blogService := service.NewBlogService(blogRepo, commentRepo, followingClient)
 
-	blogService := service.NewBlogService(blogRepo, commentRepo)
 	blogHandler := handler.NewBlogHandler(blogService)
 
 	port := os.Getenv("MONGO_PORT")

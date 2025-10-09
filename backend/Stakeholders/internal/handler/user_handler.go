@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+
 type UserHandler struct {
 	//stakeholder_proto.UnimplementedStakeholderServiceServer
 	service *service.UserService
@@ -53,6 +54,7 @@ func (h *UserHandler) GetUser(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
+
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -70,4 +72,31 @@ func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updatedUser)
+}
+
+func (h *UserHandler) CheckIfUserExists(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if id == "" {
+		http.Error(w, "Nedostaje ID korisnika.", http.StatusBadRequest)
+		return
+	}
+
+	exists, err := h.service.CheckIfUserExists(id)
+	if err != nil {
+		http.Error(w, "Greška na serveru.", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if !exists {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"message": "User wasn't found"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User exists"})
 }

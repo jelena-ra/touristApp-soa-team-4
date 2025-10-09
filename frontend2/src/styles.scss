@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimalist Design System - Inspired by whatismissing.org */
+
+@layer base {
+  :root {
+    /* Minimalist monochrome palette */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+
+    /* Subtle variations */
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 90%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 60%;
+
+    /* Minimal accent system */
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 85%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 80%;
+
+    /* Subtle borders and inputs */
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 30%;
+
+    /* Status colors - very muted */
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 95%;
+    --success: 120 40% 45%;
+    --success-foreground: 0 0% 95%;
+    --warning: 45 70% 50%;
+    --warning-foreground: 0 0% 0%;
+
+    /* Minimal effects */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --glow-subtle: 0 0 20px rgba(255, 255, 255, 0.1);
+
+    --radius: 0.25rem;
+  }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 15%;
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 20%;
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 70%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+  }
+
+  /* Particle system base */
+  .particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+@layer components {
+  /* Minimal card system */
+  .minimal-card {
+    @apply bg-card border border-border rounded-[var(--radius)] shadow-soft transition-all duration-300;
+  }
+
+  .minimal-card:hover {
+    @apply shadow-hover;
+  }
+
+  /* Floating elements */
+  .floating-element {
+    @apply transition-all duration-700 ease-out;
+  }
+
+  .floating-element:hover {
+    @apply transform -translate-y-1;
+  }
+
+  /* Minimal button styles */
+  .btn-minimal {
+    @apply border border-border bg-transparent hover:bg-accent transition-all duration-200;
+  }
+
+  .btn-minimal:hover {
+    @apply border-foreground/20;
+  }
+
+  /* Subtle glow effects */
+  .subtle-glow {
+    box-shadow: var(--glow-subtle);
+  }
+
+  .subtle-glow:hover {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Typography enhancements */
+  .text-hero {
+    @apply text-4xl md:text-6xl lg:text-7xl font-light tracking-wide;
+    letter-spacing: 0.05em;
+  }
+
+  .text-elegant {
+    @apply text-lg md:text-xl font-light tracking-wide;
+    letter-spacing: 0.02em;
+  }
+
+  /* Minimal navigation */
+  .nav-minimal {
+    @apply backdrop-blur-sm bg-background/80 border-b border-border/50;
+  }
+
+  /* Subtle animations */
+  .animate-float-slow {
+    animation: floatSlow 8s ease-in-out infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .animate-particle {
+    animation: particleFloat 15s linear infinite;
+  }
+
+  /* Loading states */
+  .loading-minimal {
+    @apply bg-muted animate-pulse rounded-sm;
+  }
+
+  /* Interactive states */
+  .interactive-minimal {
+    @apply transition-all duration-200 hover:text-foreground/80 cursor-pointer;
+  }
+}
+
+@layer utilities {
+  .perspective-deep {
+    perspective: 2000px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass-minimal {
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Keyframe animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(-1deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100px) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
