@@ -1,31 +1,40 @@
-import { Component, EventEmitter, Output, AfterViewInit, Input, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, AfterViewInit, Input, ViewChild  } from '@angular/core';
 import { Location as routerLocation } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { MapComponent } from '../../shared/map/map.component';
 import { Location } from './location.model';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { MaterialModule } from '../../material/material.module';
 
 @Component({
   selector: 'xp-tourist-location',
-  imports: [MapComponent],
+  imports: [
+    MapComponent,
+    FormsModule,
+    CommonModule,
+    MaterialModule,
+    ReactiveFormsModule
+],
   templateUrl: './tourist-location.html',
   styleUrls: ['./tourist-location.css'],
-
+  standalone: true
 })
 export class TouristLocationComponent implements AfterViewInit {
 
-    @Output() locationSelected = new EventEmitter<{ latitude: number, longitude: number }>();
-   // @ViewChild(MapComponent) mapComponent: MapComponent;
+  @Output() locationSelected = new EventEmitter<{ latitude: number, longitude: number }>();
+  // @ViewChild(MapComponent) mapComponent: MapComponent;
 
-    location: Location = { log: 0, lat: 0 };
-    onLocationSelected(event: { latitude: number, longitude: number }): void {
-     this.location.lat = event.latitude;
+  location: Location = { log: 0, lat: 0 };
+  onLocationSelected(event: { latitude: number, longitude: number }): void {
+    this.location.lat = event.latitude;
     this.location.log = event.longitude;
-     this.locationSelected.emit({ latitude: this.location.lat, longitude: this.location.log });
-     console.log('Selected location:', this.location);
-    }
-     ngAfterViewInit(): void {
-
+    this.locationSelected.emit({ latitude: this.location.lat, longitude: this.location.log });
+    console.log('Selected location:', this.location);
+  }
+  
+  ngAfterViewInit(): void {
   }
 //   @Input() keyPoints: any[] = [];
 //   @Input() showEncounters: boolean = false;

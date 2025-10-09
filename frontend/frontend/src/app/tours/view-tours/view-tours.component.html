@@ -1,0 +1,40 @@
+<div class="container">
+    <h1>All tours</h1>
+    <button mat-flat-button (click)="openCreateTour()">Add Tour</button>
+    <div  class="all-tours">
+        <div *ngFor="let tour of tours">
+            <mat-card class="tour">
+                <mat-card-header class="tour-header">
+                    <mat-card-title>{{ tour.name }}</mat-card-title>
+                    <div class="tour-difficulty" [ngClass]="tour.difficulty.toLowerCase()">
+                        <mat-card-subtitle>
+                            @if(tour.difficulty == 'EASY'){
+                                <img class="difficulty-img" src="../../../assets/tour-difficulty/easy.png">
+                            } @else {
+                                <img class="difficulty-img" src="../../../assets/tour-difficulty/hard.png">
+                            }
+                            {{ tour.difficulty }}
+                        </mat-card-subtitle>
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content class="tour-body">
+                    <p class="tour-description">{{ tour.description }}</p>
+                    <div class="tags">
+                        <ng-container *ngFor="let tag of tour.tags | slice:0:3">
+                            <mat-chip>{{ tag }}</mat-chip>
+                        </ng-container>
+
+                        <mat-chip *ngIf="tour.tags.length > 3">
+                            +{{ tour.tags.length - 3 }}
+                        </mat-chip>
+                    </div>
+                </mat-card-content>
+
+                <mat-card-actions class="tour-action">
+                    <button mat-button [routerLink]="['/tours', tour.id]">View Details</button>
+                </mat-card-actions>
+            </mat-card>
+        </div>
+    </div>
+</div>

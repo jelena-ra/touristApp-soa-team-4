@@ -1,16 +1,16 @@
 package handler
 
 import (
-	//"context"
 	"encoding/json"
+	//"context"
 	"log"
 	"net/http"
-
 	//"github.com/gorilla/mux"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/service"
 	//stakeholder_proto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/gorilla/mux"
 )
+
 
 type UserHandler struct {
 	//stakeholder_proto.UnimplementedStakeholderServiceServer
@@ -53,6 +53,7 @@ func (h *UserHandler) GetUser(writer http.ResponseWriter, req *http.Request) {
 		log.Printf("Error encoding response: %v", err)
 	}
 }
+
 
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

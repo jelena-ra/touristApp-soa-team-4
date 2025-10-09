@@ -6,6 +6,8 @@ import { RegistrationComponent } from './auth/registration/registration.componen
 import { LoginComponent } from './auth/login/login.component';
 import { UsersList } from './users-list/users-list';
 import { TouristLocationComponent } from './tour-execution/tourist-location/tourist-location';
+import { ViewToursPage } from './tours/view-tours/view-tours.component';
+import { TourDetailsPage } from './tours/tour-details/tour-detalis.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -15,6 +17,7 @@ export const routes: Routes = [
   { path: 'registration', component: RegistrationComponent },
   { path: 'usersList', component: UsersList },
   { path: 'login', component: LoginComponent },
-  { path: 'tourist-location', component: TouristLocationComponent }
-
+  { path: 'tourist-location', component: TouristLocationComponent },
+  { path: 'tours', component: ViewToursPage },
+  { path: 'tours/:id', component: TourDetailsPage },
 ];

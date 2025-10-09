@@ -1,0 +1,30 @@
+<div class="container">
+    <h1>Tour Details</h1>
+    @if(tour) {
+        <div>
+            <h1>Create Key Point</h1>
+            <div class="key-point-input">
+                <mat-form-field>
+                    <mat-label>Name</mat-label>
+                    <input type="text" matInput [(ngModel)]="newKeyPoint.name" name="keyPointName">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Description</mat-label>
+                    <textarea matInput [(ngModel)]="newKeyPoint.description" name="keyPointName">
+                    </textarea>
+                </mat-form-field>
+                <button mat-flat-button (click)="createKeyPoint()">Create</button>
+                <button mat-flat-button (click)="cancelCreate()">Cancle</button>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <app-map
+                [registerClick]="false"
+                (locationSelected)="onLocationSelected($event)"
+                [showKeyPoints]="true"
+                [keyPoints]="tour.keyPoints"
+            ></app-map>
+        </div>
+    }
+</div>

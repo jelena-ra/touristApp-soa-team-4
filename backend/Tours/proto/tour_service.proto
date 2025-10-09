@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+option go_package = "./Tours/proto";
+
+package tour;
+
+message Tour {
+  string id = 1;
+  string authorId = 2;
+  string name = 3;
+  string description = 4;
+  TourDifficulty difficulty = 5;
+  repeated TourTag tags = 6;
+  TourStatus status = 7;
+  float price = 8;
+  map<string, float> travelTimes = 9;
+  float length = 10;
+}
+
+enum TourDifficulty {
+  EASY = 0;
+  MEDIUM = 1;
+  HARD = 2;
+}
+
+enum TourTag {
+  Nature = 0;
+  Historical = 1;
+  Adventure = 2;
+  Cultural = 3;
+  Wildlife = 4;
+  Relaxation = 5;
+  Beach = 6;
+  Mountain = 7;
+  Urban = 8;
+}
+
+enum TourStatus {
+  DRAFT = 0;
+  PUBLISHED = 1;
+  ARCHIVED = 2;
+}
+
+message KeyPoint {
+  string id = 1;
+  string tourId = 2;
+  float longitude = 3;
+  float latitude = 4;
+  string name = 5;
+  string description = 6;
+  string imageId = 7;
+  int64 order = 8;
+}
+
+service TourService {
+  rpc GetAllTours(Empty) returns (TourListResponse);
+  rpc GetTourByID(TourIDRequest) returns (DetailedTourResponse);
+  rpc CreateTour(CreateTourRequest) returns (TourResponse);
+  rpc UpdateTour(UpdateTourRequest) returns (UpdateTourResponse);
+  rpc CreateKeyPoint(CreateKeyPointRequest) returns (CreateKeyPointResponse);
+  rpc UpdateKeyPoint(UpdateKeyPointRequest) returns (UpdateKeyPointResponse);
+  rpc DeleteKeyPoint(DeleteKeyPointRequest) returns (DeleteKeyPointResponse);
+}
+
+message Empty {
+
+}
+
+message TourListResponse {
+  repeated Tour tours = 1;
+}
+
+message TourIDRequest {
+  string id = 1;
+}
+
+message DetailedTourResponse {
+  Tour tour = 1;
+  repeated KeyPoint keyPoints = 2;
+}
+
+message  TourResponse {
+  Tour tour = 1;
+}
+
+message CreateTourRequest {
+  Tour tour = 1;
+}
+
+message UpdateTourRequest {
+  Tour tour = 1;
+}
+
+message UpdateTourResponse {
+  Tour tour = 1;
+}
+
+message CreateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+}
+
+message CreateKeyPointResponse {
+  KeyPoint keyPoint = 1;
+}
+
+message UpdateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+}
+
+message UpdateKeyPointResponse {
+  KeyPoint keyPoint = 1;
+}
+
+message DeleteKeyPointRequest {
+  int64 keyPointId = 1;
+}
+
+message DeleteKeyPointResponse {
+  string message = 1;
+}

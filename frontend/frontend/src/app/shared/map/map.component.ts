@@ -1,7 +1,8 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, Input, SimpleChanges, OnChanges } from '@angular/core';
 import * as L from 'leaflet';
 import { Output, EventEmitter } from '@angular/core';
 import { MapService } from './map';
+import { KeyPointInterface } from '../../tours/model/key-point.interface';
 
 // Komponenta za prikaz interaktivne mape.
 // Koristi Leaflet biblioteku.
@@ -10,17 +11,25 @@ import { MapService } from './map';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit, OnChanges  {
   // Privatna varijabla za instancu Leaflet mape.
   private map: any;
   // Privatna varijabla za praćenje trenutnog markera.
   private currentMarker: L.Marker | null = null;
+  private keyPointMarkers: L.Marker[] = [];
   
+  @Input() registerClick: boolean = true;
+
+  @Input() keyPoints: KeyPointInterface[] = [];
+  @Input() showKeyPoints: boolean = false;
+
   // Definisanje izlaznog (Output) događaja koji će emitovati
   // objekat sa koordinatama.
   @Output() locationSelected = new EventEmitter<{ latitude: number, longitude: number }>();
 
-  constructor(private service: MapService) { }
+  constructor(
+    private service: MapService
+  ) { }
 
   // Metoda za inicijalizaciju mape.
   // Postavlja centar, nivo zumiranja i OpenStreetMap slojeve.
@@ -48,6 +57,8 @@ export class MapComponent implements AfterViewInit {
 
     // Poziv funkcije za registraciju klikova.
     this.registerOnClick();
+
+    this.drawKeyPoints();
   }
 
   // Angular lifecycle hook, poziva se nakon što se view komponente inicijalizuje.
@@ -73,9 +84,11 @@ export class MapComponent implements AfterViewInit {
       const coord = e.latlng;
       const lat = coord.lat;
       const lng = coord.lng;
-      console.log(
-        'Kliknuli ste na mapu na poziciji: ' + lat + ' i dužina: ' + lng
-      );
+      if(this.registerClick) {
+        console.log(
+          'Kliknuli ste na mapu na poziciji: ' + lat + ' i dužina: ' + lng
+        );
+      }
       
       // Kreiranje novog markera i postavljanje ga na mapu
       this.currentMarker = L.marker([lat, lng]).addTo(this.map);
@@ -83,5 +96,38 @@ export class MapComponent implements AfterViewInit {
       // Emitovanje događaja sa podacima o lokaciji
       this.locationSelected.emit({ latitude: lat, longitude: lng });
     });
+  }
+
+  private drawKeyPoints(): void {
+    if(!this.showKeyPoints || !this.keyPoints) return;
+
+    this.keyPointMarkers.forEach(marker => this.map.removeLayer(marker));
+    this.keyPointMarkers = [];
+
+    this.keyPoints.forEach((kp: KeyPointInterface) => {
+      const marker = L.marker([kp.latitude, kp.longitude]).addTo(this.map);
+
+      const popupContent = `<b>${kp.name}</b><br>${kp.description}`;
+      marker.bindPopup(popupContent);
+
+      marker.on('mouseover', () => marker.openPopup());
+      marker.on('mouseout', () => marker.closePopup());
+
+      this.keyPointMarkers.push(marker);
+    });
+  }
+
+  removeCurrentMarker(): void {
+    if (this.currentMarker) {
+        this.map.removeLayer(this.currentMarker);
+        this.currentMarker = null;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['keyPoints'] && this.map) {
+      this.drawKeyPoints();
+      this.removeCurrentMarker()
+    }
   }
 }
