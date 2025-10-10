@@ -21,7 +21,7 @@ services:
     image: neo4j:4.4
     container_name: stakeholders-db
     environment:
-      NEO4J_AUTH: "neo4j/mojalutka123"
+      NEO4J_AUTH: "neo4j/password"
     ports:
       - "7475:7474"
       - "7688:7687"
@@ -78,8 +78,8 @@ services:
     env_file:
       - ./Tours/.env
     depends_on:
-      - tour-db
-    restart: on-failure
+      tour-db:
+        condition: service_healthy
 
   tour-db:
     image: mongo:latest
@@ -94,6 +94,12 @@ services:
       - tour_db_data:/data/db
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     
   api-gateway:
     build:
