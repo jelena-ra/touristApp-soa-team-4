@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import { Output, EventEmitter } from '@angular/core';
 import { MapService } from './map';
 import { KeyPointInterface } from '../../tours/model/key-point.interface';
+import 'leaflet-routing-machine';
 
 // Komponenta za prikaz interaktivne mape.
 // Koristi Leaflet biblioteku.
@@ -17,11 +18,13 @@ export class MapComponent implements AfterViewInit, OnChanges  {
   // Privatna varijabla za praćenje trenutnog markera.
   private currentMarker: L.Marker | null = null;
   private keyPointMarkers: L.Marker[] = [];
+  private routeControl: L.Routing.Control | null = null;
   
   @Input() registerClick: boolean = true;
 
   @Input() keyPoints: KeyPointInterface[] = [];
   @Input() showKeyPoints: boolean = false;
+  
 
   // Definisanje izlaznog (Output) događaja koji će emitovati
   // objekat sa koordinatama.
@@ -30,6 +33,8 @@ export class MapComponent implements AfterViewInit, OnChanges  {
   constructor(
     private service: MapService
   ) { }
+
+ 
 
   // Metoda za inicijalizaciju mape.
   // Postavlja centar, nivo zumiranja i OpenStreetMap slojeve.
@@ -127,7 +132,46 @@ export class MapComponent implements AfterViewInit, OnChanges  {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['keyPoints'] && this.map) {
       this.drawKeyPoints();
-      this.removeCurrentMarker()
+     
+      this.drawRoute(); 
+    
+      this.removeCurrentMarker();
     }
   }
+  private drawRoute(): void {
+  // 1. Proveravamo da li imamo bar dve tačke za iscrtavanje
+  if (!this.map || !this.keyPoints || this.keyPoints.length < 2) {
+    return;
+  }
+
+  // 2. Ako već postoji stara ruta, uklanjamo je sa mape
+  if (this.routeControl) {
+    this.map.removeControl(this.routeControl);
+  }
+
+  // 3. Kreiramo 'waypoints' (putne tačke) iz vašeg niza ključnih tačaka
+  const waypoints = this.keyPoints.map(kp => L.latLng(kp.latitude, kp.longitude));
+
+  // 4. Kreiramo kontrolu za rutiranje, kao u uputstvu
+  this.routeControl = L.Routing.control({
+    waypoints: waypoints,
+    router: L.routing.mapbox('pk.eyJ1IjoiZGp1cmRqZXZpY20iLCJhIjoiY20yaHVzOTgyMGJwbzJqczNteW1xMm0yayJ9.woKtBh92sOV__L25KcUu_Q', { profile: 'mapbox/walking' }),
+    // Opcije za prilagođavanje izgleda
+    routeWhileDragging: false,
+    addWaypoints: false, // Onemogućava dodavanje novih tačaka klikom
+    show: false, // Sakriva panel sa instrukcijama "levo-desno"
+    //draggableWaypoints: false,
+ 
+    fitSelectedRoutes: true
+  }).addTo(this.map);
+
+  // Možete dodati i event listener kao u primeru, ako želite da prikažete info
+  this.routeControl.on('routesfound', function(e) {
+    const routes = e.routes;
+    const summary = routes[0].summary;
+    // Prikazemo info u konzoli umesto alert-a
+    console.log('Total distance is ' + summary.totalDistance / 1000 + ' km and total time is ' + Math.round(summary.totalTime / 60) + ' minutes');
+  });
+}
+
 }

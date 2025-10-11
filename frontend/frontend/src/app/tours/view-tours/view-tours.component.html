@@ -30,6 +30,11 @@
                         </mat-chip>
                     </div>
                 </mat-card-content>
+                <div class="actions-header">
+                    <button mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
+                     Start Tour
+                    </button>
+                </div>
 
                 <mat-card-actions class="tour-action">
                     <button mat-button [routerLink]="['/tours', tour.id]">View Details</button>

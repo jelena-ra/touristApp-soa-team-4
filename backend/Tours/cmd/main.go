@@ -84,8 +84,13 @@ func main() {
 
 	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
 	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
+	tourExecutionCollectionName := "tour_executions"
+	tourExecutionRepo := repository.NewTourExecutionRepository(client, dbName, tourExecutionCollectionName)
+
 	tourService := service.NewTourService(tourRepo, keyPointRepo)
-	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient)
+
+	tourExecutionService := service.NewTourExecutionService(tourExecutionRepo, tourService)
+	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient, tourExecutionService)
 
 	port := os.Getenv("PORT")
 	if port == "" {

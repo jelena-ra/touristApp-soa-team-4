@@ -118,6 +118,22 @@ func main() {
 	router.Handle("/api/tours/update", http.HandlerFunc(tourHandler.UpdateTourHandle)).Methods("POST")
 	router.Handle("/api/key-point", http.HandlerFunc(tourHandler.CreateKeyPointHandle)).Methods("POST")
 
+	//router.Handle("/api/tour-executions/{tourId}", http.HandlerFunc(tourHandler.StartTourHandle)).Methods("POST", "OPTIONS")
+	//router.Handle("/api/tour-executions/{id}/check-proximity", http.HandlerFunc(tourHandler.CheckProximityHandle)).Methods("PUT", "OPTIONS")
+	router.Handle(
+		"/api/tour-executions/{tourId}",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.StartTourHandle)),
+		),
+	).Methods("POST", "OPTIONS")
+
+	router.Handle(
+		"/api/tour-executions/{id}/check-proximity",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.CheckProximityHandle)),
+		),
+	).Methods("PUT", "OPTIONS")
+
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),

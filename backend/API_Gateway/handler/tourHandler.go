@@ -197,3 +197,91 @@ func (h *TourHandler) CreateKeyPointHandle(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
 }
+func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var positionReq tourProto.TouristPosition
+	unmarshaler := protojson.UnmarshalOptions{}
+	if err := unmarshaler.Unmarshal(bodyBytes, &positionReq); err != nil {
+		log.Printf("Failed to decode position JSON: %v", err)
+		http.Error(w, "Invalid position data", http.StatusBadRequest)
+		return
+	}
+
+	// TODO: Izvuci ID turiste iz JWT tokena i proslijediti ga
+	gprcRequest := &tourProto.StartTourRequest{
+		TourId:   tourId,
+		Position: &positionReq,
+	}
+
+	resp, err := h.client.StartTour(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to start tour via gRPC: %v", err)
+		http.Error(w, "Failed to start tour", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonData)
+}
+
+// CheckProximityHandle obrađuje zahtev za proveru blizine.
+// Očekuje: PUT /api/tour-executions/{id}/check-proximity
+func (h *TourHandler) CheckProximityHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	// Izvuci ID sesije iz URL-a
+	vars := mux.Vars(r)
+	executionId := vars["id"]
+
+	// Pročitaj telo zahteva (JSON sa pozicijom)
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Unmarshaluj JSON u gRPC poruku
+	var positionReq tourProto.TouristPosition
+	if err := protojson.Unmarshal(bodyBytes, &positionReq); err != nil {
+		http.Error(w, "Invalid position data", http.StatusBadRequest)
+		return
+	}
+
+	// Kreiraj gRPC zahtev
+	gprcRequest := &tourProto.CheckProximityRequest{
+		Id:       executionId,
+		Position: &positionReq,
+	}
+
+	// Pozovi Tour servis preko gRPC KLIJENTA (h.client)
+	resp, err := h.client.CheckProximity(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to check proximity via gRPC: %v", err)
+		http.Error(w, "Failed to check proximity", http.StatusInternalServerError)
+		return
+	}
+
+	// Marshaluj odgovor nazad u JSON i pošalji ga
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
