@@ -26,7 +26,10 @@ func NewTourHandler(service *service.TourService, stakeholdersClient stakeholder
 }
 
 func (h *TourHandler) GetAllTours(ctx context.Context, req *tourProto.Empty) (*tourProto.TourListResponse, error) {
-	allTours := must(h.server.GetAll(ctx))
+	allTours, err := h.server.GetAll(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	protoTours := make([]*tourProto.Tour, len(allTours))
 	for i, mt := range allTours {
@@ -43,10 +46,16 @@ func (h *TourHandler) GetTourByID(ctx context.Context, req *tourProto.TourIDRequ
 		return nil, status.Error(codes.InvalidArgument, "ID is required")
 	}
 
-	tour := must(h.server.GetByID(ctx, id))
+	tour, err := h.server.GetByID(ctx, id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoTour := mapper.TourModelToProto(tour)
 
-	keyPoints := must(h.server.GetKeyPoints(ctx, id))
+	keyPoints, err := h.server.GetKeyPoints(ctx, id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoKeyPoints := make([]*tourProto.KeyPoint, len(keyPoints))
 	for i, point := range keyPoints {
 		protoKeyPoints[i] = mapper.KeyPointModelToProto(point)
@@ -68,7 +77,10 @@ func (h *TourHandler) CreateTour(ctx context.Context, req *tourProto.CreateTourR
 	//TODO check user exists and is author
 
 	modelCreateTour := mapper.TourProtoToModel(crateInfo)
-	newTour := must(h.server.Create(ctx, modelCreateTour))
+	newTour, err := h.server.Create(ctx, modelCreateTour)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoTour := mapper.TourModelToProto(newTour)
 
 	return &tourProto.TourResponse{Tour: protoTour}, nil
@@ -80,8 +92,14 @@ func (h *TourHandler) CreateKeyPoint(ctx context.Context, req *tourProto.CreateK
 		return nil, status.Error(codes.InvalidArgument, "KeyPoint information is required")
 	}
 
-	modelCreateInfo := must(mapper.KeyPointProtoToModel(createInfo))
-	newKeyPoint := must(h.server.CreateKeyPoint(ctx, modelCreateInfo))
+	modelCreateInfo, err := mapper.KeyPointProtoToModel(createInfo)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	newKeyPoint, err := h.server.CreateKeyPoint(ctx, modelCreateInfo)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoKeyPoint := mapper.KeyPointModelToProto(newKeyPoint)
 
 	return &tourProto.CreateKeyPointResponse{KeyPoint: protoKeyPoint}, nil
@@ -100,8 +118,14 @@ func (h *TourHandler) CreateRecension(ctx context.Context, req *tourProto.Create
 
 	// TODO: Validate that the author exists and is authenticated
 
-	modelRecension := must(mapper.RecensionProtoToModel(createInfo))
-	newRecension := must(h.server.CreateRecension(ctx, modelRecension))
+	modelRecension, err := mapper.RecensionProtoToModel(createInfo)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	newRecension, err := h.server.CreateRecension(ctx, modelRecension)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoRecension := mapper.RecensionModelToProto(newRecension)
 
 	return &tourProto.RecensionResponse{Recension: protoRecension}, nil
@@ -113,7 +137,10 @@ func (h *TourHandler) GetRecensionsByTourID(ctx context.Context, req *tourProto.
 		return nil, status.Error(codes.InvalidArgument, "Tour ID is required")
 	}
 
-	recensions := must(h.server.GetRecensionsByTourID(ctx, tourID))
+	recensions, err := h.server.GetRecensionsByTourID(ctx, tourID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	protoRecensions := make([]*tourProto.Recension, len(recensions))
 
 	for i, recension := range recensions {
@@ -121,11 +148,4 @@ func (h *TourHandler) GetRecensionsByTourID(ctx context.Context, req *tourProto.
 	}
 
 	return &tourProto.RecensionListResponse{Recensions: protoRecensions}, nil
-}
-
-func must[T any](val T, err error) T {
-	if err != nil {
-		panic(status.Error(codes.Internal, err.Error()))
-	}
-	return val
 }

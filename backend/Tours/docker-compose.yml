@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongo:
     image: mongo:latest
@@ -26,9 +24,9 @@ services:
       - PORT=8081
 
   tours:
-    build: 
+    build:
       context: ..
-      dockerfile: Tours/Dockerfile.parent
+      dockerfile: Tours/Dockerfile
     container_name: tours_service
     ports:
       - "8083:8083"
@@ -37,13 +35,8 @@ services:
       - stakeholders
     networks:
       - tours_network
-    environment:
-      - MONGO_URI=mongodb://mongo:27017
-      - MONGO_DB_NAME=tour_db
-      - MONGO_COLLECTION_NAME=tours
-      - MONGO_KEYPOINT_COLLECTION_NAME=key_points
-      - STAKEHOLDERS_PORT=8081
-      - PORT=8083
+    env_file:
+      - .env
 
 volumes:
   mongo_data:

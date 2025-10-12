@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	stakeholdersProto "github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/proto"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/handler"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/service"
@@ -67,30 +66,31 @@ func main() {
 		recensionCollectionName = "recensions"
 	}
 
-	stakeholdersPort := os.Getenv("STAKEHOLDERS_PORT")
-	if stakeholdersPort == "" {
-		stakeholdersPort = "8081"
-	}
-	stakeholdersAddress := "localhost:" + stakeholdersPort
+	// TODO: Stakeholders koristi HTTP, ne gRPC - privremeno zakomentarisano
+	// stakeholdersPort := os.Getenv("STAKEHOLDERS_PORT")
+	// if stakeholdersPort == "" {
+	// 	stakeholdersPort = "8081"
+	// }
+	// stakeholdersAddress := "localhost:" + stakeholdersPort
 
-	stakeholdersConn, err := grpc.Dial(stakeholdersAddress, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Failed to connect to Stakeholders service: %v", err)
-	}
-	defer func(stakeholdersConn *grpc.ClientConn) {
-		err := stakeholdersConn.Close()
-		if err != nil {
-			log.Fatalf("Failed to close connection to Stakeholders service: %v", err)
-		}
-	}(stakeholdersConn)
+	// stakeholdersConn, err := grpc.Dial(stakeholdersAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// if err != nil {
+	// 	log.Fatalf("Failed to connect to Stakeholders service: %v", err)
+	// }
+	// defer func(stakeholdersConn *grpc.ClientConn) {
+	// 	err := stakeholdersConn.Close()
+	// 	if err != nil {
+	// 		log.Fatalf("Failed to close connection to Stakeholders service: %v", err)
+	// 	}
+	// }(stakeholdersConn)
 
-	stakeholdersClient := stakeholdersProto.NewStakeholderServiceClient(stakeholdersConn)
+	// stakeholdersClient := stakeholdersProto.NewStakeholderServiceClient(stakeholdersConn)
 
 	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
 	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
 	recensionRepo := repository.NewRecensionRepository(client, dbName, recensionCollectionName)
 	tourService := service.NewTourService(tourRepo, keyPointRepo, recensionRepo)
-	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient)
+	tourHandler := handler.NewTourHandler(tourService, nil) // nil umesto stakeholdersClient
 
 	port := os.Getenv("PORT")
 	if port == "" {

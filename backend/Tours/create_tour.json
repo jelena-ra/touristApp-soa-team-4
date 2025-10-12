@@ -1,0 +1,10 @@
+{
+  "tour": {
+    "name": "Test Tour Beograd",
+    "description": "Test tura kroz centar Beograda",
+    "authorId": "guide123",
+    "price": 1500.0,
+    "difficulty": 0,
+    "status": 0
+  }
+}

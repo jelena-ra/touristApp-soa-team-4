@@ -1,21 +1,37 @@
-FROM golang:latest AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Copy both Tours and Stakeholders directories
-COPY ../Stakeholders /app/Stakeholders
-COPY . /app/Tours
+# Copy go mod files first for better caching
+COPY Tours/go.mod Tours/go.sum ./Tours/
+COPY Stakeholders/go.mod Stakeholders/go.sum ./Stakeholders/
 
+# Download dependencies
 WORKDIR /app/Tours
+RUN go mod download
 
+# Copy source code
+COPY Tours/ ./
+COPY Stakeholders/ ../Stakeholders/
+
+# Tidy dependencies
 RUN go mod tidy
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /tour-service ./cmd/main.go
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o tour-service ./cmd/main.go
 
+# Final stage
 FROM alpine:latest
 
-COPY --from=builder /tour-service /tour-service
-COPY --from=builder /app/Tours/.env ./.env
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy the binary and environment file
+COPY --from=builder /app/Tours/tour-service .
+COPY --from=builder /app/Tours/.env .
+
 EXPOSE 8083
 
-CMD ["/tour-service"]
+CMD ["./tour-service"]
