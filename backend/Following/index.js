@@ -23,7 +23,7 @@ server.addService(followingProto.FollowingService.service, followingHandler);
 
 
 
-server.bindAsync('0.0.0.0:8083', grpc.ServerCredentials.createInsecure(), (err, port) => {
+server.bindAsync('0.0.0.0:8084', grpc.ServerCredentials.createInsecure(), (err, port) => {
   if (err) {
     console.error('Greška pri pokretanju servera:', err);
     return;
