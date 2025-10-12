@@ -1,66 +1,62 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { CommonModule } from '@angular/common'; // Potreban za ngIf
-import { HttpClientModule } from '@angular/common/http';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CommonModule } from '@angular/common';
 import { Registration } from '../model/registration.model';
 import { AuthService } from '../auth.service';
-
-
-
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatRadioModule } from '@angular/material/radio';
+import { Router, RouterLink } from '@angular/router'; // <-- Dodaj RouterLink
 
 @Component({
   standalone: true,
   selector: 'xp-registration',
-  imports: [ReactiveFormsModule, MatSnackBarModule, CommonModule, HttpClientModule,  MatButtonModule, 
-    MatInputModule,  
-    MatFormFieldModule],
+  imports: [
+    ReactiveFormsModule, 
+    CommonModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatButtonModule, 
+    MatIconModule,
+    MatRadioModule,
+  ],
   templateUrl: './registration.component.html',
-  styleUrls: ['./registration.component.css']
+  styleUrls: ['./registration.component.scss'] 
 })
 export class RegistrationComponent {
+  
+  showPassword = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   registrationForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     surname: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
-    role: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    role: new FormControl('turista', [Validators.required]), // Podrazumevana vrednost
   });
 
   register(): void {
-    const registration: Registration = {
-      name: this.registrationForm.value.name || "",
-      surname: this.registrationForm.value.surname || "",
-      email: this.registrationForm.value.email || "",
-      username: this.registrationForm.value.username || "",
-      password: this.registrationForm.value.password || "",
-      role: this.registrationForm.value.role || "",
-    };
+    if (this.registrationForm.invalid) {
+      return;
+    }
+
+ 
+    const registration: Registration = this.registrationForm.value as Registration;
 
     this.authService.register(registration).subscribe({
-        next: () => alert('Korisnik registrovan!'),
+        next: () => {
+          // alert('Korisnik je ulogovan!'); 
+          // Umesto alert-a, preusmeravamo korisnika
+          this.router.navigate(['/login']); // Preusmeri na stranicu za prijavu nakon uspešne registracije
+        },  
         error: (err) => console.error('Greška pri registraciji:', err)
-      });
 
+        
+      });
   }
 }
-
-//     if (this.registrationForm.valid) {
-//       this.authService.register(registration).subscribe({
-//         next: () => {
-//           this.router.navigate(['/explore-tours']);
-//           this.notificationService.notify({ message:'Registration successful', duration: 3000, notificationType: NotificationType.SUCCESS });
-//         },error: (error) => {
-//           this.notificationService.notify({ message:'Registration failed', duration: 3000, notificationType: NotificationType.WARNING });
-//         }
-//       });
-//     }
-//   }
-// }

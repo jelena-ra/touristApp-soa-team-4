@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { MatRadioModule } from '@angular/material/radio';
 import { MatChipListbox, MatChipOption } from "@angular/material/chips";
+import { AuthService } from "../../auth/auth.service";
 
 @Component({
     selector: 'create-tour',
@@ -31,12 +32,14 @@ export class CreateTourDialog {
 
     constructor (
         private tourService: TourService,
-        private destroyRef: DestroyRef
+        private destroyRef: DestroyRef,
+        private authService: AuthService
     ) {}
+    authorId: string = "";
 
     newTour: TourInterface = {
         id: '',
-        authorId: '000000000000000000000000',
+        authorId: '',
         name: '',
         description: '',
         difficulty: "EASY",
@@ -58,8 +61,21 @@ export class CreateTourDialog {
         'Mountain',
         'Urban'
     ]
+    ngOnInit(): void {
+        this.authService.getUser().subscribe(user => {
+            this.authorId = user.id;
+            this.newTour.authorId = this.authorId;
+            console.log('Trenutni korisnik:', this.authorId);
+        });
+    }
 
     createTour(): void {
+    
+        if (!this.newTour.authorId) {
+            console.error('Nema autora, nema ni ture hehe.');
+            return;
+        }
+
         console.log(this.newTour)
         this.tourService.createTour(this.newTour)
         .pipe(takeUntilDestroyed(this.destroyRef))

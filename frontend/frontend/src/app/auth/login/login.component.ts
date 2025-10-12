@@ -1,26 +1,31 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { CommonModule } from '@angular/common'; // Potreban za ngIf
-import { HttpClientModule } from '@angular/common/http';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
-import { Router } from '@angular/router';
-
-
+import { Router, RouterLink } from '@angular/router'; // <-- Dodaj RouterLink
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
-  selector: 'xp-registration',
-  imports: [ReactiveFormsModule, MatSnackBarModule, CommonModule, HttpClientModule,  MatButtonModule, 
-    MatInputModule,  
-    MatFormFieldModule],
+  selector: 'xp-login', // Promenjeno iz 'xp-registration'
+  imports: [
+    ReactiveFormsModule, 
+    CommonModule, 
+    RouterLink, // <-- Dodaj RouterLink
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule
+  ],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.scss'] // <-- Promenjeno u .scss
 })
 export class LoginComponent {
+
+  showPassword = false; // <-- Dodata promenljiva
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -30,41 +35,26 @@ export class LoginComponent {
   });
 
   login(): void {
+    if (this.loginForm.invalid) {
+      return;
+    }
+
     const loginData = {
       username: this.loginForm.value.username || "",
       password: this.loginForm.value.password || "",
     };
 
     this.authService.login(loginData).subscribe({
-        next: () => alert('Korisnik je ulogovan!'),  
-
-        error: (err) => console.error('Greška pri logovanju:', err)
-    });
-    this.router.navigate(['home'])
+        next: () => {
+          // alert('Korisnik je ulogovan!'); 
+          // Umesto alert-a, preusmeravamo korisnika
+          this.router.navigate(['/home']); // Preusmeri na početnu stranu nakon uspešnog logina
+        },  
+        error: (err) => {
+          console.error('Greška pri logovanju:', err);
+          // Ovde bi trebalo prikazati poruku korisniku, npr. preko snack-bar-a
+          // da su kredencijali pogrešni.
+        }
+      });
   }
-
- 
 }
-
-//     if (this.registrationForm.valid) {
-//       this.authService.register(registration).subscribe({
-//         next: () => {
-//           this.router.navigate(['/explore-tours']);
-//           this.notificationService.notify({ message:'Registration successful', duration: 3000, notificationType: NotificationType.SUCCESS });
-//       password: this.loginForm.value.password || "",
-//     };
-//   }
-// }
-
-//     if (this.loginForm.valid) {
-//       this.authService.login(loginData).subscribe({
-//         next: () => {
-//           this.router.navigate(['/explore-tours']);
-//           this.notificationService.notify({ message:'Login successful', duration: 3000, notificationType: NotificationType.SUCCESS });
-//         },error: (error) => {
-//           this.notificationService.notify({ message:'Login failed', duration: 3000, notificationType: NotificationType.WARNING });
-//         }
-//       });
-//     }
-//   }
-// }

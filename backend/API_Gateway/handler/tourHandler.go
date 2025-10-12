@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jelena-ra/touristApp/soa-team-4/API_Gateway/jwt"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -192,6 +193,135 @@ func (h *TourHandler) CreateKeyPointHandle(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+	log.Printf("[API Gateway] Received request to start tour. Tourist ID from token: %s", touristId)
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var positionReq tourProto.TouristPosition
+	unmarshaler := protojson.UnmarshalOptions{}
+	if err := unmarshaler.Unmarshal(bodyBytes, &positionReq); err != nil {
+		log.Printf("Failed to decode position JSON: %v", err)
+		http.Error(w, "Invalid position data", http.StatusBadRequest)
+		return
+	}
+
+	gprcRequest := &tourProto.StartTourRequest{
+		TourId:    tourId,
+		Position:  &positionReq,
+		TouristId: touristId,
+	}
+
+	resp, err := h.client.StartTour(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to start tour via gRPC: %v", err)
+		http.Error(w, "Failed to start tour", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonData)
+}
+
+func (h *TourHandler) CheckProximityHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	executionId := vars["id"]
+
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var positionReq tourProto.TouristPosition
+	if err := protojson.Unmarshal(bodyBytes, &positionReq); err != nil {
+		http.Error(w, "Invalid position data", http.StatusBadRequest)
+		return
+	}
+
+	gprcRequest := &tourProto.CheckProximityRequest{
+		Id:        executionId,
+		Position:  &positionReq,
+		TouristId: touristId,
+	}
+
+	resp, err := h.client.CheckProximity(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to check proximity via gRPC: %v", err)
+		http.Error(w, "Failed to check proximity", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+func (h *TourHandler) AbandonTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	executionId := vars["id"]
+
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+
+	gprcRequest := &tourProto.TourExecutionRequest{
+		Id:        executionId,
+		TouristId: touristId,
+	}
+
+	resp, err := h.client.AbandonTour(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to abandon tour via gRPC: %v", err)
+		http.Error(w, "Failed to abandon tour", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -52,6 +52,42 @@ message KeyPoint {
   int64 order = 8;
 }
 
+message TouristPosition {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message CompletedKeyPoint {
+    string keyPointId = 1;
+    string completionTime = 2;
+}
+
+
+message TourExecutionResponse {
+    string id = 1;
+    string tourId = 2;
+    string touristId = 3;
+    string status = 4;
+    string startTime = 5;
+    string lastActivity = 6;
+    string completionTime = 7;
+    repeated CompletedKeyPoint completedKeyPoints = 8;
+    TouristPosition currentPosition = 9;
+}
+
+
+message StartTourRequest {
+    string tourId = 1;
+    TouristPosition position = 2;
+    string touristId = 3;
+}
+
+
+message TourExecutionRequest {
+    string id = 1;
+    string touristId = 2;
+}
+
 service TourService {
   rpc GetAllTours(Empty) returns (TourListResponse);
   rpc GetTourByID(TourIDRequest) returns (DetailedTourResponse);
@@ -60,6 +96,9 @@ service TourService {
   rpc CreateKeyPoint(CreateKeyPointRequest) returns (CreateKeyPointResponse);
   rpc UpdateKeyPoint(UpdateKeyPointRequest) returns (UpdateKeyPointResponse);
   rpc DeleteKeyPoint(DeleteKeyPointRequest) returns (DeleteKeyPointResponse);
+  rpc StartTour (StartTourRequest) returns (TourExecutionResponse);
+  rpc CheckProximity (CheckProximityRequest) returns (TourExecutionResponse);
+  rpc AbandonTour (TourExecutionRequest) returns (TourExecutionResponse);
 }
 
 message Empty {
@@ -117,4 +156,9 @@ message DeleteKeyPointRequest {
 
 message DeleteKeyPointResponse {
   string message = 1;
+}
+message CheckProximityRequest {
+  string id = 1;
+  TouristPosition position = 2;
+  string touristId = 3;
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -23,6 +24,14 @@ import (
 
 	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
 var (
@@ -34,11 +43,44 @@ func NewReverseProxy(targetURL *url.URL) *httputil.ReverseProxy {
 	return httputil.NewSingleHostReverseProxy(targetURL)
 }
 
+func initTracer(serviceName string, jaegerAddress string) (*sdktrace.TracerProvider, error) {
+	conn, err := grpc.Dial(jaegerAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	traceExporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		return nil, err
+	}
+
+	res, _ := resource.New(context.Background(), resource.WithAttributes(semconv.ServiceNameKey.String(serviceName)))
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(traceExporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	return tp, nil
+}
+
 func main() {
 
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file")
 	}
+
+	jaegerAddress := os.Getenv("JAEGER_ADDRESS")
+	tp, err := initTracer("api-gateway", jaegerAddress)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}()
 
 	//blogGRPCAddr := "localhost:8082"
 	blogGRPCAddr := "blog-service:8082"
@@ -50,8 +92,13 @@ func main() {
 	blogGRPCClient := blog_proto.NewBlogServiceClient(blogGRPCConn)
 	blogHandler := handler.NewBlogHandler(blogGRPCClient)
 
+	/*tourGRPCAddr := "tour-service:8083"
+	tourGRPCConn, err := grpc.Dial(tourGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()), otelgrpc.Clien)*/
 	tourGRPCAddr := "tour-service:8083"
-	tourGRPCConn, err := grpc.Dial(tourGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	tourGRPCConn, err := grpc.Dial(tourGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		log.Fatalf("did not connect to tour service: %v", err)
 	}
@@ -117,6 +164,29 @@ func main() {
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")
 	router.Handle("/api/tours/update", http.HandlerFunc(tourHandler.UpdateTourHandle)).Methods("POST")
 	router.Handle("/api/key-point", http.HandlerFunc(tourHandler.CreateKeyPointHandle)).Methods("POST")
+
+	//router.Handle("/api/tour-executions/{tourId}", http.HandlerFunc(tourHandler.StartTourHandle)).Methods("POST", "OPTIONS")
+	//router.Handle("/api/tour-executions/{id}/check-proximity", http.HandlerFunc(tourHandler.CheckProximityHandle)).Methods("PUT", "OPTIONS")
+	router.Handle(
+		"/api/tour-executions/{tourId}",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.StartTourHandle)),
+		),
+	).Methods("POST", "OPTIONS")
+
+	router.Handle(
+		"/api/tour-executions/{id}/check-proximity",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.CheckProximityHandle)),
+		),
+	).Methods("PUT", "OPTIONS")
+
+	router.Handle(
+		"/api/tour-executions/{id}/abandon",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.AbandonTourHandle)),
+		),
+	).Methods("PUT", "OPTIONS")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

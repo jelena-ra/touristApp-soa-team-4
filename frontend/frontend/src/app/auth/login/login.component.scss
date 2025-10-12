@@ -1,0 +1,125 @@
+
+:host {
+  --background-color: #0f172a;
+  --panel-background: rgba(30, 41, 59, 0.4);
+  --border-color: rgba(148, 163, 184, 0.2);
+  --primary-glow: rgba(96, 165, 250, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  padding: 2rem;
+  font-family: 'Roboto', sans-serif;
+}
+
+.glass-panel {
+  width: 100%;
+  max-width: 450px;
+  background: var(--panel-background);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.panel-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.icon-glow {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 10px var(--primary-glow));
+  margin-bottom: 1rem;
+}
+
+.panel-title {
+  font-size: 2.25rem;
+  font-weight: 300;
+  color: var(--text-primary);
+  letter-spacing: 0.025em;
+  text-shadow: 0 0 20px var(--primary-glow);
+}
+
+.line-separator {
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+  margin: 1.5rem auto;
+}
+
+.panel-subtitle {
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+::ng-deep .mat-mdc-form-field-flex {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 1rem !important;
+}
+
+::ng-deep .mdc-text-field--outlined .mdc-notched-outline > * {
+  border-color: var(--border-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline > * {
+  border-color: var(--primary-glow) !important;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-floating-label,
+::ng-deep .mat-mdc-form-field mat-icon {
+  color: var(--text-secondary) !important;
+}
+
+::ng-deep input.mat-mdc-input-element {
+  color: var(--text-primary) !important;
+}
+
+.submit-button {
+  padding: 1.5rem 0 !important;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  border-radius: 50px !important;
+  --mdc-protected-button-container-color: var(--primary-glow);
+  --mat-protected-button-state-layer-color: white;
+  --mat-protected-button-label-text-color: black;
+}
+
+.register-link {
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 300;
+  
+  a {
+    color: #60a5fa; 
+    text-decoration: none;
+    font-weight: 400;
+    transition: color 0.3s ease;
+    
+    &:hover {
+      color: #34d399; 
+      text-decoration: underline;
+    }
+  }
+}

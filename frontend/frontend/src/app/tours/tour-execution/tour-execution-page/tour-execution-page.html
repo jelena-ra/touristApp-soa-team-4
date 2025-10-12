@@ -1,0 +1,67 @@
+<!-- Main Content Div sa crnom pozadinom -->
+<div class="relative min-h-screen bg-black overflow-hidden">
+  <!-- Prikaz dok se podaci učitavaju -->
+  <div *ngIf="!activeTour" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="cosmic-glow mb-8">
+        <span class="text-7xl">🛰️</span>
+      </div>
+      <h1 class="text-4xl font-thin text-white mb-6 tracking-wide animate-glow">
+        Pokretanje Ture...
+      </h1>
+      <div class="cosmic-line mx-auto mb-8"></div>
+      <p class="text-xl text-gray-300 font-light">Pripremanje vaše avanture.</p>
+    </div>
+  </div>
+
+  <!-- Prikaz kada je tura aktivna -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 py-12" *ngIf="activeTour">
+    
+    <!-- Header
+    <div class="text-center mb-12">
+      <h1 class="text-5xl md:text-6xl font-thin text-white mb-6 tracking-wide animate-glow">
+        Aktivna Tura: {{ activeTour.name }}
+      </h1>
+      <div class="cosmic-line mx-auto mb-8"></div>
+    </div>
+     -->
+    <!-- Progress Info -->
+    <div class="glass-constellation rounded-2xl p-6 mb-12">
+      <div class="flex items-center justify-between">
+        <p class="text-lg text-gray-300">Napredak:</p>
+        <p class="text-lg text-white font-semibold">
+          Završeno ključnih tačaka: 
+          {{ activeTour.completedKeyPoints?.length || 0 }} / {{ keyPoints.length }}
+        </p>
+      </div>
+      <!-- Tvoj postojeći progress bar -->
+      <mat-progress-bar 
+        class="mt-4"
+        mode="determinate" 
+        [value]="((activeTour.completedKeyPoints?.length || 0) / (keyPoints.length || 1)) * 100">
+      </mat-progress-bar>
+    </div>
+
+    <!-- Interactive Map Section -->
+    <div class="mb-12">
+      <h2 class="section-title mb-8">Mapa Rute</h2>
+      <div class="map-constellation">
+        <!-- Tvoja postojeća app-map komponenta -->
+        <app-map 
+          [keyPoints]="keyPoints"
+          [showKeyPoints]="true"
+          [registerClick]="true"
+          (locationSelected)="onLocationSelected($event)">
+        </app-map>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="text-center">
+      <button (click)="abandonTour()" class="glass-button glass-button-secondary px-12 py-4 text-lg font-light tracking-wide group inline-flex items-center space-x-3">
+        <span class="text-2xl group-hover:scale-110 transition-transform">❌</span>
+        <span>Napusti Turu</span>
+      </button>
+    </div>
+  </div>
+</div>

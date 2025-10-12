@@ -1,0 +1,153 @@
+
+:host {
+  --background-color: #0f172a;
+  --panel-background: rgba(30, 41, 59, 0.4);
+  --border-color: rgba(148, 163, 184, 0.2);
+  --primary-glow: rgba(96, 165, 250, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --role-tourist: rgba(96, 165, 250, 0.8);
+  --role-guide: rgba(52, 211, 153, 0.8);
+  --role-admin: rgba(167, 139, 250, 0.8);
+  --status-blocked: rgba(239, 68, 68, 0.8);
+  --status-active: rgba(34, 197, 94, 0.8);
+}
+
+.user-list-container {
+  min-height: 100vh;
+  background-color: var(--background-color);
+  padding: 3rem;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-primary);
+}
+
+.header-constellation {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.icon-glow {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 10px var(--primary-glow));
+  margin-bottom: 1rem;
+}
+
+.header-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 20px var(--primary-glow);
+}
+
+.line-separator {
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+  margin: 1.5rem auto;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background: var(--panel-background);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-glow);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  &.selected {
+    border-color: #60a5fa; // Plava boja za selektovanu karticu
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+  }
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(52, 211, 153, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  border: 2px solid var(--border-color);
+}
+
+.user-info {
+  .user-username {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  .user-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+}
+
+.user-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+
+.meta-item {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background: rgba(0,0,0,0.2);
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &.tourist { color: var(--role-tourist); }
+  &.guide { color: var(--role-guide); }
+  &.admin { color: var(--role-admin); }
+}
+
+.status-badge {
+  &.active { color: var(--status-active); }
+  &.blocked { color: var(--status-blocked); }
+}
+
+.user-card-actions {
+  text-align: center;
+  
+  button {
+    width: 100%;
+    border-radius: 50px !important;
+  }
+}
+
+.no-users-message {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
