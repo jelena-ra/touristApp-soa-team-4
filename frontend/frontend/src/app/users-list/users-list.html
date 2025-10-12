@@ -1,24 +1,119 @@
-<div class="user-table-container">
-  <h2>Tabela Korisnika</h2>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Korisničko Ime</th>
-        <th>Email</th>
-        <th>Uloga</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let user of users"  (click)="onSelectUser(user)"  [ngStyle]="{'cursor': 'pointer'}">
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.role }}</td>
-        <td><button (click)="onBlockUser(user)" [disabled]="user.blocked" [hidden]=" user.username === this.currentUser.username">Block</button></td>
-      </tr>
-      <tr *ngIf="!users || users.length === 0">
-        <td colspan="3" style="text-align: center;">Nema korisnika za prikaz.</td>
-      </tr>
-    </tbody>
-  </table>
+<div class="user-list-container">
+  <!-- Header -->
+  <div class="header-constellation">
+    <div class="icon-glow">👥</div>
+    <h1 class="header-title">Lista Korisnika</h1>
+    <div class="line-separator"></div>
+  </div>
+
+  <!-- User Cards Grid -->
+  <div class="users-grid" *ngIf="users && users.length > 0; else noUsers">
+    <div 
+      *ngFor="let user of users" 
+      class="user-card"
+      [class.selected]="selectedUser.id === user.id"
+      (click)="onSelectUser(user)">
+      
+      <!-- Avatar and Info -->
+      <div class="user-card-header">
+        <div class="user-avatar">
+          <span class="avatar-placeholder">{{ user.username ? user.username[0].toUpperCase() : '?' }}</span>
+        </div>
+        <div class="user-info">
+          <h3 class="user-username">{{ user.username }}</h3>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+      </div>
+      
+      <!-- Role and Status -->
+      <div class="user-card-meta">
+        <!-- Promena ovde: pozivamo nove funkcije -->
+        <div class="meta-item role-badge" [ngClass]="user.role">
+          <span class="role-icon">{{ getRoleIcon(user.role) }}</span>
+          <span class="role-text">{{ getRoleText(user.role) }}</span>
+        </div>
+        <div class="meta-item status-badge" [ngClass]="user.blocked ? 'blocked' : 'active'">
+          {{ user.blocked ? 'Blokiran' : 'Aktivan' }}
+        </div>
+      </div>
+
+      <!-- Action Button (Originalna logika) -->
+      <div class="user-card-actions" *ngIf="currentUser.username !== user.username">
+        <button 
+          mat-raised-button
+          color="warn"
+          [disabled]="user.blocked"
+          (click)="onBlockUser(user); $event.stopPropagation()">
+          Block
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Poruka ako nema korisnika -->
+  <ng-template #noUsers>
+    <div class="no-users-message">
+      <div class="icon-glow">🔎</div>
+      <p>Nema korisnika za prikaz.</p>
+    </div>
+  </ng-template>
 </div>
+
+<!-- <div class="user-list-container">
+ 
+  <div class="header-constellation">
+    <div class="icon-glow">👥</div>
+    <h1 class="header-title">Lista Korisnika</h1>
+    <div class="line-separator"></div>
+  </div>
+
+
+  <div class="users-grid" *ngIf="users.length > 0; else noUsers">
+    <div 
+      *ngFor="let user of users" 
+      class="user-card"
+      [class.selected]="selectedUser?.id === user.id"
+      (click)="onSelectUser(user)">
+   
+      <div class="user-card-header">
+        <div class="user-avatar">
+          <span class="avatar-placeholder">{{ user.username[0].toUpperCase() }}</span>
+        </div>
+        <div class="user-info">
+          <h3 class="user-username">{{ user.username }}</h3>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+      </div>
+      
+
+      <div class="user-card-meta">
+        <div class="meta-item role-badge" [ngClass]="user.role">
+          <span class="role-icon">{{ getRoleIcon(user.role) }}</span>
+          <span class="role-text">{{ getRoleText(user.role) }}</span>
+        </div>
+        <div class="meta-item status-badge" [ngClass]="user.isBlocked ? 'blocked' : 'active'">
+          {{ user.isBlocked ? 'Blokiran' : 'Aktivan' }}
+        </div>
+      </div>
+
+   
+      <div class="user-card-actions" *ngIf="currentUser.id !== user.id">
+        <button 
+          mat-raised-button
+          [color]="user.isBlocked ? 'primary' : 'warn'"
+          [disabled]="user.username === 'admin'"
+          (click)="onBlockUser(user); $event.stopPropagation()">
+          {{ user.isBlocked ? 'Odblokiraj' : 'Blokiraj' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <ng-template #noUsers>
+    <div class="no-users-message">
+      <div class="icon-glow">🔎</div>
+      <p>Nema korisnika za prikaz.</p>
+    </div>
+  </ng-template>
+</div> -->

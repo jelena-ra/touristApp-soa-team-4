@@ -112,33 +112,32 @@ func must[T any](val T, err error) T {
 	return val
 }
 func (h *TourHandler) StartTour(ctx context.Context, req *tourProto.StartTourRequest) (*tourProto.TourExecutionResponse, error) {
-	// 1. Parsiraj ID ture iz gRPC zahteva
+
 	tourId, err := primitive.ObjectIDFromHex(req.GetTourId())
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Invalid tour ID format")
+		return nil, status.Error(codes.InvalidArgument, "Invalid tour ID format ;)")
 	}
 
-	// 2. Izvuci ID turiste (simulacija)
-	touristIdStr := "60d5ec49e0f3e82a8b4104a3"
-	touristId, err := primitive.ObjectIDFromHex(touristIdStr)
+	/*touristId, err := primitive.ObjectIDFromHex(req.GetTouristId())
+	log.Printf("[Tours Service] Received gRPC StartTour request. Tourist ID from request: %s", req.GetTouristId())
 	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid user ID")
-	}
 
-	// 3. Mapiraj poziciju iz proto u model
+		return nil, status.Error(codes.InvalidArgument, "Invalid tourist ID format :)")
+	}*/
+	touristId := req.GetTouristId()
+
 	position := mapper.PositionProtoToModel(req.GetPosition())
 
-	// 4. Pozovi servis (koji si već dodala u TourHandler)
 	execution, err := h.executionService.StartTour(tourId, touristId, *position)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// 5. Mapiraj rezultat nazad u proto odgovor
 	return mapper.TourExecutionModelToProto(execution), nil
 }
-func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckProximityRequest) (*tourProto.TourExecutionResponse, error) {
-	// 1. Validacija
+
+/*func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckProximityRequest) (*tourProto.TourExecutionResponse, error) {
+
 	if req.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
 	}
@@ -146,28 +145,109 @@ func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckPr
 		return nil, status.Error(codes.InvalidArgument, "Position is required")
 	}
 
-	// 2. Parsiranje ID-ja sesije
 	executionId, err := primitive.ObjectIDFromHex(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
 	}
 
-	// 3. Dobijanje ID-ja turiste (simulacija)
-	touristIdStr := "60d5ec49e0f3e82a8b4104a3" // !! PRIMER !!
+	touristIdStr := "60d5ec49e0f3e82a8b4104a3"
 	touristId, err := primitive.ObjectIDFromHex(touristIdStr)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "Invalid user ID")
 	}
 
-	// 4. Mapiranje pozicije iz proto u model
 	position := mapper.PositionProtoToModel(req.GetPosition())
 
-	// 5. Poziv executionService-a
 	execution, err := h.executionService.CheckProximity(executionId, touristId, *position)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// 6. Mapiranje rezultata nazad u proto odgovor
+	return mapper.TourExecutionModelToProto(execution), nil
+}
+
+func (h *TourHandler) AbandonTour(ctx context.Context, req *tourProto.TourExecutionRequest) (*tourProto.TourExecutionResponse, error) {
+
+	if req.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
+	}
+
+	executionId, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
+	}
+
+	touristIdStr := "60d5ec49e0f3e82a8b4104a3"
+	touristId, err := primitive.ObjectIDFromHex(touristIdStr)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "Invalid user ID")
+	}
+
+	execution, err := h.executionService.AbandonTour(executionId, touristId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return mapper.TourExecutionModelToProto(execution), nil
+}*/
+
+func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckProximityRequest) (*tourProto.TourExecutionResponse, error) {
+
+	if req.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
+	}
+	if req.GetPosition() == nil {
+		return nil, status.Error(codes.InvalidArgument, "Position is required")
+	}
+	if req.GetTouristId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Tourist ID is required")
+	}
+
+	executionId, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
+	}
+
+	/*touristId, err := primitive.ObjectIDFromHex(req.GetTouristId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid tourist ID format")
+	}*/
+	touristId := req.GetTouristId()
+
+	position := mapper.PositionProtoToModel(req.GetPosition())
+
+	execution, err := h.executionService.CheckProximity(executionId, touristId, *position)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return mapper.TourExecutionModelToProto(execution), nil
+}
+
+func (h *TourHandler) AbandonTour(ctx context.Context, req *tourProto.TourExecutionRequest) (*tourProto.TourExecutionResponse, error) {
+
+	if req.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
+	}
+	if req.GetTouristId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Tourist ID is required")
+	}
+
+	executionId, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
+	}
+
+	/*touristId, err := primitive.ObjectIDFromHex(req.GetTouristId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid tourist ID format")
+	}*/
+	touristId := req.GetTouristId()
+
+	execution, err := h.executionService.AbandonTour(executionId, touristId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return mapper.TourExecutionModelToProto(execution), nil
 }

@@ -11,6 +11,7 @@ import { KeyPointInterface } from '../../model/key-point.interface';
 import { TourService } from '../../services/tour.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar'; 
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-tour-execution-page',
@@ -24,13 +25,15 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
   private pollingSubscription?: Subscription;
   currentLocation: Location = { latitude: 0, longitude: 0 };
   keyPoints: KeyPointInterface[] = []; 
+  private touristId: string = "";
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private tourExecutionService: TourExecutionService,
     private tourService: TourService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -41,6 +44,10 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
       return;
     }
      this.startAndLoadTour(tourId);
+     this.authService.getUser().subscribe(user => {
+            this.touristId = user.id;
+            console.log('Trenutni korisnik:', this.touristId);
+        });
   }
 
  startAndLoadTour(tourId: string): void {
@@ -52,7 +59,7 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
     };
     
  
-    this.tourExecutionService.startTour(tourId, this.currentLocation).subscribe({
+    this.tourExecutionService.startTour(tourId, this.currentLocation, this.touristId).subscribe({
       next: (execution) => {
 
         this.activeTour = execution;
@@ -100,7 +107,7 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
       switchMap(() => {
     
         console.log('Provera blizine za lokaciju:', this.currentLocation);
-        return this.tourExecutionService.checkProximity(this.activeTour!.id, this.currentLocation);
+        return this.tourExecutionService.checkProximity(this.activeTour!.id, this.currentLocation, this.touristId);
       })
     ).subscribe({
       next: (updatedExecution) => {
@@ -125,7 +132,30 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
   }
 
   abandonTour(): void {
-  
+
+    if (!this.activeTour) {
+      console.error('Nema aktivne ture za napuštanje.');
+      return;
+    }
+
+    if (confirm('Da li ste sigurni da želite da napustite turu?')) {
+
+      this.tourExecutionService.abandonTour(this.activeTour.id, this.touristId).subscribe({
+        next: (updatedExecution) => {
+          console.log('Tura je uspešno napuštena:', updatedExecution);
+    
+          this.snackBar.open('Tura je napuštena.', 'OK', { duration: 3000 });
+    
+          this.stopPolling();
+      
+          this.router.navigate(['/tours']);
+        },
+        error: (err) => {
+          console.error('Greška pri napuštanju ture:', err);
+          this.snackBar.open('Došlo je do greške. Pokušajte ponovo.', 'Zatvori', { duration: 3000 });
+        }
+      });
+    }
   }
 
    stopPolling(): void {

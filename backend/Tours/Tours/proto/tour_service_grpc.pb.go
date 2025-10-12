@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: Tours/proto/tour_service.proto
+// source: proto/tour_service.proto
 
 package proto
 
@@ -459,5 +459,5 @@ var TourService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "Tours/proto/tour_service.proto",
+	Metadata: "proto/tour_service.proto",
 }

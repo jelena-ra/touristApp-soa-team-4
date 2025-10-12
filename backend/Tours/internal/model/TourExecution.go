@@ -22,7 +22,7 @@ type CompletedKeyPoint struct {
 type TourExecution struct {
 	ID                 primitive.ObjectID  `bson:"_id,omitempty"`
 	TourId             primitive.ObjectID  `bson:"tourId"`
-	TouristId          primitive.ObjectID  `bson:"touristId"`
+	TouristId          string              `bson:"touristId"`
 	Status             TourExecutionStatus `bson:"status"`
 	StartTime          time.Time           `bson:"startTime"`
 	LastActivity       time.Time           `bson:"lastActivity"`

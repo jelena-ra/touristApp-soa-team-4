@@ -1,20 +1,14 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/gorilla/mux"
-	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/service"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TourExecutionHandler struct {
 	Service *service.TourExecutionService
 }
 
-func (h *TourExecutionHandler) StartTour(w http.ResponseWriter, r *http.Request) {
+/*func (h *TourExecutionHandler) StartTour(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	tourId, err := primitive.ObjectIDFromHex(vars["tourId"])
 	if err != nil {
@@ -88,4 +82,4 @@ func (h *TourExecutionHandler) CheckProximity(w http.ResponseWriter, r *http.Req
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(execution)
-}
+}*/

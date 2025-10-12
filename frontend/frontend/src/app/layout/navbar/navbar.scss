@@ -1,0 +1,94 @@
+:host {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.navbar-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: white;
+  
+  span {
+    font-size: 1.25rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+}
+
+.nav-links {
+  margin-left: 2rem;
+
+  a {
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: white;
+    }
+
+    &.active-link {
+      color: #60a5fa; 
+      font-weight: 400;
+    }
+  }
+}
+
+.spacer {
+  flex: 1 1 auto; // Gura sve na desno
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-avatar-button {
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #60a5fa; // Plava pozadina
+    color: #0f172a; // Tamna slova
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+}
+:host ::ng-deep .user-info-menu {
+  padding: 0.5rem 1rem;
+  outline: none;
+}
+
+:host ::ng-deep .user-info-menu .username {
+  font-weight: 500;
+}
+
+:host ::ng-deep .user-info-menu .role {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: capitalize;
+}
+

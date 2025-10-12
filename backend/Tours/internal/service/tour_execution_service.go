@@ -27,7 +27,7 @@ func NewTourExecutionService(executionRepo *repository.TourExecutionRepository, 
 	}
 }
 
-func (s *TourExecutionService) StartTour(tourId, touristId primitive.ObjectID, startPosition model.TouristPosition) (*model.TourExecution, error) {
+func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId string, startPosition model.TouristPosition) (*model.TourExecution, error) {
 	// 1. Poslovno pravilo: Proveriti da li turista već ima aktivnu turu.
 	/*_, err := s.ExecutionRepo.GetActiveByTourist(touristId)
 	// Ako ne dobijemo grešku, znači da je aktivna tura pronađena, što nije dozvoljeno.
@@ -53,36 +53,31 @@ func (s *TourExecutionService) StartTour(tourId, touristId primitive.ObjectID, s
 	return execution, nil
 }
 
-// AbandonTour postavlja status sesije na "Abandoned".
-/*func (s *TourExecutionService) AbandonTour(executionId, touristId primitive.ObjectID) (*model.TourExecution, error) {
-	// 1. Pronađi sesiju.
+func (s *TourExecutionService) AbandonTour(executionId primitive.ObjectID, touristId string) (*model.TourExecution, error) {
+
 	execution, err := s.ExecutionRepo.GetById(executionId)
 	if err != nil {
 		return nil, errors.New("tour execution not found")
 	}
 
-	// 2. Poslovno pravilo: Proveri da li je to sesija ovog turiste.
 	if execution.TouristId != touristId {
 		return nil, errors.New("this is not your tour execution")
 	}
 
-	// 3. Poslovno pravilo: Tura se može napustiti samo ako je aktivna.
 	if execution.Status != model.StatusActive {
 		return nil, errors.New("tour is not active")
 	}
 
-	// 4. Ažuriranje statusa i vremena.
 	now := time.Now().UTC()
 	execution.Status = model.StatusAbandoned
 	execution.CompletionTime = &now
 	execution.LastActivity = now
 
-	// 5. Čuvanje promena u bazi.
 	err = s.ExecutionRepo.Update(execution)
 	return execution, err
-}*/
+}
 
-func (s *TourExecutionService) CheckProximity(executionId, touristId primitive.ObjectID, position model.TouristPosition) (*model.TourExecution, error) {
+func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
 
 	execution, err := s.ExecutionRepo.GetById(executionId)
 	if err != nil {

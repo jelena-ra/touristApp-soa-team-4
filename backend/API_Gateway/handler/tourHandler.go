@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jelena-ra/touristApp/soa-team-4/API_Gateway/jwt"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -204,6 +205,14 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	tourId := vars["tourId"]
 
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+	log.Printf("[API Gateway] Received request to start tour. Tourist ID from token: %s", touristId)
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -218,10 +227,10 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Izvuci ID turiste iz JWT tokena i proslijediti ga
 	gprcRequest := &tourProto.StartTourRequest{
-		TourId:   tourId,
-		Position: &positionReq,
+		TourId:    tourId,
+		Position:  &positionReq,
+		TouristId: touristId,
 	}
 
 	resp, err := h.client.StartTour(ctx, gprcRequest)
@@ -239,37 +248,38 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
-// CheckProximityHandle obrađuje zahtev za proveru blizine.
-// Očekuje: PUT /api/tour-executions/{id}/check-proximity
 func (h *TourHandler) CheckProximityHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	// Izvuci ID sesije iz URL-a
 	vars := mux.Vars(r)
 	executionId := vars["id"]
 
-	// Pročitaj telo zahteva (JSON sa pozicijom)
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	// Unmarshaluj JSON u gRPC poruku
 	var positionReq tourProto.TouristPosition
 	if err := protojson.Unmarshal(bodyBytes, &positionReq); err != nil {
 		http.Error(w, "Invalid position data", http.StatusBadRequest)
 		return
 	}
 
-	// Kreiraj gRPC zahtev
 	gprcRequest := &tourProto.CheckProximityRequest{
-		Id:       executionId,
-		Position: &positionReq,
+		Id:        executionId,
+		Position:  &positionReq,
+		TouristId: touristId,
 	}
 
-	// Pozovi Tour servis preko gRPC KLIJENTA (h.client)
 	resp, err := h.client.CheckProximity(ctx, gprcRequest)
 	if err != nil {
 		log.Printf("Failed to check proximity via gRPC: %v", err)
@@ -277,7 +287,39 @@ func (h *TourHandler) CheckProximityHandle(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Marshaluj odgovor nazad u JSON i pošalji ga
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+func (h *TourHandler) AbandonTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	executionId := vars["id"]
+
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+
+	gprcRequest := &tourProto.TourExecutionRequest{
+		Id:        executionId,
+		TouristId: touristId,
+	}
+
+	resp, err := h.client.AbandonTour(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to abandon tour via gRPC: %v", err)
+		http.Error(w, "Failed to abandon tour", http.StatusInternalServerError)
+		return
+	}
+
 	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
 	jsonData, _ := marshaler.Marshal(resp)
 

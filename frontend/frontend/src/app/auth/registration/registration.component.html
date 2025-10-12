@@ -1,42 +1,67 @@
-<div class="container">
-    <form class="registration-form" [formGroup]="registrationForm">
-        <h2 class="form-title">Kreiraj svoj nalog</h2>
-        
-        <div class="input-group">
-            <label for="username">Korisničko ime</label>
-            <input type="text" id="username" formControlName="username" placeholder="Unesite korisničko ime" required>
-        </div>
+<div class="registration-container">
+  <div class="glass-panel">
+    
+    <!-- Header -->
+    <div class="panel-header">
+      <div class="icon-glow">✨</div>
+      <h2 class="panel-title">Kreiraj Svoj Nalog</h2>
+      <div class="line-separator"></div>
+      <p class="panel-subtitle">
+        Započni svoju avanturu kroz svet tura
+      </p>
+    </div>
 
-        <div class="input-group">
-            <label for="password">Lozinka</label>
-            <input type="password" id="password" formControlName="password" placeholder="Unesite lozinku" required>
-        </div>
-        
-        <div class="input-group">
-            <label for="name">Ime</label>
-            <input type="text" id="name" formControlName="name" placeholder="Unesite svoje ime" required>
-        </div>
-        
-        <div class="input-group">
-            <label for="surname">Prezime</label>
-            <input type="text" id="surname" formControlName="surname" placeholder="Unesite svoje prezime" required>
-        </div>
+    <!-- Register Form -->
+    <form class="registration-form" [formGroup]="registrationForm" (ngSubmit)="register()">
+      
+      <div class="form-row">
+        <!-- Name Field -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Ime</mat-label>
+          <input matInput formControlName="name" required placeholder="Vaše ime">
+        </mat-form-field>
 
-        <div class="input-group role-group">
-            <label>Odaberite ulogu:</label>
-            <div class="radio-options">
-                <input type="radio" id="tourist" name="role" formControlName="role" value="turista" required>
-                <label for="tourist">Turista</label>
+        <!-- Surname Field -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Prezime</mat-label>
+          <input matInput formControlName="surname" required placeholder="Vaše prezime">
+        </mat-form-field>
+      </div>
 
-                <input type="radio" id="guide" name="role" formControlName="role" value="vodic" required>
-                <label for="guide">Vodič</label>
-            </div>
-        </div>
-        
-        <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" formControlName="email" placeholder="Unesite email" required>
-        </div>
-        <button type="submit" [disabled]="registrationForm.invalid" mat-raised-button type="submit" (click)="register()" color="button">Registruj se</button>
+      <!-- Username Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Korisničko ime</mat-label>
+        <input matInput formControlName="username" required placeholder="Odaberite korisničko ime">
+      </mat-form-field>
+
+      <!-- Email Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Email adresa</mat-label>
+        <input matInput type="email" formControlName="email" required placeholder="vas@email.com">
+      </mat-form-field>
+
+      <!-- Password Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Lozinka</mat-label>
+        <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" required placeholder="Napravite sigurnu lozinku">
+        <button mat-icon-button matSuffix (click)="showPassword = !showPassword" type="button">
+          <mat-icon>{{showPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Role Selection -->
+      <div class="role-selection">
+        <label class="role-label">Odaberite ulogu:</label>
+        <mat-radio-group formControlName="role" class="role-group">
+          <mat-radio-button value="turista">Turista</mat-radio-button>
+          <mat-radio-button value="vodic">Vodič</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" [disabled]="registrationForm.invalid" mat-raised-button color="primary" class="submit-button">
+        Registruj Se
+      </button>
     </form> 
+  </div>
 </div>

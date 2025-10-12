@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TourExecutionPageComponent } from './tour-execution-page'; // Ispravi putanju ako treba
+import { TourExecutionPageComponent } from './tour-execution-page'; 
 
-describe('TourExecutionPageComponent', () => { // Ispravka i ovde
-  // ISPRAVKA #2: Ispravi tipove
+describe('TourExecutionPageComponent', () => { 
+
   let component: TourExecutionPageComponent;
   let fixture: ComponentFixture<TourExecutionPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      // ISPRAVKA #3: Ispravi ime komponente
+
       imports: [TourExecutionPageComponent]
     })
     .compileComponents();
 
-    // ISPRAVKA #4: I ovde
+  
     fixture = TestBed.createComponent(TourExecutionPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

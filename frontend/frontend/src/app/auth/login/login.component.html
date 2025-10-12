@@ -1,18 +1,47 @@
-<div class="container">
-    <form class="registration-form" [formGroup]="loginForm">
-        <h2 class="form-title">Kreiraj svoj nalog</h2>
-        
-        <div class="input-group">
-            <label for="username">Korisničko ime</label>
-            <input type="text" id="username" formControlName="username" placeholder="Unesite korisničko ime" required>
-        </div>
-
-        <div class="input-group">
-            <label for="password">Lozinka</label>
-            <input type="password" id="password" formControlName="password" placeholder="Unesite lozinku" required>
-        </div>
+<div class="login-container">
+  <div class="glass-panel">
     
+   
+    <div class="panel-header">
+      <div class="icon-glow">🚀</div>
+      <h2 class="panel-title">Dobrodošli Nazad</h2>
+      <div class="line-separator"></div>
+      <p class="panel-subtitle">
+        Ulogujte se da nastavite svoju avanturu
+      </p>
+    </div>
 
-        <button type="submit" [disabled]="loginForm.invalid" mat-raised-button type="submit" (click)="login()" color="button">Loguj se</button>
-    </form>
+
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="login()">
+      
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Korisničko ime</mat-label>
+        <input matInput formControlName="username" required placeholder="Unesite korisničko ime">
+        <mat-icon matPrefix>person</mat-icon>
+      </mat-form-field>
+
+    
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Lozinka</mat-label>
+        <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" required placeholder="Unesite lozinku">
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix (click)="showPassword = !showPassword" type="button" aria-label="Toggle password visibility">
+          <mat-icon>{{showPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <button type="submit" [disabled]="loginForm.invalid" mat-raised-button color="primary" class="submit-button">
+        Uloguj Se
+      </button>
+
+    
+      <div class="register-link">
+        <div class="line-separator"></div>
+        <p>
+          Nemate nalog? <a routerLink="/registration">Registrujte se ovde</a>
+        </p>
+      </div>
+    </form> 
+  </div>
 </div>

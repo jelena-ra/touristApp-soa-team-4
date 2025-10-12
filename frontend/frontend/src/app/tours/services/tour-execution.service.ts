@@ -20,7 +20,7 @@ export class TourExecutionService {
    * @param tourId ID ture koja se pokreće.
    * @param startPosition Početna pozicija turiste.
    */
-  startTour(tourId: string, startPosition: Location): Observable<TourExecution> {
+  startTour(tourId: string, startPosition: Location, touristId: string): Observable<TourExecution> {
     // 1. Dobavi token
     const token = this.tokenStorage.getAccessToken();
 
@@ -42,7 +42,7 @@ export class TourExecutionService {
    * @param executionId ID aktivne sesije ture.
    * @param currentPosition Trenutna pozicija turiste.
    */
-  checkProximity(executionId: string, currentPosition: Location): Observable<TourExecution> {
+  checkProximity(executionId: string, currentPosition: Location, touristId: string): Observable<TourExecution> {
     // 1. Dobavi token
     const token = this.tokenStorage.getAccessToken();
 
@@ -63,7 +63,7 @@ export class TourExecutionService {
    * Prekida (napušta) aktivnu sesiju ture.
    * @param executionId ID aktivne sesije ture.
    */
-  abandonTour(executionId: string): Observable<TourExecution> {
+  abandonTour(executionId: string, touristId: string): Observable<TourExecution> {
     // 1. Dobavi token
     const token = this.tokenStorage.getAccessToken();
 

@@ -1,0 +1,54 @@
+<mat-toolbar class="navbar" color="primary">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-logo">
+      <mat-icon>explore</mat-icon>
+      <span>TouristApp</span>
+    </a>
+
+    <!-- Navigacioni linkovi (za ulogovane korisnike) -->
+    <div class="nav-links" *ngIf="(authService.user$ | async)?.id !== '0'">
+      <a mat-button routerLink="/tours" routerLinkActive="active-link">Ture</a>
+      <!-- Dodaj ostale linkove po potrebi -->
+      <!-- <a mat-button routerLink="/blog" routerLinkActive="active-link">Blog</a> -->
+    </div>
+
+    <!-- Spacer da gurne desni deo do kraja -->
+    <span class="spacer"></span>
+
+    <!-- Desni deo: Login/Register ili Korisnički Meni -->
+    <div class="user-section">
+      <!-- Ako korisnik NIJE ulogovan -->
+      <ng-container *ngIf="(authService.user$ | async)?.id === '0'; else userMenu">
+        <a mat-button routerLink="/login">Login</a>
+        <a mat-raised-button color="accent" routerLink="/registration">Register</a>
+      </ng-container>
+
+      <!-- Ako KORISNIK JESTE ulogovan -->
+      <ng-template #userMenu>
+        <div *ngIf="user$ | async as user">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="user-avatar-button">
+            <div class="avatar">
+              {{ getUserInitials(user.username) }}
+            </div>
+          </button>
+          <mat-menu #menu="matMenu" xPosition="before">
+            <div class="user-info-menu">
+              <p class="username">{{ user.username }}</p>
+              <p class="role">{{ user.role }}</p>
+            </div>
+            <mat-divider></mat-divider>
+            <button mat-menu-item>
+              <mat-icon>person</mat-icon>
+              <span>Profil</span>
+            </button>
+            <button mat-menu-item (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Izloguj se</span>
+            </button>
+          </mat-menu>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</mat-toolbar>

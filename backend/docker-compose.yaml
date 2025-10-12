@@ -30,7 +30,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p password -a neo4j://localhost:7687 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -77,9 +77,13 @@ services:
       - "8083:8083"
     env_file:
       - ./Tours/.env
+    environment:
+      - JAEGER_ADDRESS=jaeger:4317
     depends_on:
       tour-db:
         condition: service_healthy
+      jaeger:
+        condition: service_started
 
   tour-db:
     image: mongo:latest
@@ -111,9 +115,12 @@ services:
       - backend
     env_file:
       - ./API_Gateway/.env
+    environment:
+      - JAEGER_ADDRESS=jaeger:4317
     depends_on:
       - blog-service
       - stakeholder-service
+      - jaeger
   
   prometheus:
     image: prom/prometheus:latest
@@ -149,7 +156,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3001:3001"
+      - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -178,6 +185,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./promtail-config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
+    networks:
+      - backend
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
     networks:
       - backend
     restart: unless-stopped
