@@ -1,6 +1,9 @@
 const axios = require('axios');
 
-const STAKEHOLDERS_API_URL = 'http://localhost:8081';
+//const STAKEHOLDERS_API_URL = 'http://localhost:8081';
+
+const STAKEHOLDERS_API_URL = 'http://stakeholder-service:8081';
+
 
 const stakeholdersClient = {
   async checkUserExistence(userId) {
