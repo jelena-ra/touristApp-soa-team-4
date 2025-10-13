@@ -1,6 +1,6 @@
 <div class="container">
     <h1>All tours</h1>
-    <button mat-flat-button (click)="openCreateTour()">Add Tour</button>
+    <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Add Tour</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
             <mat-card class="tour">
@@ -30,14 +30,19 @@
                         </mat-chip>
                     </div>
                 </mat-card-content>
-                <div class="actions-header">
-                    <button mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
-                     Start Tour
-                    </button>
-                </div>
-
                 <mat-card-actions class="tour-action">
-                    <button mat-button [routerLink]="['/tours', tour.id]">View Details</button>
+                    <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">View Details</button>
+                    <button *ngIf="!activeExecution" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
+                        Start Tour
+                    </button>
+                    <ng-container *ngIf="activeExecution">
+                        <button *ngIf="activeExecution.tourId === tour.id" mat-flat-button color="accent" [routerLink]="['/tour-execution', tour.id]">
+                            Continue Tour
+                        </button>
+                        <button *ngIf="activeExecution.tourId !== tour.id" mat-flat-button color="primary" disabled title="You already have an active tour">
+                            Start Tour
+                        </button>
+                    </ng-container>
                 </mat-card-actions>
             </mat-card>
         </div>

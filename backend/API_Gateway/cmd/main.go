@@ -161,9 +161,21 @@ func main() {
 
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.GetAllToursHandle)).Methods("GET")
 	router.Handle("/api/tours/{tourId}", http.HandlerFunc(tourHandler.GetByIdHandle)).Methods("GET")
-	router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")
+	//router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")
+	router.Handle(
+		"/api/tours",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.AuthorPolicy()(http.HandlerFunc(tourHandler.CreateTourHandle)),
+		),
+	).Methods("POST", "OPTIONS")
 	router.Handle("/api/tours/update", http.HandlerFunc(tourHandler.UpdateTourHandle)).Methods("POST")
-	router.Handle("/api/key-point", http.HandlerFunc(tourHandler.CreateKeyPointHandle)).Methods("POST")
+	//router.Handle("/api/key-point", http.HandlerFunc(tourHandler.CreateKeyPointHandle)).Methods("POST")
+	router.Handle(
+		"/api/key-point",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.AuthorPolicy()(http.HandlerFunc(tourHandler.CreateKeyPointHandle)),
+		),
+	).Methods("POST", "OPTIONS")
 
 	//router.Handle("/api/tour-executions/{tourId}", http.HandlerFunc(tourHandler.StartTourHandle)).Methods("POST", "OPTIONS")
 	//router.Handle("/api/tour-executions/{id}/check-proximity", http.HandlerFunc(tourHandler.CheckProximityHandle)).Methods("PUT", "OPTIONS")
@@ -187,6 +199,13 @@ func main() {
 			authorizationMiddleware.TouristPolicy()(http.HandlerFunc(tourHandler.AbandonTourHandle)),
 		),
 	).Methods("PUT", "OPTIONS")
+
+	router.Handle(
+		"/api/tour-executions/active",
+		authenticationMiddleware.AuthenticationPolicy()(
+			http.HandlerFunc(tourHandler.GetActiveTourHandle),
+		),
+	).Methods("GET", "OPTIONS")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

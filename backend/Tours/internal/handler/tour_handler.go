@@ -251,3 +251,14 @@ func (h *TourHandler) AbandonTour(ctx context.Context, req *tourProto.TourExecut
 
 	return mapper.TourExecutionModelToProto(execution), nil
 }
+func (h *TourHandler) GetActiveTour(ctx context.Context, req *tourProto.GetActiveTourRequest) (*tourProto.TourExecutionResponse, error) {
+
+	touristId := req.GetTouristId()
+	log.Printf("[Get active tour tur servis] Received request to start tour. Tourist ID from token: %s", touristId)
+	execution, err := h.executionService.GetActiveTour(touristId)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "No active tour found")
+	}
+
+	return mapper.TourExecutionModelToProto(execution), nil
+}

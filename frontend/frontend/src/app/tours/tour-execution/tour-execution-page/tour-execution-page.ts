@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { MapComponent } from '../../../shared/map/map.component'; // Ispravi putanju ako treba
+import { MapComponent } from '../../../shared/map/map.component'; 
 import { TourExecutionService } from '../../services/tour-execution.service';
 import { TourExecution, Location } from '../../model/tour-execution.interface';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,10 @@ import { TourService } from '../../services/tour.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar'; 
 import { AuthService } from '../../../auth/auth.service';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators'; 
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import {  of } from 'rxjs'; 
 
 @Component({
   selector: 'app-tour-execution-page',
@@ -26,6 +30,7 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
   currentLocation: Location = { latitude: 0, longitude: 0 };
   keyPoints: KeyPointInterface[] = []; 
   private touristId: string = "";
+
 
   constructor(
     private route: ActivatedRoute,
@@ -43,53 +48,92 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
       this.router.navigate(['/tours']);
       return;
     }
-     this.startAndLoadTour(tourId);
+
+    const user = this.authService.getUser();
+
      this.authService.getUser().subscribe(user => {
             this.touristId = user.id;
             console.log('Trenutni korisnik:', this.touristId);
         });
-  }
 
- startAndLoadTour(tourId: string): void {
-
-  navigator.geolocation.getCurrentPosition(position => {
-    this.currentLocation = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude
-    };
-    
- 
-    this.tourExecutionService.startTour(tourId, this.currentLocation, this.touristId).subscribe({
-      next: (execution) => {
-
-        this.activeTour = execution;
-        this.tourService.getById(execution.tourId).subscribe({
-          next: (tourDetails) => {
-            
-            if (this.activeTour) {
-       
-            }
-            this.keyPoints = tourDetails.keyPoints || [];
-
-            console.log('Tura uspešno pokrenuta i detalji učitani:', this.activeTour);
-            
-          
-            this.startPolling();
-          },
-          error: (err) => {
-            console.error('Greška pri učitavanju detalja ture:', err);
-            this.router.navigate(['/tours']);
+      if (this.touristId!=null && this.touristId!=="") {
+        this.tourExecutionService.getActiveTour().pipe(
+          catchError(err => {
+            return of(null);
+          })
+        ).subscribe(existingExecution => {
+          if (existingExecution && existingExecution.tourId === tourId) {
+            console.log("Nastavlja se postojeća tura.");
+            this.loadTourDetailsAndStartPolling(existingExecution);
+          } else {
+            console.log("Pokreće se nova tura.");
+            this.startAndLoadTour(tourId);
           }
         });
-      },
-      error: (err) => {
-        console.error('Greška pri pokretanju ture:', err);
-        this.router.navigate(['/tours']);
+      } else {
+        this.router.navigate(['/login']);
       }
-    });
-  });
-}
+    
+  }
 
+//  startAndLoadTour(tourId: string): void {
+
+//   navigator.geolocation.getCurrentPosition(position => {
+//     this.currentLocation = {
+//       latitude: position.coords.latitude,
+//       longitude: position.coords.longitude
+//     };
+    
+ 
+//     this.tourExecutionService.startTour(tourId, this.currentLocation, this.touristId).subscribe({
+//       next: (execution) => {
+     
+//         this.activeTour = execution;
+//         this.tourService.getById(execution.tourId).subscribe({
+//           next: (tourDetails) => {
+//             if (this.activeTour) {
+    
+//             }
+//             this.keyPoints = tourDetails.keyPoints || [];
+//             console.log('Tura uspešno pokrenuta i detalji učitani:', this.activeTour);
+//             this.startPolling();
+//           },
+//           error: (err) => {
+//             console.error('Greška pri učitavanju detalja ture:', err);
+//             this.router.navigate(['/tours']);
+//           }
+//         });
+//       },
+
+//        error: (err: Error) => { 
+    
+//           console.error('Greška pri pokretanju ture:', err.message);
+//           this.snackBar.open(err.message, 'OK', { duration: 5000 });
+//           this.router.navigate(['/tours']);
+//         }
+//       });
+//     });
+// }
+
+ startAndLoadTour(tourId: string): void {
+    navigator.geolocation.getCurrentPosition(position => {
+    this.currentLocation = {
+      latitude: position.coords.latitude,
+       longitude: position.coords.longitude
+    };
+
+      this.tourExecutionService.startTour(tourId, this.currentLocation, this.touristId).subscribe({
+        next: (newExecution) => {
+          this.loadTourDetailsAndStartPolling(newExecution);
+        },
+        error: (err: Error) => {
+          console.error('Greška pri pokretanju nove ture:', err.message);
+          this.snackBar.open(err.message, 'OK', { duration: 5000 });
+          this.router.navigate(['/tours']);
+        }
+      });
+    });
+  }
    onLocationSelected(event: { latitude: number, longitude: number }): void {
     this.currentLocation = {
       latitude: event.latitude,
@@ -127,7 +171,10 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
           this.router.navigate(['/tours']); 
         }
       },
-      error: (err) => console.error('Greška pri proveri blizine:', err)
+       error: (err: Error) => { 
+        console.error('Greška pri proveri blizine:', err.message);
+        this.snackBar.open(err.message, 'Zatvori', { duration: 3000 });
+      }
     });
   }
 
@@ -150,16 +197,29 @@ export class TourExecutionPageComponent implements OnInit, OnDestroy {
       
           this.router.navigate(['/tours']);
         },
-        error: (err) => {
-          console.error('Greška pri napuštanju ture:', err);
-          this.snackBar.open('Došlo je do greške. Pokušajte ponovo.', 'Zatvori', { duration: 3000 });
-        }
+         error: (err: Error) => { 
+        console.error('Greška pri napuštanju ture:', err.message);
+        this.snackBar.open(err.message, 'Zatvori', { duration: 3000 });
+      }
       });
     }
   }
 
    stopPolling(): void {
     this.pollingSubscription?.unsubscribe();
+  }
+   loadTourDetailsAndStartPolling(execution: TourExecution): void {
+    this.activeTour = execution;
+    this.tourService.getById(execution.tourId).subscribe({
+      next: (tourDetails) => {
+        this.keyPoints = tourDetails.keyPoints || [];
+        if (this.activeTour) {
+          (this.activeTour as any).name = tourDetails.name;
+        }
+        this.startPolling();
+      },
+      error: (err) => console.error('Greška pri učitavanju detalja ture za nastavak:', err)
+    });
   }
 
   ngOnDestroy(): void {

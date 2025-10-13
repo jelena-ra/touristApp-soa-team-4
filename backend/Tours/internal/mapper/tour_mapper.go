@@ -89,7 +89,7 @@ func convertTravelTimesProtoToModel(times map[string]float32) map[model.Transpor
 func TourModelToProto(t *model.Tour) *tourProto.Tour {
 	return &tourProto.Tour{
 		Id:          t.ID.Hex(),
-		AuthorId:    t.AuthorId.Hex(),
+		AuthorId:    t.AuthorId,
 		Name:        t.Name,
 		Description: t.Description,
 		Difficulty:  modelToProtoDifficulty[t.Difficulty],
@@ -109,17 +109,10 @@ func TourProtoToModel(t *tourProto.Tour) *model.Tour {
 			id = parsed
 		}
 	}
-	authorId := primitive.NilObjectID
-	if t.GetAuthorId() != "" {
-		parsed, err := primitive.ObjectIDFromHex(t.GetAuthorId())
-		if err == nil {
-			authorId = parsed
-		}
-	}
 
 	return &model.Tour{
 		ID:          id,
-		AuthorId:    authorId,
+		AuthorId:    t.GetAuthorId(),
 		Name:        t.GetName(),
 		Description: t.GetDescription(),
 		Difficulty:  protoToModelDifficulty[t.GetDifficulty()],

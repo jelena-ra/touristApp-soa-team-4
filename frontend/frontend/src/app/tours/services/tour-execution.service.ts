@@ -1,8 +1,10 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TourExecution, Location } from '../model/tour-execution.interface';
 import { TokenStorage } from '../../auth/jwt/token.service';
+import {throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -12,92 +14,82 @@ export class TourExecutionService {
 
   constructor(
     private http: HttpClient,
-    private tokenStorage: TokenStorage // <-- Ubaci TokenStorage
+    private tokenStorage: TokenStorage 
   ) { }
 
-  /**
-   * Pokreće novu sesiju ture.
-   * @param tourId ID ture koja se pokreće.
-   * @param startPosition Početna pozicija turiste.
-   */
   startTour(tourId: string, startPosition: Location, touristId: string): Observable<TourExecution> {
-    // 1. Dobavi token
+ 
     const token = this.tokenStorage.getAccessToken();
 
-    // 2. Kreiraj hedere
+  
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    // 3. Pošalji zahtev sa hederima
+
     return this.http.post<TourExecution>(
       `${this.url}/${tourId}`, 
       startPosition,
-      { headers: headers } // <-- Dodaj hedere kao opciju
+      { headers: headers } 
+    ).pipe(
+      catchError(this.handleError) 
     );
   }
 
-  /**
-   * Proverava blizinu ključnih tačaka na osnovu trenutne pozicije turiste.
-   * @param executionId ID aktivne sesije ture.
-   * @param currentPosition Trenutna pozicija turiste.
-   */
+
   checkProximity(executionId: string, currentPosition: Location, touristId: string): Observable<TourExecution> {
-    // 1. Dobavi token
+
     const token = this.tokenStorage.getAccessToken();
 
-    // 2. Kreiraj hedere
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    // 3. Pošalji zahtev sa hederima
+
     return this.http.put<TourExecution>(
       `${this.url}/${executionId}/check-proximity`, 
       currentPosition,
-      { headers: headers } // <-- Dodaj hedere kao opciju
+      { headers: headers } 
+      ).pipe(
+      catchError(this.handleError) 
     );
   }
 
-  /**
-   * Prekida (napušta) aktivnu sesiju ture.
-   * @param executionId ID aktivne sesije ture.
-   */
+
   abandonTour(executionId: string, touristId: string): Observable<TourExecution> {
-    // 1. Dobavi token
+ 
     const token = this.tokenStorage.getAccessToken();
 
-    // 2. Kreiraj hedere
+
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
 
-    // 3. Pošalji zahtev sa hederima
     return this.http.put<TourExecution>(
       `${this.url}/${executionId}/abandon`, 
-      {}, // Prazno telo zahteva
-      { headers: headers } // <-- Dodaj hedere kao opciju
+      {}, 
+      { headers: headers } 
+      ).pipe(
+      catchError(this.handleError) 
     );
   }
 
-  /**
-   * Dobavlja aktivnu sesiju ture za ulogovanog korisnika.
-   */
+  private handleError(error: HttpErrorResponse) {
+   
+    console.log('Greška uhvaćena u servisu:', error.error);
+    
+    return throwError(() => new Error(error.error || 'Došlo je do nepoznate greške na serveru.'));
+  }
+
   getActiveTour(): Observable<TourExecution> {
-    // 1. Dobavi token
-    const token = this.tokenStorage.getAccessToken();
+  const token = this.tokenStorage.getAccessToken();
+  const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    // 2. Kreiraj hedere
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    // 3. Pošalji zahtev sa hederima
-    return this.http.get<TourExecution>(
-      `${this.url}/active`,
-      { headers: headers } // <-- Dodaj hedere kao opciju
-    );
-  }
+  return this.http.get<TourExecution>(
+    `${this.url}/active`,
+    { headers: headers }
+  ).pipe(catchError(this.handleError));
+}
 }
 
 

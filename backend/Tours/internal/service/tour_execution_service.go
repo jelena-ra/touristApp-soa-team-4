@@ -11,8 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Definišemo radijus u metrima unutar kog smatramo da je turista posetio tačku.
-// 50 metara je razumna vrednost.
 const PROXIMITY_RADIUS_METERS = 50.0
 
 type TourExecutionService struct {
@@ -27,16 +25,66 @@ func NewTourExecutionService(executionRepo *repository.TourExecutionRepository, 
 	}
 }
 
+/*
 func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId string, startPosition model.TouristPosition) (*model.TourExecution, error) {
-	// 1. Poslovno pravilo: Proveriti da li turista već ima aktivnu turu.
-	/*_, err := s.ExecutionRepo.GetActiveByTourist(touristId)
-	// Ako ne dobijemo grešku, znači da je aktivna tura pronađena, što nije dozvoljeno.
-	if err == nil {
-		return nil, errors.New("user already has an active tour")
-	}*/
 
-	// 2. Kreiranje novog objekta sesije.
-	execution := &model.TourExecution{
+		_, err := s.ExecutionRepo.GetActiveByTourist(touristId)
+
+		if err == nil {
+			return nil, errors.New("user already has an active tour")
+		}
+
+		execution := &model.TourExecution{
+			ID:              primitive.NewObjectID(),
+			TourId:          tourId,
+			TouristId:       touristId,
+			Status:          model.StatusActive,
+			StartTime:       time.Now().UTC(),
+			LastActivity:    time.Now().UTC(),
+			CurrentPosition: startPosition,
+		}
+
+		if createErr := s.ExecutionRepo.Create(execution); createErr != nil {
+			return nil, createErr
+		}
+
+		return execution, nil
+	}
+*/
+func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId string, startPosition model.TouristPosition) (*model.TourExecution, error) {
+
+	ctx := context.Background()
+
+	_, err := s.ExecutionRepo.GetActiveByTourist(touristId)
+	if err == nil {
+		return nil, errors.New("user already has an active tour session running")
+	}
+
+	keyPoints, err := s.TourServ.GetKeyPoints(ctx, tourId.Hex())
+	if err != nil {
+
+		return nil, err
+	}
+
+	if len(keyPoints) == 0 {
+		return nil, errors.New("cannot start a tour with no key points")
+	}
+	previousExecutions, err := s.ExecutionRepo.GetByTouristAndTour(touristId, tourId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, execution := range previousExecutions {
+
+		if execution.Status == model.StatusCompleted {
+			return nil, errors.New("cannot restart a completed tour")
+		}
+		if execution.Status == model.StatusAbandoned {
+			return nil, errors.New("cannot restart an abandoned tour")
+		}
+	}
+
+	newExecution := &model.TourExecution{
 		ID:              primitive.NewObjectID(),
 		TourId:          tourId,
 		TouristId:       touristId,
@@ -46,11 +94,11 @@ func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId st
 		CurrentPosition: startPosition,
 	}
 
-	err := s.ExecutionRepo.Create(execution)
-	if err != nil {
+	if err := s.ExecutionRepo.Create(newExecution); err != nil {
 		return nil, err
 	}
-	return execution, nil
+
+	return newExecution, nil
 }
 
 func (s *TourExecutionService) AbandonTour(executionId primitive.ObjectID, touristId string) (*model.TourExecution, error) {
@@ -142,4 +190,7 @@ func calculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
 	return R * c
+}
+func (s *TourExecutionService) GetActiveTour(touristId string) (*model.TourExecution, error) {
+	return s.ExecutionRepo.GetActiveByTourist(touristId)
 }

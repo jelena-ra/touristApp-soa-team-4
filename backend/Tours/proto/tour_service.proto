@@ -99,6 +99,7 @@ service TourService {
   rpc StartTour (StartTourRequest) returns (TourExecutionResponse);
   rpc CheckProximity (CheckProximityRequest) returns (TourExecutionResponse);
   rpc AbandonTour (TourExecutionRequest) returns (TourExecutionResponse);
+  rpc GetActiveTour (GetActiveTourRequest) returns (TourExecutionResponse);
 }
 
 message Empty {
@@ -161,4 +162,7 @@ message CheckProximityRequest {
   string id = 1;
   TouristPosition position = 2;
   string touristId = 3;
+}
+message GetActiveTourRequest {
+  string touristId = 1;
 }
