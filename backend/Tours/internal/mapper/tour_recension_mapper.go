@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
@@ -25,24 +26,17 @@ func RecensionProtoToModel(protoRecension *tourProto.Recension) (*model.Recensio
 	var err error
 	recension := &model.Recension{}
 
-	if protoRecension.Id != "" {
-		recension.ID, err = primitive.ObjectIDFromHex(protoRecension.Id)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	if protoRecension.AuthorId != "" {
 		recension.AuthorId, err = primitive.ObjectIDFromHex(protoRecension.AuthorId)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid format for AuthorId: %w", err)
 		}
 	}
 
 	if protoRecension.TourId != "" {
 		recension.TourId, err = primitive.ObjectIDFromHex(protoRecension.TourId)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid format for TourId: %w", err)
 		}
 	}
 
@@ -53,18 +47,11 @@ func RecensionProtoToModel(protoRecension *tourProto.Recension) (*model.Recensio
 	if protoRecension.VisitDate != "" {
 		recension.VisitDate, err = time.Parse(time.RFC3339, protoRecension.VisitDate)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid format for VisitDate: %w", err)
 		}
 	}
 
-	if protoRecension.CreatedAt != "" {
-		recension.CreatedAt, err = time.Parse(time.RFC3339, protoRecension.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		recension.CreatedAt = time.Now()
-	}
+	recension.CreatedAt = time.Now()
 
 	return recension, nil
 }
