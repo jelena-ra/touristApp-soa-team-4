@@ -8,7 +8,7 @@ import (
 
 type Tour struct {
 	ID          primitive.ObjectID    `bson:"_id,omitempty"`
-	AuthorId    primitive.ObjectID    `bson:"authorId"`
+	AuthorId    string                `bson:"authorId"`
 	Name        string                `bson:"name"`
 	Description string                `bson:"description"`
 	Difficulty  TourDifficulty        `bson:"difficulty"`

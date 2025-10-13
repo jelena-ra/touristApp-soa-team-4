@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jelena-ra/touristApp/soa-team-4/API_Gateway/jwt"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -322,6 +324,47 @@ func (h *TourHandler) AbandonTourHandle(w http.ResponseWriter, r *http.Request) 
 
 	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
 	jsonData, _ := marshaler.Marshal(resp)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+func (h *TourHandler) GetActiveTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	
+	claims, ok := r.Context().Value("user").(*jwt.Claims)
+	if !ok {
+		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
+		return
+	}
+	touristId := claims.ID
+
+	gprcRequest := &tourProto.GetActiveTourRequest{
+		TouristId: touristId,
+	}
+
+	resp, err := h.client.GetActiveTour(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to get active tour via gRPC: %v", err)
+
+		st, _ := status.FromError(err)
+		if st.Code() == codes.NotFound {
+			http.Error(w, st.Message(), http.StatusNotFound)
+			return
+		}
+
+		http.Error(w, "Failed to get active tour", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal active tour response to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

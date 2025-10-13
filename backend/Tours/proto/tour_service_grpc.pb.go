@@ -29,6 +29,7 @@ const (
 	TourService_StartTour_FullMethodName      = "/tour.TourService/StartTour"
 	TourService_CheckProximity_FullMethodName = "/tour.TourService/CheckProximity"
 	TourService_AbandonTour_FullMethodName    = "/tour.TourService/AbandonTour"
+	TourService_GetActiveTour_FullMethodName  = "/tour.TourService/GetActiveTour"
 )
 
 // TourServiceClient is the client API for TourService service.
@@ -45,6 +46,7 @@ type TourServiceClient interface {
 	StartTour(ctx context.Context, in *StartTourRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error)
 	CheckProximity(ctx context.Context, in *CheckProximityRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error)
 	AbandonTour(ctx context.Context, in *TourExecutionRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error)
+	GetActiveTour(ctx context.Context, in *GetActiveTourRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error)
 }
 
 type tourServiceClient struct {
@@ -155,6 +157,16 @@ func (c *tourServiceClient) AbandonTour(ctx context.Context, in *TourExecutionRe
 	return out, nil
 }
 
+func (c *tourServiceClient) GetActiveTour(ctx context.Context, in *GetActiveTourRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TourExecutionResponse)
+	err := c.cc.Invoke(ctx, TourService_GetActiveTour_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TourServiceServer is the server API for TourService service.
 // All implementations must embed UnimplementedTourServiceServer
 // for forward compatibility.
@@ -169,6 +181,7 @@ type TourServiceServer interface {
 	StartTour(context.Context, *StartTourRequest) (*TourExecutionResponse, error)
 	CheckProximity(context.Context, *CheckProximityRequest) (*TourExecutionResponse, error)
 	AbandonTour(context.Context, *TourExecutionRequest) (*TourExecutionResponse, error)
+	GetActiveTour(context.Context, *GetActiveTourRequest) (*TourExecutionResponse, error)
 	mustEmbedUnimplementedTourServiceServer()
 }
 
@@ -208,6 +221,9 @@ func (UnimplementedTourServiceServer) CheckProximity(context.Context, *CheckProx
 }
 func (UnimplementedTourServiceServer) AbandonTour(context.Context, *TourExecutionRequest) (*TourExecutionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AbandonTour not implemented")
+}
+func (UnimplementedTourServiceServer) GetActiveTour(context.Context, *GetActiveTourRequest) (*TourExecutionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetActiveTour not implemented")
 }
 func (UnimplementedTourServiceServer) mustEmbedUnimplementedTourServiceServer() {}
 func (UnimplementedTourServiceServer) testEmbeddedByValue()                     {}
@@ -410,6 +426,24 @@ func _TourService_AbandonTour_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TourService_GetActiveTour_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetActiveTourRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TourServiceServer).GetActiveTour(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TourService_GetActiveTour_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TourServiceServer).GetActiveTour(ctx, req.(*GetActiveTourRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TourService_ServiceDesc is the grpc.ServiceDesc for TourService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -456,6 +490,10 @@ var TourService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AbandonTour",
 			Handler:    _TourService_AbandonTour_Handler,
+		},
+		{
+			MethodName: "GetActiveTour",
+			Handler:    _TourService_GetActiveTour_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -28,17 +28,33 @@ func NewTourExecutionRepository(client *mongo.Client, dbName, collectionName str
 	}
 }
 
-func (r *TourExecutionRepository) GetActiveByTourist(touristId int64) (*model.TourExecution, error) {
+func (r *TourExecutionRepository) GetActiveByTourist(touristId string) (*model.TourExecution, error) {
 	var execution model.TourExecution
 	filter := bson.M{
 		"touristId": touristId,
 		"status":    model.StatusActive,
 	}
 	err := r.Collection.FindOne(context.Background(), filter).Decode(&execution)
+	return &execution, err
+}
+func (r *TourExecutionRepository) GetByTouristAndTour(touristId string, tourId primitive.ObjectID) ([]*model.TourExecution, error) {
+	filter := bson.M{
+		"touristId": touristId,
+		"tourId":    tourId,
+	}
+
+	cursor, err := r.Collection.Find(context.Background(), filter)
 	if err != nil {
 		return nil, err
 	}
-	return &execution, nil
+	defer cursor.Close(context.Background())
+
+	var executions []*model.TourExecution
+	if err = cursor.All(context.Background(), &executions); err != nil {
+		return nil, err
+	}
+
+	return executions, nil
 }
 
 func (r *TourExecutionRepository) Create(execution *model.TourExecution) error {
