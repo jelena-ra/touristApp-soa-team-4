@@ -113,6 +113,18 @@ func (s *BlogService) CreateComment(ctx context.Context, comment *model.Comment)
 		return nil, errors.New("blog not found")
 	}
 
+	followExistsResponse, err := s.followingClient.FollowExists(ctx, &following_proto.FollowExistsRequest{
+		FollowerId: comment.UserID,
+		FollowedId: blog.AuthorID,
+	})
+	if err != nil {
+		return nil, errors.New("failed to check following status")
+	}
+
+	if !followExistsResponse.Exists {
+		return nil, errors.New("you must follow the blog author to leave a comment")
+	}
+
 	comment.CreatedAt = time.Now()
 	comment.LastModified = time.Now()
 

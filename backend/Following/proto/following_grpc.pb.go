@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: proto/following.proto
+// source: following.proto
 
 package proto
 
@@ -22,6 +22,7 @@ const (
 	FollowingService_FollowUser_FullMethodName           = "/following.FollowingService/FollowUser"
 	FollowingService_GetRecommendations_FullMethodName   = "/following.FollowingService/GetRecommendations"
 	FollowingService_GetFollowingsForUser_FullMethodName = "/following.FollowingService/GetFollowingsForUser"
+	FollowingService_FollowExists_FullMethodName         = "/following.FollowingService/FollowExists"
 )
 
 // FollowingServiceClient is the client API for FollowingService service.
@@ -31,6 +32,7 @@ type FollowingServiceClient interface {
 	FollowUser(ctx context.Context, in *FollowRequest, opts ...grpc.CallOption) (*FollowResponse, error)
 	GetRecommendations(ctx context.Context, in *GetRecommendationsRequest, opts ...grpc.CallOption) (*GetRecommendationsResponse, error)
 	GetFollowingsForUser(ctx context.Context, in *GetFollowingsForUserRequest, opts ...grpc.CallOption) (*GetFollowingsForUserResponse, error)
+	FollowExists(ctx context.Context, in *FollowExistsRequest, opts ...grpc.CallOption) (*FollowExistsResponse, error)
 }
 
 type followingServiceClient struct {
@@ -71,6 +73,16 @@ func (c *followingServiceClient) GetFollowingsForUser(ctx context.Context, in *G
 	return out, nil
 }
 
+func (c *followingServiceClient) FollowExists(ctx context.Context, in *FollowExistsRequest, opts ...grpc.CallOption) (*FollowExistsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FollowExistsResponse)
+	err := c.cc.Invoke(ctx, FollowingService_FollowExists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FollowingServiceServer is the server API for FollowingService service.
 // All implementations must embed UnimplementedFollowingServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type FollowingServiceServer interface {
 	FollowUser(context.Context, *FollowRequest) (*FollowResponse, error)
 	GetRecommendations(context.Context, *GetRecommendationsRequest) (*GetRecommendationsResponse, error)
 	GetFollowingsForUser(context.Context, *GetFollowingsForUserRequest) (*GetFollowingsForUserResponse, error)
+	FollowExists(context.Context, *FollowExistsRequest) (*FollowExistsResponse, error)
 	mustEmbedUnimplementedFollowingServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedFollowingServiceServer) GetRecommendations(context.Context, *
 }
 func (UnimplementedFollowingServiceServer) GetFollowingsForUser(context.Context, *GetFollowingsForUserRequest) (*GetFollowingsForUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFollowingsForUser not implemented")
+}
+func (UnimplementedFollowingServiceServer) FollowExists(context.Context, *FollowExistsRequest) (*FollowExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FollowExists not implemented")
 }
 func (UnimplementedFollowingServiceServer) mustEmbedUnimplementedFollowingServiceServer() {}
 func (UnimplementedFollowingServiceServer) testEmbeddedByValue()                          {}
@@ -172,6 +188,24 @@ func _FollowingService_GetFollowingsForUser_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FollowingService_FollowExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FollowExistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FollowingServiceServer).FollowExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FollowingService_FollowExists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FollowingServiceServer).FollowExists(ctx, req.(*FollowExistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FollowingService_ServiceDesc is the grpc.ServiceDesc for FollowingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -191,7 +225,11 @@ var FollowingService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetFollowingsForUser",
 			Handler:    _FollowingService_GetFollowingsForUser_Handler,
 		},
+		{
+			MethodName: "FollowExists",
+			Handler:    _FollowingService_FollowExists_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/following.proto",
+	Metadata: "following.proto",
 }
