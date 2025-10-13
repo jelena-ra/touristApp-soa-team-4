@@ -21,7 +21,7 @@ services:
     image: neo4j:4.4
     container_name: stakeholders-db
     environment:
-      NEO4J_AUTH: "neo4j/password"
+      NEO4J_AUTH: "neo4j/mojalutka123"
     ports:
       - "7475:7474"
       - "7688:7687"
@@ -30,7 +30,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p password -a neo4j://localhost:7687 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,7 +48,8 @@ services:
     env_file:
       - ./Blog/.env
     depends_on:
-      - blog-db
+      blog-db:
+        condition: service_healthy
     environment:
       - FOLLOWING_SERVICE_ADDR=host.docker.internal:8083
 
@@ -65,6 +66,12 @@ services:
       - blog_db_data:/data/db
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   tour-service:
     image: tour-service:compose_build
