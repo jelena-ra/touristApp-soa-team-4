@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	pb "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/service"
@@ -57,7 +59,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 }
 
 func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequest) (*blog_proto.LikeBlogResponse, error) {
-	id_blog := req.GetBlogId() // Sigurnije je koristiti Gettere
+	id_blog := req.GetBlogId()
 	id_user := req.GetUserId()
 	likedBlog, err := h.service.LikeBlog(ctx, id_blog, id_user)
 	if err != nil {
@@ -68,6 +70,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 	for _, commentModel := range likedBlog.Comments {
 		protoComments = append(protoComments, &blog_proto.Comment{
 			Id:           commentModel.ID.Hex(),
+			BlogId:       commentModel.BlogID,
 			UserId:       commentModel.UserID,
 			Content:      commentModel.Content,
 			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
@@ -103,6 +106,7 @@ func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRe
 	for _, commentModel := range likedBlog.Comments {
 		protoComments = append(protoComments, &blog_proto.Comment{
 			Id:           commentModel.ID.Hex(),
+			BlogId:       commentModel.BlogID,
 			UserId:       commentModel.UserID,
 			Content:      commentModel.Content,
 			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
@@ -189,8 +193,12 @@ func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateC
 	}
 
 	comment := &model.Comment{
-		UserID:  commentReq.GetUserId(),
-		Content: commentReq.Content,
+		ID:           primitive.ObjectID{},
+		BlogID:       commentReq.BlogId,
+		UserID:       commentReq.UserId,
+		Content:      commentReq.Content,
+		CreatedAt:    time.Now(),
+		LastModified: time.Now(),
 	}
 
 	createdComment, err := h.service.CreateComment(ctx, comment)
@@ -199,10 +207,10 @@ func (h *BlogHandler) CreateComment(ctx context.Context, req *blog_proto.CreateC
 	}
 
 	protoCommentRes := &blog_proto.Comment{
-		Id:      createdComment.ID.Hex(),
-		UserId:  createdComment.UserID,
-		Content: createdComment.Content,
-
+		Id:           createdComment.ID.Hex(),
+		BlogId:       createdComment.BlogID,
+		UserId:       createdComment.UserID,
+		Content:      createdComment.Content,
 		CreatedAt:    timestamppb.New(createdComment.CreatedAt),
 		LastModified: timestamppb.New(createdComment.LastModified),
 	}
@@ -224,11 +232,10 @@ func (h *BlogHandler) UpdateComment(ctx context.Context, req *blog_proto.UpdateC
 	}
 
 	protoCommentRes := &blog_proto.Comment{
-		Id:      updatedComment.ID.Hex(),
-		UserId:  updatedComment.UserID,
-		Content: updatedComment.Content,
-
-		// OVO JE PROMENA: Korišćenje timestamppb.New() funkcije
+		Id:           updatedComment.ID.Hex(),
+		BlogId:       updatedComment.BlogID,
+		UserId:       updatedComment.UserID,
+		Content:      updatedComment.Content,
 		CreatedAt:    timestamppb.New(updatedComment.CreatedAt),
 		LastModified: timestamppb.New(updatedComment.LastModified),
 	}

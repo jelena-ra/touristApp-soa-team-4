@@ -26,10 +26,11 @@ message BlogFull {
 
 message Comment {
   string id = 1;
-  string user_id = 2;
-  string content = 3;
-  google.protobuf.Timestamp created_at = 4;
-  google.protobuf.Timestamp last_modified = 5;
+  string blog_id = 2;
+  string user_id = 3;
+  string content = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp last_modified = 6;
 }
 
 message CreateBlogInput {
@@ -40,14 +41,16 @@ message CreateBlogInput {
 }
 
 message CreateCommentInput {
-  string user_id = 1;
-  string content = 2;
+  string blog_id = 1;
+  string user_id = 2;
+  string content = 3;
 }
 
 message UpdateCommentInput {
   string user_id = 1;
   string comment_id = 2;
   string content = 3;
+  string blog_id = 4;
 }
 
 message CreateBlogRequest {

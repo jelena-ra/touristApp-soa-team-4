@@ -13,6 +13,8 @@ type CommentRepository interface {
 	CreateComment(ctx context.Context, blog *model.Comment) (*model.Comment, error)
 	Update(ctx context.Context, comment *model.Comment) (*model.Comment, error)
 	GetById(ctx context.Context, id string) (*model.Comment, error)
+	GetByBlogId(ctx context.Context, blogId string) ([]*model.Comment, error)
+	DeleteByBlogId(ctx context.Context, blogId string) error
 }
 
 type CommentRepositoryMongo struct {
@@ -46,6 +48,32 @@ func (r *CommentRepositoryMongo) GetById(ctx context.Context, id string) (*model
 	}
 
 	return &comment, nil
+}
+
+func (r *CommentRepositoryMongo) GetByBlogId(ctx context.Context, blogId string) ([]*model.Comment, error) {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	filter := bson.M{"blogId": blogId}
+
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var comments []*model.Comment
+	if err = cursor.All(ctx, &comments); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}
+
+func (r *CommentRepositoryMongo) DeleteByBlogId(ctx context.Context, blogId string) error {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	filter := bson.M{"blogId": blogId}
+
+	_, err := collection.DeleteMany(ctx, filter)
+	return err
 }
 
 func (r *CommentRepositoryMongo) CreateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {

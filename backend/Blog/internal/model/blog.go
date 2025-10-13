@@ -19,6 +19,7 @@ type Blog struct {
 
 type Comment struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	BlogID       string             `bson:"blogId"`
 	UserID       string             `bson:"userId"`
 	Content      string             `bson:"content"`
 	CreatedAt    time.Time          `bson:"createdAt"`
