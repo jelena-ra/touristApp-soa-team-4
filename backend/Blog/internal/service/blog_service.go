@@ -105,6 +105,14 @@ func (s *BlogService) GetFeedForUser(ctx context.Context, userId string) ([]mode
 }
 
 func (s *BlogService) CreateComment(ctx context.Context, comment *model.Comment) (*model.Comment, error) {
+	blog, err := s.repo.GetById(ctx, comment.BlogID)
+	if err != nil {
+		return nil, err
+	}
+	if blog == nil {
+		return nil, errors.New("blog not found")
+	}
+
 	comment.CreatedAt = time.Now()
 	comment.LastModified = time.Now()
 
