@@ -262,3 +262,38 @@ func (h *TourHandler) GetActiveTour(ctx context.Context, req *tourProto.GetActiv
 
 	return mapper.TourExecutionModelToProto(execution), nil
 }
+
+func (h *TourHandler) CreateRecension(ctx context.Context, req *tourProto.CreateRecensionRequest) (*tourProto.RecensionResponse, error) {
+	createInfo := req.GetRecension()
+	if createInfo == nil {
+		return nil, status.Error(codes.InvalidArgument, "Recension information is required")
+	}
+
+	if createInfo.Rating < 1 || createInfo.Rating > 5 {
+		return nil, status.Error(codes.InvalidArgument, "Rating must be between 1 and 5")
+	}
+
+	// TODO: Validacija za autora i turu - da li postoje
+
+	modelRecension := must(mapper.RecensionProtoToModel(createInfo))
+	newRecension := must(h.server.CreateRecension(ctx, modelRecension))
+	protoRecension := mapper.RecensionModelToProto(newRecension)
+
+	return &tourProto.RecensionResponse{Recension: protoRecension}, nil
+}
+
+func (h *TourHandler) GetRecensionsByTourID(ctx context.Context, req *tourProto.TourIDRequest) (*tourProto.RecensionListResponse, error) {
+	tourID := req.GetId()
+	if tourID == "" {
+		return nil, status.Error(codes.InvalidArgument, "Tour ID is required")
+	}
+
+	recensions := must(h.server.GetRecensionsByTourID(ctx, tourID))
+	protoRecensions := make([]*tourProto.Recension, len(recensions))
+
+	for i, recension := range recensions {
+		protoRecensions[i] = mapper.RecensionModelToProto(recension)
+	}
+
+	return &tourProto.RecensionListResponse{Recensions: protoRecensions}, nil
+}

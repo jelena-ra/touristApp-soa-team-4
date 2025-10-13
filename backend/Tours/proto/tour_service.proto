@@ -100,10 +100,23 @@ service TourService {
   rpc CheckProximity (CheckProximityRequest) returns (TourExecutionResponse);
   rpc AbandonTour (TourExecutionRequest) returns (TourExecutionResponse);
   rpc GetActiveTour (GetActiveTourRequest) returns (TourExecutionResponse);
+  rpc CreateRecension(CreateRecensionRequest) returns (RecensionResponse);
+  rpc GetRecensionsByTourID(TourIDRequest) returns (RecensionListResponse);
 }
 
 message Empty {
 
+}
+
+message Recension {
+ string id = 1;
+ string authorId = 2;
+ string tourId = 3;
+ int32 rating = 4;
+ string visitDate = 5;
+ string comment = 6;
+ string createdAt = 7;
+ repeated string pictures = 8;
 }
 
 message TourListResponse {
@@ -165,4 +178,18 @@ message CheckProximityRequest {
 }
 message GetActiveTourRequest {
   string touristId = 1;
+}
+
+message CreateRecensionRequest {
+ Recension recension = 1;
+}
+
+
+message RecensionResponse {
+ Recension recension = 1;
+}
+
+
+message RecensionListResponse {
+ repeated Recension recensions = 1;
 }
