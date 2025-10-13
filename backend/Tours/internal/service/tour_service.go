@@ -9,14 +9,16 @@ import (
 )
 
 type TourService struct {
-	tourRepo     repository.TourRepository
-	keyPointRepo repository.KeyPointRepository
+	tourRepo      repository.TourRepository
+	keyPointRepo  repository.KeyPointRepository
+	recensionRepo *repository.RecensionRepository
 }
 
-func NewTourService(tourRepo repository.TourRepository, keyPointRepo repository.KeyPointRepository) *TourService {
+func NewTourService(tourRepo repository.TourRepository, keyPointRepo repository.KeyPointRepository, recensionRepo *repository.RecensionRepository) *TourService {
 	return &TourService{
-		tourRepo:     tourRepo,
-		keyPointRepo: keyPointRepo,
+		tourRepo:      tourRepo,
+		keyPointRepo:  keyPointRepo,
+		recensionRepo: recensionRepo,
 	}
 }
 
@@ -79,4 +81,22 @@ func (s *TourService) CreateKeyPoint(ctx context.Context, keyPoint *model.KeyPoi
 	}
 
 	return s.keyPointRepo.CreateKeyPoint(ctx, keyPoint)
+}
+
+func (s *TourService) CreateRecension(ctx context.Context, recension *model.Recension) (*model.Recension, error) {
+	_, err := s.tourRepo.GetByID(ctx, recension.TourId.Hex())
+	if err != nil {
+		return nil, err
+	}
+
+	return s.recensionRepo.Create(ctx, recension)
+}
+
+func (s *TourService) GetRecensionsByTourID(ctx context.Context, tourID string) ([]*model.Recension, error) {
+	_, err := s.tourRepo.GetByID(ctx, tourID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.recensionRepo.GetByTourID(ctx, tourID)
 }
