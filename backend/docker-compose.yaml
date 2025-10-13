@@ -21,7 +21,7 @@ services:
     image: neo4j:4.4
     container_name: stakeholders-db
     environment:
-      NEO4J_AUTH: "neo4j/password"
+      NEO4J_AUTH: "neo4j/mojalutka123"
     ports:
       - "7475:7474"
       - "7688:7687"
@@ -30,7 +30,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p password -a neo4j://localhost:7687 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,8 +49,44 @@ services:
       - ./Blog/.env
     depends_on:
       - blog-db
+      - following-service
     environment:
-      - FOLLOWING_SERVICE_ADDR=host.docker.internal:8083
+      - FOLLOWING_SERVICE_ADDR=host.docker.internal:8084
+
+
+  following-service:
+    image: following-service:compose_build
+    build:
+      context: ./Following
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    ports:
+      - "8084:8084"
+    env_file:
+      - ./Following/.env
+    depends_on:
+      following-db:
+        condition: service_healthy
+
+  following-db:
+    image: neo4j:4.4
+    container_name: following-db
+    environment:
+      NEO4J_AUTH: "neo4j/mojalutka123"
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - following_db_data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   blog-db:
     image: mongo:latest
@@ -206,5 +242,6 @@ networks:
 volumes:
   blog_db_data:
   stakeholders_db_data:
+  following_db_data:
   tour_db_data:
   grafana_data:
