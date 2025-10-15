@@ -22,7 +22,7 @@
     gap: 1.5rem 0.8rem;
     grid-template-columns: repeat(auto-fill, 400px);
 }
-
+.b
 .tour {
     width: 350px;
     height: 450px;
@@ -42,7 +42,25 @@
     flex-direction: column;
     justify-content: space-between;
 }
-
+.confirmbuttons{
+    display: flex;
+    padding: 10%;
+    justify-content: space-between;
+}
+.buydialog {
+    position: fixed;   
+    flex-direction: column;
+    display: flex;      
+    top: 50%;                 
+    left: 50%;               
+    transform: translate(-50%, -50%); 
+    
+    z-index: 9999;          
+    background: rgb(240, 240, 240);       
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
 .tags {
     display: flex;
     gap: 0.3rem;

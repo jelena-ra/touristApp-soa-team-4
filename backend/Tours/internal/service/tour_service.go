@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TourService struct {
@@ -25,7 +27,12 @@ func (s *TourService) GetAll(ctx context.Context) ([]*model.Tour, error) {
 }
 
 func (s *TourService) GetByID(ctx context.Context, id string) (*model.Tour, error) {
-	return s.tourRepo.GetByID(ctx, id)
+	//return s.tourRepo.GetByID(ctx, id)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tour ID: %w", err)
+	}
+	return s.tourRepo.GetByIDVerified(ctx, objID)
 }
 
 func (s *TourService) Create(ctx context.Context, tour *model.Tour) (*model.Tour, error) {

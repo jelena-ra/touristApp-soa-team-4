@@ -16,6 +16,10 @@ import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from "../../auth/auth.service";
 import { User } from "../../auth/model/user.model";
+import { PurchaseService } from "../../purchase/service/purchase.service";
+import { OrderItem } from "../../purchase/model/order-item.interface";
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 @Component({
     selector: 'view-tours',
@@ -37,6 +41,19 @@ import { User } from "../../auth/model/user.model";
 })
 export class ViewToursPage implements OnInit{
     tours: TourInterface[] = []
+    openBuyDialog: boolean = false;
+
+    tourSelected:TourInterface={
+        id: "",
+            authorId: "",
+            name: "",
+            description: "",
+            difficulty: "EASY",
+            tags: ["Nature"],
+            status: "DRAFT",
+            price: 0,
+            keyPoints: []};
+    
     readonly dialog = inject(MatDialog);
     activeExecution: TourExecution | null = null;
     private userId: string = "";
@@ -44,7 +61,9 @@ export class ViewToursPage implements OnInit{
 
     constructor(private tourService: TourService,
         private destroyRef: DestroyRef,
+        private snackBar: MatSnackBar,
         private tourExecutionService: TourExecutionService,
+        private purchaseService: PurchaseService,
         private authService: AuthService
     ) {}
 
@@ -67,6 +86,43 @@ export class ViewToursPage implements OnInit{
             });
     }
 
+    buyTour():void{
+        this.openBuyDialog=false;
+          const payload = {
+        user_id: this.userId, 
+        item: {
+            tour_id: this.tourSelected.id,
+            name: this.tourSelected.name,
+            price: this.tourSelected.price
+        }
+    };
+        
+    this.purchaseService.addToCart(payload).subscribe({
+        next: (response) => {
+            console.log("Tour added to cart:", response);
+             this.snackBar.open('Tour successfully added to cart!', 'Close', {
+                duration: 3000,
+                horizontalPosition: 'right',
+                verticalPosition: 'top',
+            });
+        },
+        error: (err) => {
+            console.error("Error adding tour to cart:", err);
+             this.snackBar.open('Failed to add tour to cart.', 'Close', {
+                duration: 3000,
+                horizontalPosition: 'right',
+                verticalPosition: 'top',
+            });
+        }
+    });
+    }
+    cancelBuying():void{
+        this.openBuyDialog=false;
+    }
+    openbuyTour(itemSelected: TourInterface):void{
+        this.openBuyDialog=true; 
+        this.tourSelected =itemSelected;
+    }
     openCreateTour(): void {
         // TODO provera da li je korisnik ulogovan i da li je autor
         if(this.userId === '' || this.userId === '0') {

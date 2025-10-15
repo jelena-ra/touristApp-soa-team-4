@@ -1,5 +1,9 @@
 <div class="container">
     <h1>All tours</h1>
+    <div *ngIf="openBuyDialog" class="buydialog">
+        <p>Are you sure you want to buy this tour?</p>
+        <div class="confirmbuttons"> <button mat-flat-button color="primary" (click)="buyTour()">Yes</button> <button  (click)="cancelBuying()" mat-flat-button color="primary">No</button></div>
+    </div>
     <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Add Tour</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
@@ -34,6 +38,9 @@
                     <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">View Details</button>
                     <button *ngIf="!activeExecution" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
                         Start Tour
+                    </button>
+                     <button  mat-flat-button color="primary"  (click)="openbuyTour(tour)">
+                        Buy Tour
                     </button>
                     <ng-container *ngIf="activeExecution">
                         <button *ngIf="activeExecution.tourId === tour.id" mat-flat-button color="accent" [routerLink]="['/tour-execution', tour.id]">

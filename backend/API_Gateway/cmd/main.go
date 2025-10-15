@@ -37,6 +37,7 @@ import (
 var (
 	//stakeholdersServiceURL, _ = url.Parse("http://localhost:8081")
 	stakeholdersServiceURL, _ = url.Parse("http://stakeholder-service:8081")
+	purchaseServiceURL, _     = url.Parse("http://purchase-service:8085")
 )
 
 func NewReverseProxy(targetURL *url.URL) *httputil.ReverseProxy {
@@ -122,10 +123,15 @@ func main() {
 	}
 
 	stakeholdersProxy := NewReverseProxy(stakeholdersServiceURL)
+	purchaseProxy := NewReverseProxy(purchaseServiceURL)
 
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
+	router.Handle("/api/cart/add", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/remove", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/view", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
+	router.Handle("/api/cart/checkout", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
 	router.Handle(
 		"/api/users/{id}/block",
 		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
