@@ -109,7 +109,6 @@ func (s *PurchaseService) Checkout(userID string) ([]model.TourPurchaseToken, er
 		tokens = append(tokens, token)
 	}
 
-	// Praznimo korpu (delete iteme) i update-uj total
 	if err := s.itemRepo.ClearItems(cart.CartID); err != nil {
 		return nil, err
 	}
@@ -120,34 +119,39 @@ func (s *PurchaseService) Checkout(userID string) ([]model.TourPurchaseToken, er
 	return tokens, nil
 }
 
-// Dohvati korpu korisnika
 func (s *PurchaseService) GetCart(userID string) (*model.ShoppingCart, error) {
 	return s.cartRepo.GetCartByUserID(userID)
 }
 
-// GetCartWithItems vraća korpu i sve stavke za datog korisnika
 func (s *PurchaseService) GetCartWithItems(userID string) (*model.ShoppingCart, []model.OrderItem, error) {
-	// Dobavi korpu
+
 	cart, err := s.cartRepo.GetCartByUserID(userID)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if cart == nil {
-		// Ako korpa ne postoji, kreiramo praznu korpu (nije obavezno)
+
 		cart = &model.ShoppingCart{
 			UserID: userID,
 			Total:  0,
-			CartID: "", // ili neki UUID ako želiš
+			CartID: "",
 		}
 		return cart, []model.OrderItem{}, nil
 	}
 
-	// Dohvati sve iteme iz repo
 	items, err := s.itemRepo.GetItems(cart.CartID)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return cart, items, nil
+}
+func (s *PurchaseService) GetTokensByUser(userID string) ([]model.TourPurchaseToken, error) {
+	tokens, err := s.tokenRepo.GetTokensByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
 }

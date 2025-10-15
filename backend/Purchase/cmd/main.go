@@ -31,6 +31,7 @@ func main() {
 	http.HandleFunc("/remove", purchaseHandler.RemoveItemHandler)
 	http.HandleFunc("/view", purchaseHandler.ViewCartHandler)
 	http.HandleFunc("/checkout", purchaseHandler.CheckoutHandler)
+	http.HandleFunc("/tokens", purchaseHandler.GetTokensByUserHandler)
 
 	port := ":8085"
 	fmt.Printf("Purchase service running at http://localhost%s\n", port)

@@ -129,6 +129,7 @@ func main() {
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
 	router.Handle("/api/cart/add", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/tokens", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
 	router.Handle("/api/cart/remove", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
 	router.Handle("/api/cart/view", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
 	router.Handle("/api/cart/checkout", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")

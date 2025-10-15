@@ -138,3 +138,30 @@ func (h *PurchaseHandler) CheckoutHandler(w http.ResponseWriter, r *http.Request
 
 	writeJSON(w, http.StatusOK, tokens)
 }
+
+func (h *PurchaseHandler) GetTokensByUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID := r.URL.Query().Get("user_id")
+	if userID == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "user_id is required"})
+		return
+	}
+
+	fmt.Printf("Fetching tokens for userID: %s\n", userID)
+
+	tokens, err := h.cartService.GetTokensByUser(userID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": fmt.Sprintf("failed to get tokens: %v", err)})
+		return
+	}
+
+	if tokens == nil {
+		tokens = []model.TourPurchaseToken{}
+	}
+
+	writeJSON(w, http.StatusOK, tokens)
+}

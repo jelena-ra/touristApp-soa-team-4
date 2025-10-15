@@ -31,10 +31,14 @@ services:
       - backend
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+     # interval: 10s
+      #timeout: 5s
+      #retries: 5
+      #start_period: 30s
+      interval: 10s       # Proveravaj svakih 10 sekundi
+      timeout: 15s        # Povećano sa 5s na 15s (daj više vremena da se cypher-shell pokrene i poveže)
+      retries: 15         # Povećano sa 5 na 15
+      start_period: 60s
 
   blog-service:
     image: blog-service:compose_build
@@ -86,7 +90,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+     # start_period: 30s
+      start_period: 60s
 
   blog-db:
     image: mongo:latest
@@ -202,7 +207,7 @@ services:
       - jaeger
       - purchase-service
       -  tour-service
-  
+
   
   prometheus:
     image: prom/prometheus:latest
