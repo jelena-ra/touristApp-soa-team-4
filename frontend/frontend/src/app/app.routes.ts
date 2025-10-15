@@ -9,10 +9,12 @@ import { TouristLocationComponent } from './tour-execution/tourist-location/tour
 import { ViewToursPage } from './tours/view-tours/view-tours.component';
 import { TourDetailsPage } from './tours/tour-details/tour-detalis.component';
 import { TourExecutionPageComponent } from './tours/tour-execution/tour-execution-page/tour-execution-page';
+import { CartComponent } from './purchase/purchase/purchase';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: Home },
+  { path: 'cart', component: CartComponent },
   { path: 'create-profile', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },

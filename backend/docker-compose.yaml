@@ -31,12 +31,16 @@ services:
       - backend
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+     # interval: 10s
+      #timeout: 5s
+      #retries: 5
+      #start_period: 30s
+      interval: 10s       # Proveravaj svakih 10 sekundi
+      timeout: 15s        # Povećano sa 5s na 15s (daj više vremena da se cypher-shell pokrene i poveže)
+      retries: 15         # Povećano sa 5 na 15
+      start_period: 60s
 
-blog-service:
+  blog-service:
     image: blog-service:compose_build
     build:
       context: ./Blog
@@ -88,7 +92,8 @@ blog-service:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+     # start_period: 30s
+      start_period: 60s
 
   blog-db:
     image: mongo:latest
@@ -143,12 +148,55 @@ blog-service:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+     # test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "-u", "user", "-p", "pass", "--authenticationDatabase", "admin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      #start_period: 30s
+      start_period: 60s
+
+  purchase-service:
+        build:
+          context: ./Purchase
+          dockerfile: Dockerfile
+        container_name: purchase-service
+        networks:
+          - backend
+        ports:
+          - "8085:8085"
+        env_file:
+          - ./Purchase/.env
+        environment:
+          - DB_HOST=purchase-db
+          - DB_PORT=5432
+          - DB_USER=postgres
+          - DB_PASSWORD=super
+          - DB_NAME=purchase_db
+        depends_on:
+          purchase-db:
+            condition: service_healthy
+
+  purchase-db:
+    image: postgres:16
+    container_name: purchase-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: purchase_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - purchase_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
-    
+
   api-gateway:
     build:
       context: .
@@ -165,6 +213,9 @@ blog-service:
       - blog-service
       - stakeholder-service
       - jaeger
+      - purchase-service
+      -  tour-service
+
   
   prometheus:
     image: prom/prometheus:latest
@@ -250,6 +301,7 @@ networks:
 volumes:
   blog_db_data:
   stakeholders_db_data:
+  purchase_db_data:
   following_db_data:
   tour_db_data:
   grafana_data:

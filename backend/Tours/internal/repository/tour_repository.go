@@ -13,6 +13,7 @@ import (
 type TourRepository interface {
 	GetAll(ctx context.Context) ([]*model.Tour, error)
 	GetByID(ctx context.Context, id string) (*model.Tour, error)
+	GetByIDVerified(ctx context.Context, id primitive.ObjectID) (*model.Tour, error)
 	CreateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
 	UpdateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
 }
@@ -60,6 +61,15 @@ func (t TourRepositoryMongo) CreateTour(ctx context.Context, tour *model.Tour) (
 	}
 	tour.ID = newTour.InsertedID.(primitive.ObjectID)
 	return tour, nil
+}
+func (t TourRepositoryMongo) GetByIDVerified(ctx context.Context, id primitive.ObjectID) (*model.Tour, error) {
+	var tour model.Tour
+	collection := t.client.Database(t.dbName).Collection(t.collectionName)
+	if err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&tour); err != nil {
+		return nil, err
+	}
+
+	return &tour, nil
 }
 
 func (t TourRepositoryMongo) GetByID(ctx context.Context, id string) (*model.Tour, error) {
