@@ -40,7 +40,7 @@ services:
       retries: 15         # Povećano sa 5 na 15
       start_period: 60s
 
-  blog-service:
+blog-service:
     image: blog-service:compose_build
     build:
       context: ./Blog
@@ -52,8 +52,10 @@ services:
     env_file:
       - ./Blog/.env
     depends_on:
-      - blog-db
-      - following-service
+      following-service:
+        condition: service_started
+      blog-db:          
+        condition: service_healthy
     environment:
       - FOLLOWING_SERVICE_ADDR=host.docker.internal:8084
 
@@ -106,6 +108,12 @@ services:
       - blog_db_data:/data/db
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   tour-service:
     image: tour-service:compose_build
