@@ -40,7 +40,7 @@ services:
       retries: 15         # Povećano sa 5 na 15
       start_period: 60s
 
-blog-service:
+  blog-service:
     image: blog-service:compose_build
     build:
       context: ./Blog

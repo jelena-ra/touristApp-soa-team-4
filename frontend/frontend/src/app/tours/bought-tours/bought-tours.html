@@ -1,6 +1,5 @@
 <div class="container">
     <h1>My tours</h1>
-    <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Add Tour</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
             <mat-card class="tour">
