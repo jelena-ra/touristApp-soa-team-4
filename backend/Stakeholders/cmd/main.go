@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -34,6 +35,7 @@ func startServer(userHandler *handler.UserHandler, imageHandler *handler.ImageHa
 	).Methods("GET", "OPTIONS")*/
 	router.HandleFunc("/profile/{userId}", profileHandler.GetProfileByUserId).Methods("GET")
 	router.HandleFunc("/profile", profileHandler.CreateProfile).Methods("POST")
+	router.HandleFunc("/profile-update", profileHandler.UpdateProfile).Methods("POST")
 
 	// Integrisane rute iz obe verzije
 	router.HandleFunc("/image", imageHandler.UploadImageHandler).Methods("POST")
@@ -79,7 +81,18 @@ func main() {
 
 	log.Println("Successfully connected to Neo4j.")
 
-	imageDB, err := gorm.Open(sqlite.Open("images.db"), &gorm.Config{})
+	const sqliteBaseDir = "/data/sqlite"
+	dbFileName := "images.db"
+	dbPath := filepath.Join(sqliteBaseDir, dbFileName)
+
+	if _, err := os.Stat(sqliteBaseDir); os.IsNotExist(err) {
+		err = os.MkdirAll(sqliteBaseDir, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create directory for SQLite database at %s: %v", sqliteBaseDir, err)
+		}
+	}
+
+	imageDB, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to image database: %v", err)
 	}

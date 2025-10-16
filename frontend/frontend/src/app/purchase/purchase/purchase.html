@@ -2,32 +2,32 @@
   <div class="glass-panel">
     <div class="panel-header">
       <mat-icon class="icon-glow">shopping_cart</mat-icon>
-      <h1 class="panel-title">Your Shopping Cart</h1>
+      <h1 class="panel-title">Vasa korpa za kupovinu</h1>
       <div class="line-separator"></div>
-      <p class="panel-subtitle">Review your selected tours before checkout.</p>
+      <p class="panel-subtitle">Pregledajte odabrane ture prije kupovine.</p>
     </div>
 
       <div class="user-money-display">
       <mat-icon>account_balance_wallet</mat-icon>
-      <span>Your Funds: {{ userMoney | currency:'USD':'symbol':'1.2-2' }}</span>
+      <span >Stanje na racunu: {{ userMoney | currency:'USD':'symbol':'1.2-2' }}</span>
     </div>
     <div class="line-separator"></div>
-    
+
     <div *ngIf="cartItems.length === 0" class="empty-cart-message">
       <mat-icon>remove_shopping_cart</mat-icon>
-      <p>Your cart is empty!</p>
-      <button mat-flat-button color="primary" routerLink="/tours">Start Shopping</button>
+      <p>Vasa korpa je prazna!</p>
+      <button mat-flat-button color="primary" routerLink="/tours">Zapocnite kupovinu</button>
     </div>
 
     <div *ngIf="cartItems.length > 0" class="cart-items-list">
       <mat-card *ngFor="let item of cartItems" class="cart-item-card">
         <mat-card-header>
           <mat-card-title>{{ item.name }}</mat-card-title>
-          <mat-card-subtitle>Price: {{ item.price | currency:'USD':'symbol':'1.2-2' }}</mat-card-subtitle>
+          <mat-card-subtitle>Cena: {{ item.price | currency:'USD':'symbol':'1.2-2' }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-actions >
           <button mat-icon-button color="warn" (click)="removeItem(item.tour_id)" title="Remove item">
-            <mat-icon>delete</mat-icon>
+            <mat-icon>obrisi</mat-icon>
           </button>
         </mat-card-actions>
       </mat-card>
@@ -38,8 +38,8 @@
           <span class="price-value">{{ totalPrice | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
         <div class="cart-actions">
-          <button mat-stroked-button color="warn" (click)="clearCart()">Clear Cart</button>
-          <button mat-flat-button color="primary" (click)="checkout()">Checkout</button>
+          <button mat-stroked-button color="warn" (click)="clearCart()">Isprazni korpu</button>
+          <button mat-flat-button color="primary" (click)="checkout()">Kupi</button>
         </div>
       </div>
     </div>

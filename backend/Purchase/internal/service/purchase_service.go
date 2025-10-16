@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -84,7 +85,7 @@ func (s *PurchaseService) RemoveItem(userID string, tourID string) error {
 	return s.cartRepo.UpdateTotal(cart.CartID, total)
 }
 
-func (s *PurchaseService) Checkout(userID string) ([]model.TourPurchaseToken, error) {
+func (s *PurchaseService) Checkout(userID string, token string) ([]model.TourPurchaseToken, error) {
 	cart, err := s.cartRepo.GetCartByUserID(userID)
 	if err != nil || cart == nil {
 		return nil, err
@@ -95,6 +96,22 @@ func (s *PurchaseService) Checkout(userID string) ([]model.TourPurchaseToken, er
 		return nil, err
 	}
 
+	ctx := context.Background()
+	profile, err := client.GetProfile(ctx, userID, token)
+	if err != nil {
+		return nil, fmt.Errorf("Error: %w", err)
+	}
+	if profile.Money < cart.Total {
+		return nil, fmt.Errorf("Not enough money")
+	}
+
+	ok, err := client.ChangeProfileMoney(ctx, userID, cart.Total, token)
+	if err != nil {
+		return nil, fmt.Errorf("Error: %w", err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("Couldn't update user money!")
+	}
 	tokens := []model.TourPurchaseToken{}
 	for _, item := range items {
 

@@ -10,6 +10,7 @@ import { OrderItem } from '../model/order-item.interface';
 import { Cart } from '../model/cart.interface'; 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TokenStorage } from '../../auth/jwt/token.service';
 
 @Component({
   standalone: true,
@@ -31,20 +32,23 @@ export class CartComponent implements OnInit {
   userId: string = '';
   userMoney: number= 0;
   private destroyRef = inject(DestroyRef);
+  token:string | null =null;
 
   constructor(
     private authService: AuthService,
     private purchaseService: PurchaseService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private tokenStorage : TokenStorage
   ) {}
 
   ngOnInit(): void {
+     this.token = this.tokenStorage.getAccessToken();
     this.authService.getUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.userId = user.id;
         this.loadCart();
       } else {
-        this.snackBar.open('You must be logged in to view your cart.', 'Close', { duration: 3000 });
+        this.snackBar.open('Morate biti ulogovani da biste videli korpu.', 'Close', { duration: 3000 });
       }
     });
   }
@@ -64,7 +68,7 @@ export class CartComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error loading cart:', err);
-          this.snackBar.open('Failed to load cart. ' + err.error.error, 'Close', { duration: 3000 });
+          this.snackBar.open('Nije moguce ucitati korpu. ' + err.error.error, 'Close', { duration: 3000 });
         }
       });
   }
@@ -80,12 +84,12 @@ export class CartComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackBar.open('Item removed from cart!', 'Close', { duration: 3000 });
+          this.snackBar.open('Uklonjena stavka iz korpe!', 'Close', { duration: 3000 });
           this.loadCart();
         },
         error: (err) => {
           console.error('Error removing item:', err);
-          this.snackBar.open('Failed to remove item. ' + err.error.error, 'Close', { duration: 3000 });
+          this.snackBar.open('Nije moguce ukloniti stavku. ' + err.error.error, 'Close', { duration: 3000 });
         }
       });
   }
@@ -93,7 +97,7 @@ export class CartComponent implements OnInit {
   clearCart(): void {
   
     if (!this.userId || this.cartItems.length === 0) {
-      this.snackBar.open('Cart is already empty.', 'Close', { duration: 3000 });
+      this.snackBar.open('Korpa je prazna.', 'Close', { duration: 3000 });
       return;
     }
     const removePromises = this.cartItems.map(item =>
@@ -102,12 +106,12 @@ export class CartComponent implements OnInit {
 
     Promise.all(removePromises)
       .then(() => {
-        this.snackBar.open('Cart cleared successfully!', 'Close', { duration: 3000 });
+        this.snackBar.open('Uspesno ispraznjena korpa!', 'Close', { duration: 3000 });
         this.loadCart();
       })
       .catch(err => {
         console.error('Error clearing cart:', err);
-        this.snackBar.open('Failed to clear cart. Some items might not be removed.', 'Close', { duration: 3000 });
+        this.snackBar.open('Nije moguce isprazniti korpu', 'Close', { duration: 3000 });
         this.loadCart(); 
       });
   }
@@ -115,7 +119,7 @@ export class CartComponent implements OnInit {
 
   checkout(): void {
     if (!this.userId || this.cartItems.length === 0) {
-      this.snackBar.open('Your cart is empty. Nothing to checkout.', 'Close', { duration: 3000 });
+      this.snackBar.open('Vasa korpa je prazna. Nema stavki za kupovinu', 'Close', { duration: 3000 });
       return;
     }
 
@@ -124,12 +128,12 @@ export class CartComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Checkout successful:', response);
-          this.snackBar.open('Checkout successful! You have purchased the tours.', 'Close', { duration: 5000 });
+          this.snackBar.open('Usesno kupljene ture!', 'Close', { duration: 5000 });
           this.loadCart(); 
         },
         error: (err) => {
           console.error('Error during checkout:', err);
-          this.snackBar.open('Checkout failed. ' + err.error.error, 'Close', { duration: 3000 });
+          this.snackBar.open('Neuspesna kupovina! ' + err.error.error, 'Close', { duration: 3000 });
         }
       });
   }
