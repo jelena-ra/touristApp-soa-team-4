@@ -96,8 +96,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to image database: %v", err)
 	}
-
-	imageDB.AutoMigrate(&repository.Image{})
+	log.Printf("Successfully connected to SQLite database at: %s", dbPath)
+	err = imageDB.AutoMigrate(&repository.Image{})
+	if err != nil {
+		log.Fatalf("Failed to auto migrate image database: %v", err)
+	}
+	log.Println("Image database auto migration complete.")
 
 	imageRepo := repository.NewImageRepository(imageDB)
 	imageService := service.NewImageService(imageRepo)
