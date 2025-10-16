@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    volumes:
+      - stakeholder_images_data:/data/sqlite
     ports:
       - "8081:8081"
     env_file:
@@ -305,3 +307,4 @@ volumes:
   following_db_data:
   tour_db_data:
   grafana_data:
+  stakeholder_images_data:

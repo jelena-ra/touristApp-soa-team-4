@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: Home },
   { path: 'cart', component: CartComponent },
-  { path: 'create-profile', component: Profileform },
+  { path: 'create-profile/:flag', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },
   { path: 'usersList', component: UsersList },

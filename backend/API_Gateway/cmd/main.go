@@ -128,11 +128,11 @@ func main() {
 	authenticationMiddleware := middleware.NewAuthenticationMiddleware(jwtConfig)
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware()
 
-	router.Handle("/api/cart/add", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
-	router.Handle("/api/cart/tokens", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
-	router.Handle("/api/cart/remove", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
-	router.Handle("/api/cart/view", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
-	router.Handle("/api/cart/checkout", (http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/add", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/tokens", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
+	router.Handle("/api/cart/remove", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/cart/view", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
+	router.Handle("/api/cart/checkout", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
 	router.Handle(
 		"/api/users/{id}/block",
 		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
@@ -152,6 +152,10 @@ func main() {
 	).Methods("GET", "OPTIONS")
 	router.Handle(
 		"/api/profile",
+		authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
+	).Methods("POST", "OPTIONS")
+	router.Handle(
+		"/api/profile-update",
 		authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
 	).Methods("POST", "OPTIONS")
 	router.Handle(

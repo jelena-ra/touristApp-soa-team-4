@@ -17,7 +17,7 @@ func TourExists(tourID string) (bool, error) {
 	if resp.StatusCode == http.StatusNotFound {
 		return false, nil
 	} else if resp.StatusCode != http.StatusOK {
-		return false, fmt.Errorf("greška od tour API-ja kod pronalaska ture : %d", resp.StatusCode)
+		return false, fmt.Errorf("error with finding existing tours : %d", resp.StatusCode)
 	}
 
 	var tour interface{}
