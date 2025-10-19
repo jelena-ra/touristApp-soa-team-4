@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: tour_service.proto
+// source: Tours/proto/tour_service.proto
 
 package proto
 
@@ -32,6 +32,8 @@ const (
 	TourService_GetActiveTour_FullMethodName         = "/tour.TourService/GetActiveTour"
 	TourService_CreateRecension_FullMethodName       = "/tour.TourService/CreateRecension"
 	TourService_GetRecensionsByTourID_FullMethodName = "/tour.TourService/GetRecensionsByTourID"
+	TourService_PublishTour_FullMethodName           = "/tour.TourService/PublishTour"
+	TourService_ArchiveTour_FullMethodName           = "/tour.TourService/ArchiveTour"
 )
 
 // TourServiceClient is the client API for TourService service.
@@ -51,6 +53,8 @@ type TourServiceClient interface {
 	GetActiveTour(ctx context.Context, in *GetActiveTourRequest, opts ...grpc.CallOption) (*TourExecutionResponse, error)
 	CreateRecension(ctx context.Context, in *CreateRecensionRequest, opts ...grpc.CallOption) (*RecensionResponse, error)
 	GetRecensionsByTourID(ctx context.Context, in *TourIDRequest, opts ...grpc.CallOption) (*RecensionListResponse, error)
+	PublishTour(ctx context.Context, in *PublishTourRequest, opts ...grpc.CallOption) (*PublishTourResponse, error)
+	ArchiveTour(ctx context.Context, in *ArchiveTourRequest, opts ...grpc.CallOption) (*ArchiveTourResponse, error)
 }
 
 type tourServiceClient struct {
@@ -191,6 +195,26 @@ func (c *tourServiceClient) GetRecensionsByTourID(ctx context.Context, in *TourI
 	return out, nil
 }
 
+func (c *tourServiceClient) PublishTour(ctx context.Context, in *PublishTourRequest, opts ...grpc.CallOption) (*PublishTourResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishTourResponse)
+	err := c.cc.Invoke(ctx, TourService_PublishTour_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tourServiceClient) ArchiveTour(ctx context.Context, in *ArchiveTourRequest, opts ...grpc.CallOption) (*ArchiveTourResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ArchiveTourResponse)
+	err := c.cc.Invoke(ctx, TourService_ArchiveTour_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TourServiceServer is the server API for TourService service.
 // All implementations must embed UnimplementedTourServiceServer
 // for forward compatibility.
@@ -208,6 +232,8 @@ type TourServiceServer interface {
 	GetActiveTour(context.Context, *GetActiveTourRequest) (*TourExecutionResponse, error)
 	CreateRecension(context.Context, *CreateRecensionRequest) (*RecensionResponse, error)
 	GetRecensionsByTourID(context.Context, *TourIDRequest) (*RecensionListResponse, error)
+	PublishTour(context.Context, *PublishTourRequest) (*PublishTourResponse, error)
+	ArchiveTour(context.Context, *ArchiveTourRequest) (*ArchiveTourResponse, error)
 	mustEmbedUnimplementedTourServiceServer()
 }
 
@@ -256,6 +282,12 @@ func (UnimplementedTourServiceServer) CreateRecension(context.Context, *CreateRe
 }
 func (UnimplementedTourServiceServer) GetRecensionsByTourID(context.Context, *TourIDRequest) (*RecensionListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecensionsByTourID not implemented")
+}
+func (UnimplementedTourServiceServer) PublishTour(context.Context, *PublishTourRequest) (*PublishTourResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishTour not implemented")
+}
+func (UnimplementedTourServiceServer) ArchiveTour(context.Context, *ArchiveTourRequest) (*ArchiveTourResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ArchiveTour not implemented")
 }
 func (UnimplementedTourServiceServer) mustEmbedUnimplementedTourServiceServer() {}
 func (UnimplementedTourServiceServer) testEmbeddedByValue()                     {}
@@ -512,6 +544,42 @@ func _TourService_GetRecensionsByTourID_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TourService_PublishTour_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishTourRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TourServiceServer).PublishTour(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TourService_PublishTour_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TourServiceServer).PublishTour(ctx, req.(*PublishTourRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TourService_ArchiveTour_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArchiveTourRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TourServiceServer).ArchiveTour(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TourService_ArchiveTour_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TourServiceServer).ArchiveTour(ctx, req.(*ArchiveTourRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TourService_ServiceDesc is the grpc.ServiceDesc for TourService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -571,7 +639,15 @@ var TourService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetRecensionsByTourID",
 			Handler:    _TourService_GetRecensionsByTourID_Handler,
 		},
+		{
+			MethodName: "PublishTour",
+			Handler:    _TourService_PublishTour_Handler,
+		},
+		{
+			MethodName: "ArchiveTour",
+			Handler:    _TourService_ArchiveTour_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "tour_service.proto",
+	Metadata: "Tours/proto/tour_service.proto",
 }

@@ -3,6 +3,12 @@
     height: 100%;
     margin: 0%;
     padding: 0%;
+    --background-color: #0f172a;
+    --panel-background: rgba(30, 41, 59, 0.4);
+    --border-color: rgba(148, 163, 184, 0.2);
+    --primary-glow: rgba(96, 165, 250, 0.5);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
 }
 
 .container {
@@ -23,4 +29,274 @@
     display: flex;
     gap: 2rem;
     width: 100%;
+}
+
+.tour-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  font-family: 'Roboto', sans-serif;
+
+  .tour-card {
+    padding: 16px;
+    background: var(--panel-background);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 24px;
+    color: var(--text-primary);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+    .tour-header {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .flex-item {
+      flex: 1 1 30%;
+    }
+
+    .tags-row {
+      margin: 12px 0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .keypoint-section {
+    padding: 16px;
+    background: var(--panel-background);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 24px;
+    color: var(--text-primary);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+    .keypoint-wrapper {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      ::ng-deep .mat-mdc-form-field-flex {
+        background-color: rgba(15, 23, 42, 0.5) !important;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        border-radius: 1rem !important;
+      }
+
+      ::ng-deep .mdc-text-field--outlined .mdc-notched-outline > * {
+        border-color: var(--border-color) !important;
+      }
+
+      ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline > * {
+        border-color: var(--primary-glow) !important;
+      }
+
+      ::ng-deep .mat-mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      ::ng-deep input.mat-mdc-input-element,
+      ::ng-deep textarea.mat-mdc-input-element {
+        color: var(--text-primary) !important;
+      }
+    }
+
+    .tags-row {
+      margin: 12px 0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      button {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+      }
+    }
+
+    .keypoint-form {
+      flex: 0 0 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .flex-item {
+        flex: 1 1 0;
+        min-width: 200px;
+      }
+
+      .form-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+      }
+
+      /* Preview slike isti kao popup */
+      .popup-image-container {
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        margin-top: 8px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+      }
+    }
+
+    .keypoint-map {
+      flex: 1;
+
+      app-map {
+        width: 100%;
+        height: 300px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .keypoints-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    background: var(--panel-background);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 24px;
+    color: var(--text-primary);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+    .keypoint-card {
+      padding: 12px;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--panel-background);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 1.5rem;
+      padding: 24px;
+      color: var(--text-primary);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+
+      /* Slika identična popup-u */
+      .popup-image-container {
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        margin-bottom: 8px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+      }
+
+      h4 {
+        margin: 4px 0 0;
+        text-align: center;
+      }
+
+      p {
+        margin: 2px 0 0;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+    }
+  }
+}
+
+.popup-image-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background-color: #f0f0f0;
+}
+
+.popup-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Inputs i Textareas disabled */
+::ng-deep input.mat-mdc-input-element:disabled,
+::ng-deep textarea.mat-mdc-input-element:disabled {
+  color: #000 !important; /* crni tekst */
+  background-color: #d3d3d3 !important; /* svetlo siva pozadina */
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+/* Placeholder disabled */
+::ng-deep input.mat-mdc-input-element:disabled::placeholder,
+::ng-deep textarea.mat-mdc-input-element:disabled::placeholder {
+  color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Buttons disabled */
+::ng-deep button.mat-mdc-button:disabled {
+  color: #000 !important;
+  background-color: #d3d3d3 !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+
+/* Chips disabled */
+::ng-deep .mat-mdc-chip.mat-mdc-chip-disabled {
+  color: #000 !important;
+  background-color: #d3d3d3 !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
 }
