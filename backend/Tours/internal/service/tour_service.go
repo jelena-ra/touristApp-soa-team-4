@@ -106,12 +106,19 @@ func (s *TourService) GetRecensionsByTourID(ctx context.Context, tourID string) 
 }
 
 func (s *TourService) PublishTour(ctx context.Context, tourID string) (string, error) {
-	tour, err := s.tourRepo.GetByID(ctx, tourID)
+	log.Println("Uslo u publish")
+	oid, err := primitive.ObjectIDFromHex(tourID)
+	if err != nil {
+		return "", errors.New("invalid tour ID")
+	}
+
+	tour, err := s.tourRepo.GetByID(ctx, oid.Hex())
 	if err != nil {
 		return "Could not find tour", err
 	}
+	log.Println("Pronadjen id")
 
-	if tour.Status != model.Published {
+	if tour.Status == model.Published {
 		return "", errors.New("tour already published")
 	}
 
@@ -119,6 +126,7 @@ func (s *TourService) PublishTour(ctx context.Context, tourID string) (string, e
 	if err != nil {
 		return "Could not find keyPoint for the tour", err
 	}
+	log.Println("Pronadjeni keypoints")
 
 	if len(keyPoints) < 2 {
 		return "", errors.New("tour does not have enough key points")
@@ -132,12 +140,18 @@ func (s *TourService) PublishTour(ctx context.Context, tourID string) (string, e
 	if err != nil {
 		return "", err
 	}
+	log.Println("USPESNO ODRADJEN UPDATE")
 
 	return "Tour successfully published", nil
 }
 
 func (s *TourService) ArchiveTour(ctx context.Context, tourID string) (string, error) {
-	tour, err := s.tourRepo.GetByID(ctx, tourID)
+	oid, err := primitive.ObjectIDFromHex(tourID)
+	if err != nil {
+		return "", errors.New("invalid tour ID")
+	}
+
+	tour, err := s.tourRepo.GetByID(ctx, oid.Hex())
 	if err != nil {
 		return "Could not find tour", err
 	}

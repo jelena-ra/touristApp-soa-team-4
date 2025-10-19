@@ -106,11 +106,9 @@ export class TourDetailsPage implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (updatedTour) => {
-                    this.tour = updatedTour;
-                    this.editableTour = JSON.parse(JSON.stringify(updatedTour));
-                    this.tagSelection = [...this.editableTour.tags];
                     this._snackBar.open('Tour updated', 'OK', { duration: 2000 });
                     this.editMode = false;
+                    this.getTour();
                 },
                 error: (err) => {
                     console.error('Update error:', err);
@@ -190,12 +188,21 @@ export class TourDetailsPage implements OnInit {
         this.filePreview = URL.createObjectURL(this.selectedFile);
     }
 
-    publishTour(tourId: string) {
-        console.log('Publish tour', tourId);
+    publishTour() {
+        this.tourService.publish(this.tour.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+            next: (response) => {
+
+            },
+            error: (err) => {
+                console.log(err)
+            }
+        })
     }
 
-    archiveTour(tourId: string) {
-        console.log('Archive tour', tourId);
+    archiveTour() {
+        this.tourService.archive(this.tour.id);
     }
 
     get sortedKeyPoints() {

@@ -49,13 +49,13 @@
             <button mat-flat-button color="primary"
             *ngIf="(tour.status === 'DRAFT' || tour.status === 'ARCHIVED') && tour.keyPoints.length >= 2"
             [disabled]="editMode"
-            (click)="publishTour(tour.id)">
+            (click)="publishTour()">
             Publish
             </button>
 
             <button mat-flat-button color="warn"
             *ngIf="tour.status === 'PUBLISHED'"
-            (click)="archiveTour(tour.id)">
+            (click)="archiveTour()">
             Archive
             </button>
         </ng-container>
