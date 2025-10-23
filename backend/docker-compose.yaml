@@ -36,7 +36,7 @@ services:
       retries: 5
       start_period: 30s
 
-blog-service:
+  blog-service:
     image: blog-service:compose_build
     build:
       context: ./Blog
@@ -54,7 +54,6 @@ blog-service:
         condition: service_healthy
     environment:
       - FOLLOWING_SERVICE_ADDR=host.docker.internal:8084
-
 
   following-service:
     image: following-service:compose_build
@@ -77,14 +76,14 @@ blog-service:
     environment:
       NEO4J_AUTH: "neo4j/mojalutka123"
     ports:
-      - 7474:7474
-      - 7687:7687
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - following_db_data:/data
     networks:
       - backend
     healthcheck:
-      test: [ "CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'" ]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5

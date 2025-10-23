@@ -4,4 +4,6 @@ use (
 	API_Gateway
 	Tours
 	Blog
+	Following
+	Stakeholders
 )
