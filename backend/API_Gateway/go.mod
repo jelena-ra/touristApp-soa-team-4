@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/jelena-ra/touristApp/soa-team-4/Following v0.0.0-00010101000000-000000000000
 	github.com/jelena-ra/touristApp/soa-team-4/Tours v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
 	go.opentelemetry.io/otel v1.38.0
@@ -44,5 +45,6 @@ require (
 
 replace (
 	github.com/jelena-ra/touristApp/soa-team-4/Blog => ../Blog
+	github.com/jelena-ra/touristApp/soa-team-4/Following => ../Following
 	github.com/jelena-ra/touristApp/soa-team-4/Tours => ../Tours
 )
