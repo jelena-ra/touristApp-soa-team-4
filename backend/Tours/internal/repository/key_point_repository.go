@@ -15,6 +15,8 @@ import (
 type KeyPointRepository interface {
 	CreateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error)
 	GetKeyPointByTourId(ctx context.Context, tourId string) ([]*model.KeyPoint, error)
+	UpdateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error)
+	DeleteKeyPoint(ctx context.Context, id primitive.ObjectID) error
 }
 
 type KeyPointRepositoryMongo struct {
@@ -79,4 +81,37 @@ func (r *KeyPointRepositoryMongo) GetKeyPointByTourId(ctx context.Context, tourI
 	}
 
 	return keyPoints, nil
+}
+func (r *KeyPointRepositoryMongo) UpdateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error) {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+
+	filter := bson.M{"_id": keyPoint.ID}
+	update := bson.M{"$set": bson.M{
+		"name":        keyPoint.Name,
+		"description": keyPoint.Description,
+		"longitude":   keyPoint.Longitude,
+		"latitude":    keyPoint.Latitude,
+	}}
+
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return keyPoint, nil
+}
+
+func (r *KeyPointRepositoryMongo) DeleteKeyPoint(ctx context.Context, id primitive.ObjectID) error {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+
+	filter := bson.M{"_id": id}
+	result, err := collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return errors.New("key point not found")
+	}
+
+	return nil
 }

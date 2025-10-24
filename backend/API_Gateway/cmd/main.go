@@ -213,6 +213,19 @@ func main() {
 			http.HandlerFunc(tourHandler.GetActiveTourHandle),
 		),
 	).Methods("GET", "OPTIONS")
+	router.Handle(
+		"/api/key-point",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.AuthorPolicy()(http.HandlerFunc(tourHandler.UpdateKeyPointHandle)),
+		),
+	).Methods("PUT", "OPTIONS")
+
+	router.Handle(
+		"/api/key-point/{id}",
+		authenticationMiddleware.AuthenticationPolicy()(
+			authorizationMiddleware.AuthorPolicy()(http.HandlerFunc(tourHandler.DeleteKeyPointHandle)),
+		),
+	).Methods("DELETE", "OPTIONS")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),

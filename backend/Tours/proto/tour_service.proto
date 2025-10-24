@@ -165,7 +165,7 @@ message UpdateKeyPointResponse {
 }
 
 message DeleteKeyPointRequest {
-  int64 keyPointId = 1;
+  string keyPointId = 1;
 }
 
 message DeleteKeyPointResponse {

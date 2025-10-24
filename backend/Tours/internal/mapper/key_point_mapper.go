@@ -25,6 +25,14 @@ func KeyPointProtoToModel(kp *tourProto.KeyPoint) (*model.KeyPoint, error) {
 	m := &model.KeyPoint{}
 	var err error
 
+	// Set ID if provided
+	if kp.Id != "" {
+		m.ID, err = primitive.ObjectIDFromHex(kp.Id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid keypoint ID format")
+		}
+	}
+
 	m.TourID, err = primitive.ObjectIDFromHex(kp.TourId)
 	if err != nil {
 		return nil, fmt.Errorf("tourId is required")

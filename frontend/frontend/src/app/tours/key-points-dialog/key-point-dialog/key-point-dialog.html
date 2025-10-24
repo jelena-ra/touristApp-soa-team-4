@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>{{ data.isNew ? 'Kreiraj' : 'Ažuriraj' }} Ključnu Tačku</h2>
+
+<mat-dialog-content class="dialog-content">
+
+  <form #keyPointForm="ngForm">
+    <p>Koordinate: {{ data.keyPoint.latitude | number:'1.4-4' }}, {{ data.keyPoint.longitude | number:'1.4-4' }}</p>
+    <mat-form-field appearance="outline">
+      <mat-label>Naziv</mat-label>
+
+      <input matInput [(ngModel)]="data.keyPoint.name" name="name" #name="ngModel" required>
+ 
+      <mat-error *ngIf="name.invalid && name.touched">Naziv je obavezan.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Opis</mat-label>
+      <textarea matInput [(ngModel)]="data.keyPoint.description" name="description" #description="ngModel" required></textarea>
+      <mat-error *ngIf="description.invalid && description.touched">Opis je obavezan.</mat-error>
+    </mat-form-field>
+  </form>
+   <label class="map-label">Podesi lokaciju:</label>
+  <div class="map-wrapper">
+    <app-mini-map
+      [initialCenter]="{ lat: data.keyPoint.latitude, lon: data.keyPoint.longitude }"
+      (locationSelected)="onLocationSelected($event)">
+    </app-mini-map>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button *ngIf="!data.isNew" mat-button color="warn" (click)="onDelete()">Obriši</button>
+  <span class="spacer"></span>
+  <button mat-button (click)="onNoClick()">Odustani</button>
+
+  <button mat-flat-button color="primary" 
+          [disabled]="keyPointForm.invalid"
+          (click)="onSave()">
+    {{ data.isNew ? 'Kreiraj' : 'Sačuvaj' }}
+  </button>
+</mat-dialog-actions>

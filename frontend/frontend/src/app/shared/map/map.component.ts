@@ -1,124 +1,162 @@
-import { Component, AfterViewInit, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, AfterViewInit, Input, SimpleChanges, OnChanges, Output, EventEmitter, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
-import { Output, EventEmitter } from '@angular/core';
-import { MapService } from './map';
-import { KeyPointInterface } from '../../tours/model/key-point.interface';
 import 'leaflet-routing-machine';
+import { MapService } from './map'; 
+import { KeyPointInterface } from '../../tours/model/key-point.interface';
 
-// Komponenta za prikaz interaktivne mape.
-// Koristi Leaflet biblioteku.
 @Component({
   selector: 'app-map',
+  standalone: true, 
+  imports: [],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements AfterViewInit, OnChanges  {
-  // Privatna varijabla za instancu Leaflet mape.
+export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private map: any;
-  // Privatna varijabla za praćenje trenutnog markera.
   private currentMarker: L.Marker | null = null;
   private keyPointMarkers: L.Marker[] = [];
   private routeControl: L.Routing.Control | null = null;
   
   @Input() registerClick: boolean = true;
-
   @Input() keyPoints: KeyPointInterface[] = [];
   @Input() showKeyPoints: boolean = false;
+
+  @Input() initialCenter?: { lat: number, lon: number };
+  @Input() initialMarker?: { lat: number, lon: number };
   
-
-  // Definisanje izlaznog (Output) događaja koji će emitovati
-  // objekat sa koordinatama.
   @Output() locationSelected = new EventEmitter<{ latitude: number, longitude: number }>();
+  @Output() markerClicked = new EventEmitter<KeyPointInterface>();
 
-  constructor(
-    private service: MapService
-  ) { }
+  constructor(private service: MapService) { }
 
- 
-
-  // Metoda za inicijalizaciju mape.
-  // Postavlja centar, nivo zumiranja i OpenStreetMap slojeve.
-  private initMap(): void {
-    // Kreiranje instance mape u HTML elementu sa id-jem 'map'.
-    this.map = L.map('map', {
-      center: [45.2396, 19.8227], // Centar mape (Novi Sad, Srbija)
-      zoom: 13, // Početni nivo zumiranja
-    });
-
-    // Kreiranje sloja pločica sa OpenStreetMap-a.
-    // Ovo obezbeđuje vizuelni prikaz mape.
-    const tiles = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        maxZoom: 18,
-        minZoom: 3,
-        attribution:
-          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' // Atribucija za OpenStreetMap
-      }
-    );
-
-    // Dodavanje sloja na mapu.
-    tiles.addTo(this.map);
-
-    // Poziv funkcije za registraciju klikova.
-    this.registerOnClick();
-
-    this.drawKeyPoints();
-  }
-
-  // Angular lifecycle hook, poziva se nakon što se view komponente inicijalizuje.
-  // Idealno mesto za inicijalizaciju biblioteka kao što je Leaflet.
   ngAfterViewInit(): void {
     let DefaultIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.6.0/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.6.0/dist/images/marker-shadow.png'
     });
-
     L.Marker.prototype.options.icon = DefaultIcon;
-    this.initMap();
+    
+    // Add a small delay to ensure the DOM is ready, especially in dialogs
+    setTimeout(() => {
+      this.initMap();
+    }, 100);
   }
 
-  // Metoda koja registruje 'click' događaj na mapi.
-  // Na klik, uklanja stari i postavlja novi marker.
-  registerOnClick(): void {
-    this.map.on('click', (e: any) => {
-      // Ako već postoji marker na mapi, ukloni ga.
-      if (this.currentMarker) {
-        this.map.removeLayer(this.currentMarker);
-      }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['keyPoints'] && this.map) {
+      this.updateMapDisplay();
+    }
+  }
 
-      const coord = e.latlng;
-      const lat = coord.lat;
-      const lng = coord.lng;
-      if(this.registerClick) {
-        console.log(
-          'Kliknuli ste na mapu na poziciji: ' + lat + ' i dužina: ' + lng
-        );
-      }
-      
-      // Kreiranje novog markera i postavljanje ga na mapu
-      this.currentMarker = L.marker([lat, lng]).addTo(this.map);
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+  }
 
-      // Emitovanje događaja sa podacima o lokaciji
-      this.locationSelected.emit({ latitude: lat, longitude: lng });
+  private initMap(): void {
+    // Check if the map container exists
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) {
+      console.error('Map container not found');
+      return;
+    }
+
+    // Check if map is already initialized
+    if (this.map) {
+      console.log('Map already initialized, skipping...');
+      return;
+    }
+
+    const centerCoords: [number, number] = this.initialCenter && this.initialCenter.lat !== 0
+      ? [this.initialCenter.lat, this.initialCenter.lon]
+      : [45.2396, 19.8227];
+
+    this.map = L.map('map', {
+      center: centerCoords,
+      zoom: 13,
     });
+
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      minZoom: 3,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    tiles.addTo(this.map);
+
+    if (this.initialMarker && this.initialMarker.lat !== 0) {
+      this.currentMarker = L.marker([this.initialMarker.lat, this.initialMarker.lon]).addTo(this.map);
+    }
+
+    this.registerOnClick();
+    this.updateMapDisplay(); 
   }
 
-  private drawKeyPoints(): void {
-    if(!this.showKeyPoints || !this.keyPoints) return;
+  private updateMapDisplay(): void {
+    if (this.routeControl) {
+      this.map.removeControl(this.routeControl);
+      this.routeControl = null;
+    }
+
 
     this.keyPointMarkers.forEach(marker => this.map.removeLayer(marker));
     this.keyPointMarkers = [];
 
-    this.keyPoints.forEach((kp: KeyPointInterface) => {
-      const marker = L.marker([kp.latitude, kp.longitude]).addTo(this.map);
+    if (this.showKeyPoints && this.keyPoints) {
+      this.keyPoints.forEach((kp: KeyPointInterface) => {
+        const marker = L.marker([kp.latitude, kp.longitude]).addTo(this.map);
+        const popupContent = `<b>${kp.name}</b><br>${kp.description}`;
+        marker.bindPopup(popupContent);
+        marker.on('mouseover', () => marker.openPopup());
+        marker.on('mouseout', () => marker.closePopup());
+        marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e);
+          this.markerClicked.emit(kp);
+        });
+        this.keyPointMarkers.push(marker);
+      });
+    }
 
-      const popupContent = `<b>${kp.name}</b><br>${kp.description}`;
-      marker.bindPopup(popupContent);
 
-      marker.on('mouseover', () => marker.openPopup());
-      marker.on('mouseout', () => marker.closePopup());
+    if (this.keyPoints && this.keyPoints.length >= 2) {
+      const waypoints = this.keyPoints.map(kp => L.latLng(kp.latitude, kp.longitude));
 
-      this.keyPointMarkers.push(marker);
+      this.routeControl = L.Routing.control({
+        waypoints: waypoints,
+        router: L.routing.mapbox('pk.eyJ1IjoiZGp1cmRqZXZpY20iLCJhIjoiY20yaHVzOTgyMGJwbzJqczNteW1xMm0yayJ9.woKtBh92sOV__L25KcUu_Q', { profile: 'mapbox/walking' }),
+      
+      plan: L.Routing.plan(waypoints, {
+
+        createMarker: () => false, 
+        draggableWaypoints: false,
+        addWaypoints: false,
+      }),
+
+        show: false,
+        routeWhileDragging: false,
+        fitSelectedRoutes: true,
+      }).addTo(this.map);
+
+      this.routeControl.on('routesfound', function(e) {
+        const summary = e.routes[0].summary;
+        console.log(`Route found: ${summary.totalDistance / 1000} km, ${Math.round(summary.totalTime / 60)} min`);
+      });
+    }
+
+    this.removeCurrentMarker();
+  }
+
+  private registerOnClick(): void {
+    this.map.on('click', (e: any) => {
+      if (!this.registerClick) return;
+
+      if (this.currentMarker) {
+        this.map.removeLayer(this.currentMarker);
+      }
+      const coord = e.latlng;
+      this.currentMarker = L.marker([coord.lat, coord.lng]).addTo(this.map);
+      this.locationSelected.emit({ latitude: coord.lat, longitude: coord.lng });
     });
   }
 
@@ -129,49 +167,26 @@ export class MapComponent implements AfterViewInit, OnChanges  {
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['keyPoints'] && this.map) {
-      this.drawKeyPoints();
-     
-      this.drawRoute(); 
-    
-      this.removeCurrentMarker();
+  // Method to check if map is initialized
+  isMapInitialized(): boolean {
+    return this.map !== null && this.map !== undefined;
+  }
+
+  // Method to reinitialize map if needed (useful for dialogs)
+  reinitializeMap(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
     }
+    
+    // Clear any existing map data from the container
+    const mapContainer = document.getElementById('map');
+    if (mapContainer) {
+      mapContainer.innerHTML = '';
+    }
+    
+    setTimeout(() => {
+      this.initMap();
+    }, 50);
   }
-  private drawRoute(): void {
-  // 1. Proveravamo da li imamo bar dve tačke za iscrtavanje
-  if (!this.map || !this.keyPoints || this.keyPoints.length < 2) {
-    return;
-  }
-
-  // 2. Ako već postoji stara ruta, uklanjamo je sa mape
-  if (this.routeControl) {
-    this.map.removeControl(this.routeControl);
-  }
-
-  // 3. Kreiramo 'waypoints' (putne tačke) iz vašeg niza ključnih tačaka
-  const waypoints = this.keyPoints.map(kp => L.latLng(kp.latitude, kp.longitude));
-
-  // 4. Kreiramo kontrolu za rutiranje, kao u uputstvu
-  this.routeControl = L.Routing.control({
-    waypoints: waypoints,
-    router: L.routing.mapbox('pk.eyJ1IjoiZGp1cmRqZXZpY20iLCJhIjoiY20yaHVzOTgyMGJwbzJqczNteW1xMm0yayJ9.woKtBh92sOV__L25KcUu_Q', { profile: 'mapbox/walking' }),
-    // Opcije za prilagođavanje izgleda
-    routeWhileDragging: false,
-    addWaypoints: false, // Onemogućava dodavanje novih tačaka klikom
-    show: false, // Sakriva panel sa instrukcijama "levo-desno"
-    //draggableWaypoints: false,
- 
-    fitSelectedRoutes: true
-  }).addTo(this.map);
-
-  // Možete dodati i event listener kao u primeru, ako želite da prikažete info
-  this.routeControl.on('routesfound', function(e) {
-    const routes = e.routes;
-    const summary = routes[0].summary;
-    // Prikazemo info u konzoli umesto alert-a
-    console.log('Total distance is ' + summary.totalDistance / 1000 + ' km and total time is ' + Math.round(summary.totalTime / 60) + ' minutes');
-  });
-}
-
 }

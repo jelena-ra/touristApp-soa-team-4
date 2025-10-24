@@ -297,3 +297,39 @@ func (h *TourHandler) GetRecensionsByTourID(ctx context.Context, req *tourProto.
 
 	return &tourProto.RecensionListResponse{Recensions: protoRecensions}, nil
 }
+
+func (h *TourHandler) UpdateKeyPoint(ctx context.Context, req *tourProto.UpdateKeyPointRequest) (*tourProto.UpdateKeyPointResponse, error) {
+
+	if req.GetKeyPoint() == nil {
+		return nil, status.Error(codes.InvalidArgument, "KeyPoint information is required")
+	}
+
+	modelUpdateInfo, err := mapper.KeyPointProtoToModel(req.GetKeyPoint())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	updatedKeyPoint, err := h.server.UpdateKeyPoint(ctx, modelUpdateInfo)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	protoKeyPoint := mapper.KeyPointModelToProto(updatedKeyPoint)
+
+	return &tourProto.UpdateKeyPointResponse{KeyPoint: protoKeyPoint}, nil
+}
+
+func (h *TourHandler) DeleteKeyPoint(ctx context.Context, req *tourProto.DeleteKeyPointRequest) (*tourProto.DeleteKeyPointResponse, error) {
+
+	keyPointId := req.GetKeyPointId()
+	if keyPointId == "" {
+		return nil, status.Error(codes.InvalidArgument, "KeyPoint ID is required")
+	}
+
+	err := h.server.DeleteKeyPoint(ctx, keyPointId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &tourProto.DeleteKeyPointResponse{Message: "Key point successfully deleted"}, nil
+}

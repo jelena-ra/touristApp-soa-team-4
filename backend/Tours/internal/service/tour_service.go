@@ -107,3 +107,20 @@ func (s *TourService) GetRecensionsByTourID(ctx context.Context, tourID string) 
 
 	return s.recensionRepo.GetByTourID(ctx, tourID)
 }
+func (s *TourService) UpdateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error) {
+	// Da li autor ture smije da mijenja tacku
+	//TODO: validacija za edit i slike i long i lat
+	return s.keyPointRepo.UpdateKeyPoint(ctx, keyPoint)
+}
+
+func (s *TourService) DeleteKeyPoint(ctx context.Context, id string) error {
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("invalid key point ID format")
+	}
+
+	// TODO: Provjeriti da li korisnik koji briše ima dozvolu (npr. da li je autor ture).
+
+	return s.keyPointRepo.DeleteKeyPoint(ctx, oid)
+}
