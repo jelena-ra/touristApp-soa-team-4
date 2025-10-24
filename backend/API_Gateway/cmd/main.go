@@ -23,6 +23,7 @@ import (
 	"github.com/joho/godotenv"
 
 	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
+	following_proto "github.com/jelena-ra/touristApp/soa-team-4/Following/proto"
 	tourProto "github.com/jelena-ra/touristApp/soa-team-4/Tours/proto"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -91,6 +92,18 @@ func main() {
 	defer blogGRPCConn.Close()
 	blogGRPCClient := blog_proto.NewBlogServiceClient(blogGRPCConn)
 	blogHandler := handler.NewBlogHandler(blogGRPCClient)
+
+	followingGRPCAddr := "following-service:8084" // Adresa vašeg following servisa
+	followingGRPCConn, err := grpc.Dial(followingGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Fatalf("did not connect to following service: %v", err)
+	}
+	defer followingGRPCConn.Close()
+	followingGRPCClient := following_proto.NewFollowingServiceClient(followingGRPCConn)
+	followingHandler := handler.NewFollowingHandler(followingGRPCClient)
 
 	/*tourGRPCAddr := "tour-service:8083"
 	tourGRPCConn, err := grpc.Dial(tourGRPCAddr, grpc.WithTransportCredentials(insecure.NewCredentials()), otelgrpc.Clien)*/
@@ -206,6 +219,11 @@ func main() {
 			http.HandlerFunc(tourHandler.GetActiveTourHandle),
 		),
 	).Methods("GET", "OPTIONS")
+
+	router.Handle("/api/follow", http.HandlerFunc(followingHandler.FollowUserHandler)).Methods("POST", "OPTIONS")
+	router.Handle("/api/recommendations/{userId}", http.HandlerFunc(followingHandler.GetRecommendationsHandler)).Methods("GET", "OPTIONS")
+	router.Handle("/api/followings/{userId}", http.HandlerFunc(followingHandler.GetFollowingsForUserHandler)).Methods("GET", "OPTIONS")
+	router.Handle("/api/follow/exists/{followerId}/{followedId}", http.HandlerFunc(followingHandler.FollowExistsHandler)).Methods("GET", "OPTIONS")
 
 	corsObj := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4200"}),
