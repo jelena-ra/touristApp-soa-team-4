@@ -16,23 +16,12 @@ export class KeyPointService {
         return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     }
 
-    createKeyPoint(newKeyPoint: KeyPointInterface): Observable<KeyPointInterface> {
+    createKeyPoint(newKeyPoint: KeyPointInterface, imageBase64: string) : Observable<KeyPointInterface> {
         return this.http.post<{ keyPoint: KeyPointInterface }>(
-            this.url, 
-            { keyPoint: newKeyPoint }, 
-            { headers: this.getHeaders() }
+            'http://localhost:8000/api/key-point',
+            { keyPoint: newKeyPoint, imageBase64 }
         ).pipe(
-            map(response => response.keyPoint) 
-        );
-    }
-
-    updateKeyPoint(keyPoint: KeyPointInterface): Observable<KeyPointInterface> {
-        return this.http.put<{ keyPoint: KeyPointInterface }>(
-            this.url, 
-            { keyPoint: keyPoint }, 
-            { headers: this.getHeaders() }
-        ).pipe(
-            map(response => response.keyPoint)
+            map(res => res.keyPoint)
         );
     }
 
@@ -40,6 +29,16 @@ export class KeyPointService {
         return this.http.delete<unknown>(
             `${this.url}/${keyPointId}`, 
             { headers: this.getHeaders() }
+        );
+    }
+
+     updateKeyPoint(keyPoint: KeyPointInterface): Observable<KeyPointInterface> {
+        return this.http.put<{ keyPoint: KeyPointInterface }>(
+            this.url, 
+            { keyPoint: keyPoint }, 
+            { headers: this.getHeaders() }
+        ).pipe(
+            map(response => response.keyPoint)
         );
     }
 }

@@ -54,7 +54,6 @@ export class KeyPointsMapPageComponent implements OnInit {
       description: '',
       latitude: event.latitude,
       longitude: event.longitude,
-      imageID: '',
       order: 0
     };
     this.openKeyPointDialog(true, newKeyPoint);
@@ -75,9 +74,9 @@ export class KeyPointsMapPageComponent implements OnInit {
 
       if (result.action === 'save') {
         if (isNew) {
-          this.keyPointService.createKeyPoint(result.data).subscribe(createdKP => {
-            this.tour!.keyPoints = [...this.tour!.keyPoints, createdKP];
-          });
+          // this.keyPointService.createKeyPoint(result.data).subscribe(createdKP => {
+          //   this.tour!.keyPoints = [...this.tour!.keyPoints, createdKP];
+          // });
         } else {
           this.keyPointService.updateKeyPoint(result.data).subscribe(updatedKP => {
              const index = this.tour!.keyPoints.findIndex(kp => kp.id === updatedKP.id);

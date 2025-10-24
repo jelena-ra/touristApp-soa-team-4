@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import { MapService } from './map'; 
 import { KeyPointInterface } from '../../tours/model/key-point.interface';
+import { Transport } from '../../tours/model/tour.interface'; // <-- Import iz stare verzije
 
 @Component({
   selector: 'app-map',
@@ -17,10 +18,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private keyPointMarkers: L.Marker[] = [];
   private routeControl: L.Routing.Control | null = null;
   
+  // === DODATAK IZ STARE VERZIJE ===
+  private lastRouteSummary: any | null = null;
+  
   @Input() registerClick: boolean = true;
   @Input() keyPoints: KeyPointInterface[] = [];
   @Input() showKeyPoints: boolean = false;
-
   @Input() initialCenter?: { lat: number, lon: number };
   @Input() initialMarker?: { lat: number, lon: number };
   
@@ -36,10 +39,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     });
     L.Marker.prototype.options.icon = DefaultIcon;
     
-    // Add a small delay to ensure the DOM is ready, especially in dialogs
-    setTimeout(() => {
-      this.initMap();
-    }, 100);
+    setTimeout(() => this.initMap(), 100);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -56,32 +56,19 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private initMap(): void {
-    // Check if the map container exists
     const mapContainer = document.getElementById('map');
-    if (!mapContainer) {
-      console.error('Map container not found');
-      return;
-    }
-
-    // Check if map is already initialized
-    if (this.map) {
-      console.log('Map already initialized, skipping...');
-      return;
-    }
+    if (!mapContainer || this.map) return;
 
     const centerCoords: [number, number] = this.initialCenter && this.initialCenter.lat !== 0
       ? [this.initialCenter.lat, this.initialCenter.lon]
       : [45.2396, 19.8227];
 
-    this.map = L.map('map', {
-      center: centerCoords,
-      zoom: 13,
-    });
+    this.map = L.map('map', { center: centerCoords, zoom: 13 });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       minZoom: 3,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      attribution: '&copy; OpenStreetMap'
     });
     tiles.addTo(this.map);
 
@@ -99,15 +86,28 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.routeControl = null;
     }
 
-
     this.keyPointMarkers.forEach(marker => this.map.removeLayer(marker));
     this.keyPointMarkers = [];
 
     if (this.showKeyPoints && this.keyPoints) {
       this.keyPoints.forEach((kp: KeyPointInterface) => {
         const marker = L.marker([kp.latitude, kp.longitude]).addTo(this.map);
-        const popupContent = `<b>${kp.name}</b><br>${kp.description}`;
+        
+        // === DODATAK IZ STARE VERZIJE ===
+        const popupContent = `
+          <div class="custom-keypoint-popup">
+            <div class="popup-image-container">
+              <img src="${kp.imageUrl}" alt="${kp.name}" />
+            </div>
+            <div class="popup-text">
+              <strong>${kp.name}</strong><br/>
+              <p>${kp.description}</p>
+            </div>
+          </div>
+        `;
         marker.bindPopup(popupContent);
+        // ================================
+
         marker.on('mouseover', () => marker.openPopup());
         marker.on('mouseout', () => marker.closePopup());
         marker.on('click', (e) => {
@@ -118,39 +118,37 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       });
     }
 
-
     if (this.keyPoints && this.keyPoints.length >= 2) {
       const waypoints = this.keyPoints.map(kp => L.latLng(kp.latitude, kp.longitude));
 
       this.routeControl = L.Routing.control({
         waypoints: waypoints,
         router: L.routing.mapbox('pk.eyJ1IjoiZGp1cmRqZXZpY20iLCJhIjoiY20yaHVzOTgyMGJwbzJqczNteW1xMm0yayJ9.woKtBh92sOV__L25KcUu_Q', { profile: 'mapbox/walking' }),
-      
-      plan: L.Routing.plan(waypoints, {
-
-        createMarker: () => false, 
-        draggableWaypoints: false,
-        addWaypoints: false,
-      }),
-
+        plan: L.Routing.plan(waypoints, {
+          createMarker: () => false, 
+          draggableWaypoints: false,
+          addWaypoints: false,
+        }),
         show: false,
         routeWhileDragging: false,
         fitSelectedRoutes: true,
       }).addTo(this.map);
 
-      this.routeControl.on('routesfound', function(e) {
+      // === DODATAK IZ STARE VERZIJE ===
+      this.routeControl.on('routesfound', (e: any) => {
         const summary = e.routes[0].summary;
+        this.lastRouteSummary = summary;
         console.log(`Route found: ${summary.totalDistance / 1000} km, ${Math.round(summary.totalTime / 60)} min`);
       });
+      // ================================
     }
-
+    
     this.removeCurrentMarker();
   }
 
   private registerOnClick(): void {
     this.map.on('click', (e: any) => {
       if (!this.registerClick) return;
-
       if (this.currentMarker) {
         this.map.removeLayer(this.currentMarker);
       }
@@ -167,26 +165,34 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
   }
 
-  // Method to check if map is initialized
-  isMapInitialized(): boolean {
-    return this.map !== null && this.map !== undefined;
+  // === DODATAK IZ STARE VERZIJE: JAVNE METODE ===
+  
+  private formatDuration(hours: number): string {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return h > 0 ? `${h} h ${m} min` : `${m} min`;
   }
 
-  // Method to reinitialize map if needed (useful for dialogs)
-  reinitializeMap(): void {
-    if (this.map) {
-      this.map.remove();
-      this.map = null;
+  public getDistanceKm(): number | null {
+    if (!this.lastRouteSummary) return null;
+    return this.lastRouteSummary.totalDistance / 1000;
+  }
+
+  public getDurationByTransport(): Record<Transport, string> | null {
+    if (!this.lastRouteSummary) return null;
+
+    const distanceKm = this.lastRouteSummary.totalDistance / 1000;
+    const speeds: Record<Transport, number> = {
+      WALKING: 5,
+      BICYCLE: 15,
+      CAR: 50,
+    };
+
+    const durationByTransport: Partial<Record<Transport, string>> = {};
+
+    for (const t of Object.keys(speeds) as Transport[]) {
+      durationByTransport[t] = this.formatDuration(distanceKm / speeds[t]);
     }
-    
-    // Clear any existing map data from the container
-    const mapContainer = document.getElementById('map');
-    if (mapContainer) {
-      mapContainer.innerHTML = '';
-    }
-    
-    setTimeout(() => {
-      this.initMap();
-    }, 50);
+    return durationByTransport as Record<Transport, string>;
   }
 }

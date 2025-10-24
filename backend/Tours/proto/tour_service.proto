@@ -48,7 +48,7 @@ message KeyPoint {
   float latitude = 4;
   string name = 5;
   string description = 6;
-  string imageId = 7;
+  string imageUrl = 7;
   int64 order = 8;
 }
 
@@ -102,6 +102,24 @@ service TourService {
   rpc GetActiveTour (GetActiveTourRequest) returns (TourExecutionResponse);
   rpc CreateRecension(CreateRecensionRequest) returns (RecensionResponse);
   rpc GetRecensionsByTourID(TourIDRequest) returns (RecensionListResponse);
+  rpc PublishTour(PublishTourRequest) returns (PublishTourResponse);
+  rpc ArchiveTour(ArchiveTourRequest) returns (ArchiveTourResponse);
+}
+
+message ArchiveTourRequest {
+  string tourId = 1;
+}
+
+message ArchiveTourResponse {
+  string message = 1;
+}
+
+message PublishTourRequest {
+  string tourId = 1;
+}
+
+message PublishTourResponse {
+  string message = 1;
 }
 
 message Empty {
@@ -150,6 +168,7 @@ message UpdateTourResponse {
 
 message CreateKeyPointRequest {
   KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
 }
 
 message CreateKeyPointResponse {

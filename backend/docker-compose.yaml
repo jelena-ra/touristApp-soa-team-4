@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    volumes:
+      - stakeholder_images_data:/data/sqlite
     ports:
       - "8081:8081"
     env_file:
@@ -133,6 +135,8 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_started
+    volumes:
+      - tours_uploads_data:/app/uploads
 
   tour-db:
     image: mongo:latest
@@ -215,7 +219,8 @@ services:
       - jaeger
       - purchase-service
       -  tour-service
-
+    volumes:
+      - tours_uploads_data:/app/uploads
   
   prometheus:
     image: prom/prometheus:latest
@@ -305,3 +310,5 @@ volumes:
   following_db_data:
   tour_db_data:
   grafana_data:
+  stakeholder_images_data:
+  tours_uploads_data:

@@ -158,6 +158,8 @@ func main() {
 
 	tourProto.RegisterTourServiceServer(grpcServer, tourHandler)
 
+	log.Println("BBBBBBBBB")
+
 	log.Println("Tour gRPC service is running on port 8083...")
 	log.Fatal(grpcServer.Serve(listen))
 }

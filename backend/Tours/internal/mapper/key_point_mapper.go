@@ -16,7 +16,7 @@ func KeyPointModelToProto(kp *model.KeyPoint) *tourProto.KeyPoint {
 		Latitude:    float32(kp.Latitude),
 		Name:        kp.Name,
 		Description: kp.Description,
-		ImageId:     kp.ImageID.Hex(),
+		ImageUrl:    kp.ImageURL,
 		Order:       int64(kp.Order),
 	}
 }
@@ -43,6 +43,7 @@ func KeyPointProtoToModel(kp *tourProto.KeyPoint) (*model.KeyPoint, error) {
 	m.Name = kp.Name
 	m.Description = kp.Description
 	m.Order = int(kp.Order)
+	m.ImageURL = kp.ImageUrl
 
 	return m, nil
 }

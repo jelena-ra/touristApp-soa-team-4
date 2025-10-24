@@ -116,7 +116,11 @@ func (h *PurchaseHandler) ViewCartHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (h *PurchaseHandler) CheckoutHandler(w http.ResponseWriter, r *http.Request) {
-
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+		return
+	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -130,7 +134,7 @@ func (h *PurchaseHandler) CheckoutHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	tokens, err := h.cartService.Checkout(req.UserID)
+	tokens, err := h.cartService.Checkout(req.UserID, authHeader)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return

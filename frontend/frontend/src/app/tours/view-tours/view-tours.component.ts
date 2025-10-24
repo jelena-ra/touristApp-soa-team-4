@@ -57,7 +57,7 @@ export class ViewToursPage implements OnInit{
     readonly dialog = inject(MatDialog);
     activeExecution: TourExecution | null = null;
     private userId: string = "";
-     user: User | null = null;
+    user: User | null = null;
 
     constructor(private tourService: TourService,
         private destroyRef: DestroyRef,
@@ -81,7 +81,16 @@ export class ViewToursPage implements OnInit{
         this.tourService.getAll()
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((response) => {
-            this.tours = response
+            console.log("User role: ", this.user?.role)
+            if(this.user?.role === "author") {
+                this.tours = response.filter(t => {
+                    return t.authorId == this.user?.id
+                })
+            } else {
+                this.tours = response.filter(t => {
+                    return t.status === "PUBLISHED"
+                })
+            }
             this.checkActiveExecution();
             });
     }
