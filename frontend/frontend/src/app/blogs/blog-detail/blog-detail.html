@@ -1,0 +1,57 @@
+<div class="blog-container" *ngIf="blog; else loading">
+  <!-- Prikaz slika (primer sa prvom slikom kao glavnom) -->
+  <img *ngIf="blog.images && blog.images.length > 0" [src]="blog.images[0]" alt="Blog image" class="main-image">
+
+  <h1>{{ blog.title }}</h1>
+  
+  <!-- Ovde se dešava magija za Markdown -->
+  <markdown class="blog-content" [data]="blog.content"></markdown>
+  
+  <hr>
+
+  <div class="actions-section">
+
+  <button (click)="toggleLike()" [disabled]="isLiking || !currentUserId" class="like-button">
+    <span *ngIf="!hasLiked">👍 Like</span>
+    <span *ngIf="hasLiked">👎 Unlike</span>
+  </button>
+  
+  <span class="likes-counter">{{ blog?.likes?.length || 0 }} likes</span>
+</div>
+</div>
+
+<div class="comments-section" *ngIf="blog">
+  <hr>
+  <h3>Komentari ({{ blog.comments?.length || 0 }})</h3>
+
+  <!-- Forma za unos novog komentara (prikazuje se samo ulogovanim korisnicima) -->
+  <div *ngIf="currentUserId" class="comment-form">
+    <form [formGroup]="commentForm" (ngSubmit)="onCommentSubmit()">
+      <textarea formControlName="content" placeholder="Napišite komentar..." rows="4"></textarea>
+      <button type="submit" [disabled]="commentForm.invalid">Pošalji</button>
+    </form>
+  </div>
+
+  <!-- Poruka za korisnike koji nisu ulogovani -->
+  <div *ngIf="!currentUserId" class="login-prompt">
+    <p>Morate biti <a routerLink="/login">ulogovani</a> da biste ostavili komentar.</p>
+  </div>
+
+  <!-- Lista postojećih komentara -->
+  <div class="comments-list" *ngIf="blog.comments && blog.comments.length > 0; else noComments">
+    <div *ngFor="let comment of blog.comments" class="comment">
+      <p class="comment-author">Korisnik: {{ comment.user_id }}</p>
+      <p class="comment-content">{{ comment.content }}</p>
+      <p class="comment-date">{{ comment.created_at | date:'medium' }}</p>
+    </div>
+  </div>
+
+  <!-- Poruka ako nema komentara -->
+  <ng-template #noComments>
+    <p>Nema komentara. Budite prvi koji će ostaviti utisak!</p>
+  </ng-template>
+</div>
+
+<ng-template #loading>
+  <p>Loading blog...</p>
+</ng-template>

@@ -167,6 +167,7 @@ func main() {
 
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.GetAllBlogsHandler)).Methods("GET")
 	router.Handle("/api/blogs", http.HandlerFunc(blogHandler.CreateBlogHandler)).Methods("POST")
+	router.Handle("/api/blogs/{blogId}", http.HandlerFunc(blogHandler.GetBlogByIdHandler)).Methods("GET")
 	router.Handle("/api/blogs/{blogId}/like/{userId}", http.HandlerFunc(blogHandler.LikeBlogHandler)).Methods("PUT")
 	router.Handle("/api/blogs/{blogId}/unlike/{userId}", http.HandlerFunc(blogHandler.UnlikeBlogHandler)).Methods("DELETE")
 	router.Handle("/api/comments", http.HandlerFunc(blogHandler.CreateCommentHandler)).Methods("POST")

@@ -23,6 +23,7 @@ const (
 	BlogService_LikeBlog_FullMethodName       = "/blog.BlogService/LikeBlog"
 	BlogService_UnlikeBlog_FullMethodName     = "/blog.BlogService/UnlikeBlog"
 	BlogService_GetAllBlogs_FullMethodName    = "/blog.BlogService/GetAllBlogs"
+	BlogService_GetBlogById_FullMethodName    = "/blog.BlogService/GetBlogById"
 	BlogService_GetFeedForUser_FullMethodName = "/blog.BlogService/GetFeedForUser"
 	BlogService_CreateComment_FullMethodName  = "/blog.BlogService/CreateComment"
 	BlogService_UpdateComment_FullMethodName  = "/blog.BlogService/UpdateComment"
@@ -36,6 +37,7 @@ type BlogServiceClient interface {
 	LikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
 	UnlikeBlog(ctx context.Context, in *LikeBlogRequest, opts ...grpc.CallOption) (*LikeBlogResponse, error)
 	GetAllBlogs(ctx context.Context, in *GetAllBlogsRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error)
+	GetBlogById(ctx context.Context, in *GetBlogRequest, opts ...grpc.CallOption) (*GetBlogResponse, error)
 	GetFeedForUser(ctx context.Context, in *GetFeedForUserRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error)
 	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
@@ -89,6 +91,16 @@ func (c *blogServiceClient) GetAllBlogs(ctx context.Context, in *GetAllBlogsRequ
 	return out, nil
 }
 
+func (c *blogServiceClient) GetBlogById(ctx context.Context, in *GetBlogRequest, opts ...grpc.CallOption) (*GetBlogResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBlogResponse)
+	err := c.cc.Invoke(ctx, BlogService_GetBlogById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *blogServiceClient) GetFeedForUser(ctx context.Context, in *GetFeedForUserRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetAllBlogsResponse)
@@ -127,6 +139,7 @@ type BlogServiceServer interface {
 	LikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
 	UnlikeBlog(context.Context, *LikeBlogRequest) (*LikeBlogResponse, error)
 	GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error)
+	GetBlogById(context.Context, *GetBlogRequest) (*GetBlogResponse, error)
 	GetFeedForUser(context.Context, *GetFeedForUserRequest) (*GetAllBlogsResponse, error)
 	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
@@ -151,6 +164,9 @@ func (UnimplementedBlogServiceServer) UnlikeBlog(context.Context, *LikeBlogReque
 }
 func (UnimplementedBlogServiceServer) GetAllBlogs(context.Context, *GetAllBlogsRequest) (*GetAllBlogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllBlogs not implemented")
+}
+func (UnimplementedBlogServiceServer) GetBlogById(context.Context, *GetBlogRequest) (*GetBlogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlogById not implemented")
 }
 func (UnimplementedBlogServiceServer) GetFeedForUser(context.Context, *GetFeedForUserRequest) (*GetAllBlogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFeedForUser not implemented")
@@ -254,6 +270,24 @@ func _BlogService_GetAllBlogs_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlogService_GetBlogById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlogServiceServer).GetBlogById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlogService_GetBlogById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlogServiceServer).GetBlogById(ctx, req.(*GetBlogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BlogService_GetFeedForUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetFeedForUserRequest)
 	if err := dec(in); err != nil {
@@ -330,6 +364,10 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllBlogs",
 			Handler:    _BlogService_GetAllBlogs_Handler,
+		},
+		{
+			MethodName: "GetBlogById",
+			Handler:    _BlogService_GetBlogById_Handler,
 		},
 		{
 			MethodName: "GetFeedForUser",

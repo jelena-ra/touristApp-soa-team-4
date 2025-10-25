@@ -51,6 +51,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Images:        createdBlog.Images,
 		NumberOfLikes: 0,
 		Comments:      make([]*blog_proto.Comment, 0),
+		Likes:         createdBlog.Likes,
 	}
 
 	return &blog_proto.CreateBlogResponse{
@@ -86,6 +87,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
+		Likes:         likedBlog.Likes,
 	}
 
 	LikedBlogResponse := &blog_proto.LikeBlogResponse{
@@ -122,6 +124,7 @@ func (h *BlogHandler) UnlikeBlog(ctx context.Context, req *blog_proto.LikeBlogRe
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
+		Likes:         likedBlog.Likes,
 	}
 
 	LikedBlogResponse := &blog_proto.LikeBlogResponse{
@@ -152,6 +155,46 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 
 	return &blog_proto.GetAllBlogsResponse{
 		Blogs: protoBlogs,
+	}, nil
+}
+
+func (h *BlogHandler) GetBlogById(ctx context.Context, req *blog_proto.GetBlogRequest) (*blog_proto.GetBlogResponse, error) {
+	blogId := req.GetId()
+	if blogId == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "blog id cannot be empty")
+	}
+
+	blog, err := h.service.GetBlogById(ctx, blogId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get blog: %v", err)
+	}
+
+	// build BlogFull for GetBlogById (BlogFull contains Likes and Comments)
+	protoComments := make([]*blog_proto.Comment, 0)
+	for _, commentModel := range blog.Comments {
+		protoComments = append(protoComments, &blog_proto.Comment{
+			Id:           commentModel.ID.Hex(),
+			BlogId:       commentModel.BlogID,
+			UserId:       commentModel.UserID,
+			Content:      commentModel.Content,
+			CreatedAt:    timestamppb.New(commentModel.CreatedAt),
+			LastModified: timestamppb.New(commentModel.LastModified),
+		})
+	}
+
+	protoBlogFull := &blog_proto.BlogFull{
+		Id:            blog.ID.Hex(),
+		Title:         blog.Title,
+		Content:       blog.Content,
+		AuthorId:      blog.AuthorID,
+		Images:        blog.Images,
+		NumberOfLikes: int32(len(blog.Likes)),
+		Comments:      protoComments,
+		Likes:         blog.Likes,
+	}
+
+	return &blog_proto.GetBlogResponse{
+		BlogPost: protoBlogFull,
 	}, nil
 }
 

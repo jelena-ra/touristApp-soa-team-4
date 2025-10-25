@@ -22,6 +22,7 @@ message BlogFull {
   repeated string images = 5;
   int32 number_of_likes = 6;
   repeated Comment comments = 7;
+  repeated string likes = 8;
 }
 
 message Comment {
@@ -82,7 +83,7 @@ message GetBlogRequest {
 }
 
 message GetBlogResponse {
-  Blog blog_post = 1;
+  BlogFull blog_post = 1;
 }
 
 message UpdateBlogRequest {
@@ -117,6 +118,7 @@ service BlogService {
   rpc LikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
   rpc UnlikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
   rpc GetAllBlogs (GetAllBlogsRequest) returns (GetAllBlogsResponse);
+  rpc GetBlogById (GetBlogRequest) returns (GetBlogResponse);
   rpc GetFeedForUser (GetFeedForUserRequest) returns (GetAllBlogsResponse);
   rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);

@@ -84,6 +84,14 @@ func (s *BlogService) GetAllBlogs(ctx context.Context) ([]model.Blog, error) {
 	return blogs, nil
 }
 
+func (s *BlogService) GetBlogById(ctx context.Context, blogId string) (*model.Blog, error) {
+	blog, err := s.repo.GetById(ctx, blogId)
+	if err != nil {
+		return nil, err
+	}
+	return blog, nil
+}
+
 func (s *BlogService) GetFeedForUser(ctx context.Context, userId string) ([]model.Blog, error) {
 	followedResponse, err := s.followingClient.GetFollowingsForUser(ctx, &following_proto.GetFollowingsForUserRequest{Id: userId})
 	if err != nil {

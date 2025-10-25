@@ -2,8 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom, pro
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http'; 
 import { routes } from './app.routes';
-
-// Uvoz SharedModule-a
+import { MarkdownModule } from 'ngx-markdown';
 import { SharedModule } from './shared/shared.module';
 
 export const appConfig: ApplicationConfig = {
@@ -12,8 +11,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(),
-    // Ovo je ključni deo. Uvozimo SharedModule kako bi njegove komponente
-    // bile dostupne u celoj aplikaciji.
-    importProvidersFrom(SharedModule)
+    importProvidersFrom(SharedModule),
+    importProvidersFrom(MarkdownModule.forRoot()), 
   ]
 };

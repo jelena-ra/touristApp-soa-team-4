@@ -115,6 +115,7 @@ type BlogFull struct {
 	Images        []string               `protobuf:"bytes,5,rep,name=images,proto3" json:"images,omitempty"`
 	NumberOfLikes int32                  `protobuf:"varint,6,opt,name=number_of_likes,json=numberOfLikes,proto3" json:"number_of_likes,omitempty"`
 	Comments      []*Comment             `protobuf:"bytes,7,rep,name=comments,proto3" json:"comments,omitempty"`
+	Likes         []string               `protobuf:"bytes,8,rep,name=likes,proto3" json:"likes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,6 +195,13 @@ func (x *BlogFull) GetNumberOfLikes() int32 {
 func (x *BlogFull) GetComments() []*Comment {
 	if x != nil {
 		return x.Comments
+	}
+	return nil
+}
+
+func (x *BlogFull) GetLikes() []string {
+	if x != nil {
+		return x.Likes
 	}
 	return nil
 }
@@ -788,7 +796,7 @@ func (x *GetBlogRequest) GetId() string {
 
 type GetBlogResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	BlogPost      *Blog                  `protobuf:"bytes,1,opt,name=blog_post,json=blogPost,proto3" json:"blog_post,omitempty"`
+	BlogPost      *BlogFull              `protobuf:"bytes,1,opt,name=blog_post,json=blogPost,proto3" json:"blog_post,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -823,7 +831,7 @@ func (*GetBlogResponse) Descriptor() ([]byte, []int) {
 	return file_blog_service_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *GetBlogResponse) GetBlogPost() *Blog {
+func (x *GetBlogResponse) GetBlogPost() *BlogFull {
 	if x != nil {
 		return x.BlogPost
 	}
@@ -1237,7 +1245,7 @@ const file_blog_service_proto_rawDesc = "" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12\x1b\n" +
 	"\tauthor_id\x18\x04 \x01(\tR\bauthorId\x12\x16\n" +
 	"\x06images\x18\x05 \x03(\tR\x06images\x12&\n" +
-	"\x0fnumber_of_likes\x18\x06 \x01(\x05R\rnumberOfLikes\"\xd2\x01\n" +
+	"\x0fnumber_of_likes\x18\x06 \x01(\x05R\rnumberOfLikes\"\xe8\x01\n" +
 	"\bBlogFull\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
@@ -1245,7 +1253,8 @@ const file_blog_service_proto_rawDesc = "" +
 	"\tauthor_id\x18\x04 \x01(\tR\bauthorId\x12\x16\n" +
 	"\x06images\x18\x05 \x03(\tR\x06images\x12&\n" +
 	"\x0fnumber_of_likes\x18\x06 \x01(\x05R\rnumberOfLikes\x12)\n" +
-	"\bcomments\x18\a \x03(\v2\r.blog.CommentR\bcomments\"\xe1\x01\n" +
+	"\bcomments\x18\a \x03(\v2\r.blog.CommentR\bcomments\x12\x14\n" +
+	"\x05likes\x18\b \x03(\tR\x05likes\"\xe1\x01\n" +
 	"\aComment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\ablog_id\x18\x02 \x01(\tR\x06blogId\x12\x17\n" +
@@ -1283,10 +1292,9 @@ const file_blog_service_proto_rawDesc = "" +
 	"\x15UpdateCommentResponse\x12'\n" +
 	"\acomment\x18\x01 \x01(\v2\r.blog.CommentR\acomment\" \n" +
 	"\x0eGetBlogRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\":\n" +
-	"\x0fGetBlogResponse\x12'\n" +
-	"\tblog_post\x18\x01 \x01(\v2\n" +
-	".blog.BlogR\bblogPost\"<\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\">\n" +
+	"\x0fGetBlogResponse\x12+\n" +
+	"\tblog_post\x18\x01 \x01(\v2\x0e.blog.BlogFullR\bblogPost\"<\n" +
 	"\x11UpdateBlogRequest\x12'\n" +
 	"\tblog_post\x18\x01 \x01(\v2\n" +
 	".blog.BlogR\bblogPost\"=\n" +
@@ -1307,14 +1315,15 @@ const file_blog_service_proto_rawDesc = "" +
 	"\ablog_id\x18\x01 \x01(\tR\x06blogId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"?\n" +
 	"\x10LikeBlogResponse\x12+\n" +
-	"\tblog_post\x18\x01 \x01(\v2\x0e.blog.BlogFullR\bblogPost2\xe8\x03\n" +
+	"\tblog_post\x18\x01 \x01(\v2\x0e.blog.BlogFullR\bblogPost2\xa4\x04\n" +
 	"\vBlogService\x12?\n" +
 	"\n" +
 	"CreateBlog\x12\x17.blog.CreateBlogRequest\x1a\x18.blog.CreateBlogResponse\x129\n" +
 	"\bLikeBlog\x12\x15.blog.LikeBlogRequest\x1a\x16.blog.LikeBlogResponse\x12;\n" +
 	"\n" +
 	"UnlikeBlog\x12\x15.blog.LikeBlogRequest\x1a\x16.blog.LikeBlogResponse\x12B\n" +
-	"\vGetAllBlogs\x12\x18.blog.GetAllBlogsRequest\x1a\x19.blog.GetAllBlogsResponse\x12H\n" +
+	"\vGetAllBlogs\x12\x18.blog.GetAllBlogsRequest\x1a\x19.blog.GetAllBlogsResponse\x12:\n" +
+	"\vGetBlogById\x12\x14.blog.GetBlogRequest\x1a\x15.blog.GetBlogResponse\x12H\n" +
 	"\x0eGetFeedForUser\x12\x1b.blog.GetFeedForUserRequest\x1a\x19.blog.GetAllBlogsResponse\x12H\n" +
 	"\rCreateComment\x12\x1a.blog.CreateCommentRequest\x1a\x1b.blog.CreateCommentResponse\x12H\n" +
 	"\rUpdateComment\x12\x1a.blog.UpdateCommentRequest\x1a\x1b.blog.UpdateCommentResponseB\n" +
@@ -1369,7 +1378,7 @@ var file_blog_service_proto_depIdxs = []int32{
 	1,  // 6: blog.CreateBlogResponse.blog_post:type_name -> blog.BlogFull
 	2,  // 7: blog.CreateCommentResponse.comment:type_name -> blog.Comment
 	2,  // 8: blog.UpdateCommentResponse.comment:type_name -> blog.Comment
-	0,  // 9: blog.GetBlogResponse.blog_post:type_name -> blog.Blog
+	1,  // 9: blog.GetBlogResponse.blog_post:type_name -> blog.BlogFull
 	0,  // 10: blog.UpdateBlogRequest.blog_post:type_name -> blog.Blog
 	0,  // 11: blog.UpdateBlogResponse.blog_post:type_name -> blog.Blog
 	0,  // 12: blog.GetAllBlogsResponse.blogs:type_name -> blog.Blog
@@ -1378,18 +1387,20 @@ var file_blog_service_proto_depIdxs = []int32{
 	21, // 15: blog.BlogService.LikeBlog:input_type -> blog.LikeBlogRequest
 	21, // 16: blog.BlogService.UnlikeBlog:input_type -> blog.LikeBlogRequest
 	18, // 17: blog.BlogService.GetAllBlogs:input_type -> blog.GetAllBlogsRequest
-	19, // 18: blog.BlogService.GetFeedForUser:input_type -> blog.GetFeedForUserRequest
-	7,  // 19: blog.BlogService.CreateComment:input_type -> blog.CreateCommentRequest
-	8,  // 20: blog.BlogService.UpdateComment:input_type -> blog.UpdateCommentRequest
-	9,  // 21: blog.BlogService.CreateBlog:output_type -> blog.CreateBlogResponse
-	22, // 22: blog.BlogService.LikeBlog:output_type -> blog.LikeBlogResponse
-	22, // 23: blog.BlogService.UnlikeBlog:output_type -> blog.LikeBlogResponse
-	20, // 24: blog.BlogService.GetAllBlogs:output_type -> blog.GetAllBlogsResponse
-	20, // 25: blog.BlogService.GetFeedForUser:output_type -> blog.GetAllBlogsResponse
-	10, // 26: blog.BlogService.CreateComment:output_type -> blog.CreateCommentResponse
-	11, // 27: blog.BlogService.UpdateComment:output_type -> blog.UpdateCommentResponse
-	21, // [21:28] is the sub-list for method output_type
-	14, // [14:21] is the sub-list for method input_type
+	12, // 18: blog.BlogService.GetBlogById:input_type -> blog.GetBlogRequest
+	19, // 19: blog.BlogService.GetFeedForUser:input_type -> blog.GetFeedForUserRequest
+	7,  // 20: blog.BlogService.CreateComment:input_type -> blog.CreateCommentRequest
+	8,  // 21: blog.BlogService.UpdateComment:input_type -> blog.UpdateCommentRequest
+	9,  // 22: blog.BlogService.CreateBlog:output_type -> blog.CreateBlogResponse
+	22, // 23: blog.BlogService.LikeBlog:output_type -> blog.LikeBlogResponse
+	22, // 24: blog.BlogService.UnlikeBlog:output_type -> blog.LikeBlogResponse
+	20, // 25: blog.BlogService.GetAllBlogs:output_type -> blog.GetAllBlogsResponse
+	13, // 26: blog.BlogService.GetBlogById:output_type -> blog.GetBlogResponse
+	20, // 27: blog.BlogService.GetFeedForUser:output_type -> blog.GetAllBlogsResponse
+	10, // 28: blog.BlogService.CreateComment:output_type -> blog.CreateCommentResponse
+	11, // 29: blog.BlogService.UpdateComment:output_type -> blog.UpdateCommentResponse
+	22, // [22:30] is the sub-list for method output_type
+	14, // [14:22] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
 	14, // [14:14] is the sub-list for extension extendee
 	0,  // [0:14] is the sub-list for field type_name

@@ -19,6 +19,36 @@ func NewBlogHandler(client blog_proto.BlogServiceClient) *BlogHandler {
 	return &BlogHandler{client: client}
 }
 
+func (h *BlogHandler) GetBlogByIdHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	blogID, ok := vars["blogId"]
+	if !ok {
+		http.Error(w, "Blog ID is missing in URL", http.StatusBadRequest)
+		return
+	}
+
+	grpcRequest := &blog_proto.GetBlogRequest{
+		Id: blogID,
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.GetBlogById(ctx, grpcRequest)
+	if err != nil {
+		log.Printf("Failed to get blog by id via gRPC: %v", err)
+		http.Error(w, "Failed to get blog", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp.GetBlogPost()); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func (h *BlogHandler) GetAllBlogsHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
