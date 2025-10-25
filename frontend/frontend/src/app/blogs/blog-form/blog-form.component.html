@@ -1,0 +1,37 @@
+<div class="form-container">
+  <h2>Kreiraj Novi Blog</h2>
+  <form [formGroup]="blogForm" (ngSubmit)="onSubmit()">
+    
+    <!-- Polja za naslov i sadržaj ostaju ista... -->
+    <div class="form-group">
+      <label for="title">Naslov</label>
+      <input id="title" type="text" formControlName="title">
+    </div>
+    
+    <div class="form-group">
+      <label for="content">Sadržaj (Markdown)</label>
+      <textarea id="content" formControlName="content" rows="10"></textarea>
+    </div>
+
+    <!-- NOVI DEO ZA UPLOAD SLIKA -->
+    <div class="form-group">
+      <label>Slike</label>
+      <!-- Sakrivamo default input, a otvaramo ga klikom na dugme -->
+      <button type="button" class="btn-upload" (click)="fileInput.click()">Odaberi Slike</button>
+      <input hidden type="file" multiple #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg">
+    </div>
+
+    <!-- NOVI DEO ZA PRIKAZ PREVIEWS-A -->
+    <div class="image-previews" *ngIf="imagePreviews.length > 0">
+      <div *ngFor="let preview of imagePreviews; let i = index" class="preview-card">
+        <img [src]="preview.url" [alt]="preview.file.name">
+        <button type="button" class="btn-remove" (click)="removePreview(i)">×</button>
+      </div>
+    </div>
+    
+    <button type="submit" [disabled]="blogForm.invalid || isUploading">
+      <span *ngIf="!isUploading">Kreiraj Blog</span>
+      <span *ngIf="isUploading">Kreiranje u toku...</span>
+    </button>
+  </form>
+</div>

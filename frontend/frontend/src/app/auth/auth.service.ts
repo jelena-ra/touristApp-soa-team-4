@@ -83,6 +83,27 @@ export class AuthService {
     return this.user$;
   }
 
+  public getCurrentUserId(): string | null {
+    try {
+      const accessToken = this.tokenStorage.getAccessToken();
+      if (!accessToken) {
+        return null;
+      }
+
+      const jwtHelperService = new JwtHelperService();
+      const decodedToken = jwtHelperService.decodeToken(accessToken);
+
+      if (decodedToken && decodedToken.id) {
+        return decodedToken.id;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Greška prilikom dekodiranja tokena:", error);
+      return null;
+    }
+  }
+
   login(login: Login): Observable<AuthenticationResponse> {
     return this.http
       .post<AuthenticationResponse>(`http://localhost:8000/api/users/login`, login)

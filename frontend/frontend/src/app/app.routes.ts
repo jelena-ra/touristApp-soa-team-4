@@ -9,6 +9,7 @@ import { TouristLocationComponent } from './tour-execution/tourist-location/tour
 import { ViewToursPage } from './tours/view-tours/view-tours.component';
 import { TourDetailsPage } from './tours/tour-details/tour-detalis.component';
 import { TourExecutionPageComponent } from './tours/tour-execution/tour-execution-page/tour-execution-page';
+import { BlogFormComponent } from './blogs/blog-form/blog-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -21,5 +22,6 @@ export const routes: Routes = [
   { path: 'tourist-location', component: TouristLocationComponent },
   { path: 'tours', component: ViewToursPage },
   { path: 'tours/:id', component: TourDetailsPage },
-    { path: 'tour-execution/:id', component: TourExecutionPageComponent }
+  { path: 'tour-execution/:id', component: TourExecutionPageComponent },
+  { path: 'blogs/create', component: BlogFormComponent }
 ];
