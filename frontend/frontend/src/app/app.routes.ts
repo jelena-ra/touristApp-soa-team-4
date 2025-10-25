@@ -10,6 +10,8 @@ import { ViewToursPage } from './tours/view-tours/view-tours.component';
 import { TourDetailsPage } from './tours/tour-details/tour-detalis.component';
 import { TourExecutionPageComponent } from './tours/tour-execution/tour-execution-page/tour-execution-page';
 import { BlogFormComponent } from './blogs/blog-form/blog-form.component';
+import { RecommendationsComponent } from './following/pages/recommendations/recommendations';
+import { UserListComponent } from './following/pages/user-list/user-list';
 import { BlogDetailComponent } from './blogs/blog-detail/blog-detail';
 
 export const routes: Routes = [
@@ -26,4 +28,6 @@ export const routes: Routes = [
   { path: 'tour-execution/:id', component: TourExecutionPageComponent },
   { path: 'blogs/create', component: BlogFormComponent }
   ,{ path: 'blogs/:id', component: BlogDetailComponent }
+  ,{ path: 'following/recommendations', component: RecommendationsComponent }
+  ,{ path: 'following/users', component: UserListComponent }
 ];

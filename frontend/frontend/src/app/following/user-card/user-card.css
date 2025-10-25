@@ -1,0 +1,35 @@
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fff;
+  margin-bottom: 1rem;
+}
+
+.user-info {
+  font-weight: bold;
+}
+
+.follow-btn, .following-btn { /* Primenjujemo zajedničke stilove */
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.follow-btn {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+/* Novi stil za "Following" dugme */
+.following-btn {
+  background-color: #e9ecef; /* Svetlo siva pozadina */
+  color: #495057; /* Tamno siva boja teksta */
+  border: 1px solid #ced4da;
+  cursor: not-allowed; /* Pokazuje da je dugme neaktivno */
+}

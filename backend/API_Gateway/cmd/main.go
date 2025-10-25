@@ -150,7 +150,7 @@ func main() {
 	router.Handle("/api/users", stakeholdersProxy).Methods("POST", "OPTIONS")
 	router.Handle(
 		"/api/users",
-		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
+		authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api", stakeholdersProxy)),
 	).Methods("GET", "OPTIONS")
 	router.Handle(
 		"/api/profile/{userId}",

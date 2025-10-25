@@ -1,0 +1,16 @@
+<div class="recommendations-container">
+  <h2>Preporuke za praćenje</h2>
+  
+  <div *ngIf="recommendations.length > 0; else noRecommendations">
+    <app-user-card 
+      *ngFor="let user of recommendations"
+      [user]="user"
+      [isFollowing]="false" 
+      (follow)="onFollow($event)">
+    </app-user-card>
+  </div>
+
+  <ng-template #noRecommendations>
+    <p>Trenutno nema preporuka za vas. Istražite više!</p>
+  </ng-template>
+</div>

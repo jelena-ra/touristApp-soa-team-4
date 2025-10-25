@@ -1,0 +1,15 @@
+<!-- src/app/following/user-card/user-card.component.html -->
+
+<div class="user-card">
+  <div class="user-info">
+    <span class="username">{{ user.username }}</span>
+  </div>
+  <div class="actions">
+    <button *ngIf="!isFollowing" class="follow-btn" (click)="onFollowClick()">
+      Follow
+    </button>
+    <button *ngIf="isFollowing" class="following-btn" [disabled]="true">
+      Following
+    </button>
+  </div>
+</div>

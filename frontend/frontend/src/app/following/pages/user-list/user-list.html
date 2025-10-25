@@ -1,0 +1,16 @@
+<div class="user-list-container">
+  <h2>Svi korisnici</h2>
+
+  <div *ngIf="isLoading">
+    <p>Učitavanje korisnika...</p>
+  </div>
+
+  <div *ngIf="!isLoading && users.length > 0">
+    <app-user-card 
+      *ngFor="let user of users"
+      [user]="user"
+      [isFollowing]="followingIds.has(user.id)" 
+      (follow)="onFollow($event)">
+    </app-user-card>
+  </div>
+</div>
