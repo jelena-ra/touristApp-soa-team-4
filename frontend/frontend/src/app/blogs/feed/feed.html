@@ -1,0 +1,19 @@
+<div class="feed-container">
+  <h2>Najnovije objave</h2>
+
+  <div *ngIf="isLoading">
+    <p>Učitavanje blogova...</p>
+  </div>
+
+  <div *ngIf="!isLoading && allBlogs.length > 0; else noBlogs">
+    <app-blog-card 
+      *ngFor="let blog of allBlogs" 
+      [blog]="blog"
+      [isClickable]="followingAuthorIds.has(blog.authorId!)"> 
+    </app-blog-card>
+  </div>
+
+  <ng-template #noBlogs>
+    <p *ngIf="!isLoading">Trenutno nema dostupnih blogova.</p>
+  </ng-template>
+</div>

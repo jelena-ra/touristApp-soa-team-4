@@ -48,4 +48,12 @@ export class BlogService {
   createComment(commentData: CommentPayload): Observable<Comment> {
     return this.http.post<Comment>(`${this.apiUrl}/comments`, commentData);
   }
+
+  getFeedForUser(userId: string): Observable<Blog[]> {
+    return this.http.get<Blog[]>(`${this.apiUrl}/feed/${userId}`);
+  }
+
+  getAllBlogs(): Observable<Blog[]> { // izmeniti!
+    return this.http.get<Blog[]>(this.apiUrl);
+  }
 }

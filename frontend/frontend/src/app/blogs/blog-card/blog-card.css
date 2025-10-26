@@ -1,0 +1,67 @@
+.blog-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+.blog-card:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.card-content {
+  padding: 1rem;
+}
+.card-title {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+}
+.card-excerpt {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.card-footer {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.blog-card.clickable {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.blog-card.clickable:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Stil za "zaključan" overlay */
+.blog-card {
+  position: relative; /* Potrebno da bi se overlay pozicionirao unutar kartice */
+}
+
+.locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7); /* Polu-providna bela */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  font-weight: bold;
+  color: #333;
+  backdrop-filter: blur(2px); /* Zamućuje pozadinu */
+  z-index: 10;
+}

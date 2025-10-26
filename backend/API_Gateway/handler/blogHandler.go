@@ -262,3 +262,33 @@ func (h *BlogHandler) UpdateCommentHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (h *BlogHandler) GetFeedForUserHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID, ok := vars["userId"]
+	if !ok {
+		http.Error(w, "User ID is missing in URL", http.StatusBadRequest)
+		return
+	}
+
+	grpcRequest := &blog_proto.GetFeedForUserRequest{
+		UserId: userID,
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := h.client.GetFeedForUser(ctx, grpcRequest)
+	if err != nil {
+		log.Printf("Failed to get feed for user via gRPC: %v", err)
+		http.Error(w, "Failed to get feed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp.GetBlogs()); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
