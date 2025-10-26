@@ -94,7 +94,23 @@ func (t TourRepositoryMongo) UpdateTour(ctx context.Context, tour *model.Tour) (
 	}
 
 	collection := t.client.Database(t.dbName).Collection(t.collectionName)
-	if _, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, tour); err != nil {
+
+	update := bson.M{
+		"$set": bson.M{
+			"name":        tour.Name,
+			"description": tour.Description,
+			"price":       tour.Price,
+			"difficulty":  tour.Difficulty,
+			"tags":        tour.Tags,
+			"length":      tour.Length,
+			"travelTimes": tour.TravelTimes,
+			"status":      tour.Status,
+			"publishedAt": tour.PublishedAt,
+			"archivedAt":  tour.ArchivedAt,
+		},
+	}
+
+	if _, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, update); err != nil {
 		return nil, err
 	}
 

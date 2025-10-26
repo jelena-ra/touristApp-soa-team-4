@@ -5,6 +5,6 @@ export interface KeyPointInterface {
   latitude: number;
   name: string;
   description: string;
-  imageID?: string;
+  imageUrl?: string;
   order: number;
 }

@@ -9,6 +9,6 @@ type KeyPoint struct {
 	Latitude    float64            `bson:"latitude"`
 	Name        string             `bson:"name"`
 	Description string             `bson:"description"`
-	ImageID     primitive.ObjectID `bson:"image_id,omitempty"`
+	ImageURL    string             `bson:"image_url,omitempty"`
 	Order       int                `bson:"order"`
 }

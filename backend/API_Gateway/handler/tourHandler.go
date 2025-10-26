@@ -135,8 +135,20 @@ func (h *TourHandler) UpdateTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Failed to read request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
 	var updateTourRequest tourProto.UpdateTourRequest
-	if err := json.NewDecoder(r.Body).Decode(&updateTourRequest); err != nil {
+	unmarshaler := protojson.UnmarshalOptions{
+		AllowPartial:   true,
+		DiscardUnknown: true,
+	}
+
+	if err := unmarshaler.Unmarshal(bodyBytes, &updateTourRequest); err != nil {
 		log.Printf("Failed to decode request body: %v", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -332,7 +344,7 @@ func (h *TourHandler) AbandonTourHandle(w http.ResponseWriter, r *http.Request) 
 func (h *TourHandler) GetActiveTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	
+
 	claims, ok := r.Context().Value("user").(*jwt.Claims)
 	if !ok {
 		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
@@ -369,4 +381,58 @@ func (h *TourHandler) GetActiveTourHandle(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
+}
+
+func (h *TourHandler) PublishTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	resp, err := h.client.PublishTour(ctx, &tourProto.PublishTourRequest{TourId: tourId})
+	if err != nil {
+		log.Printf("Failed to publish tour via gRPC: %v", err)
+		http.Error(w, "Failed to publish tour", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"message": resp.Message,
+	})
+	if err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *TourHandler) ArchiveTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	resp, err := h.client.ArchiveTour(ctx, &tourProto.ArchiveTourRequest{TourId: tourId})
+	if err != nil {
+		log.Printf("Failed to archive tour via gRPC: %v", err)
+		http.Error(w, "Failed to archive tour", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"message": resp.Message,
+	})
+	if err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

@@ -186,6 +186,8 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_started
+    volumes:
+      - tours_uploads_data:/app/uploads
 
   tour-db:
     image: mongo:latest
@@ -268,7 +270,8 @@ services:
       - jaeger
       - purchase-service
       -  tour-service
-
+    volumes:
+      - tours_uploads_data:/app/uploads
   
   prometheus:
     image: prom/prometheus:latest
@@ -359,5 +362,6 @@ volumes:
   tour_db_data:
   grafana_data:
   stakeholder_images_data:
+  tours_uploads_data:
   saga_db_data:
   rabbitmq_data:
