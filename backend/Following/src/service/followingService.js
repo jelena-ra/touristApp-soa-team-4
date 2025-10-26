@@ -29,24 +29,37 @@ class FollowingService {
     }
   }
 
-  async getRecommendations(userId) { 
-    const userExists = await stakeholdersClient.checkUserExistence(userId);
-    if (!userExists) {
-      throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
-    }
+async getRecommendations(userId) {
+  console.log(`Započinjanje procesa preporuka za korisnika (ID: ${userId})`);
 
-    const recommendedIds = await followingRepository.getRecommendation(userId);
-    if (!recommendedIds || recommendedIds.length === 0) {
-      return [];
-    }
-    const profilePromises = recommendedIds.map(id => {
-      return stakeholdersClient.getProfileByUserId(id);
-    });
-
-    const recommendedProfiles = await Promise.all(profilePromises);
-    const finalProfiles = recommendedProfiles.filter(profile => profile !== null);
-    return finalProfiles;
+  const userExists = await stakeholdersClient.checkUserExistence(userId);
+  if (!userExists) {
+    console.error(`Greška: Korisnik (ID: ${userId}) ne postoji.`);
+    throw new Error(`Korisnik (ID: ${userId}) ne postoji.`);
   }
+
+  const recommendedIds = await followingRepository.getRecommendation(userId);
+  if (!recommendedIds || recommendedIds.length === 0) {
+    console.log(`Nema preporučenih ID-jeva iz repozitorijuma za korisnika (ID: ${userId}).`);
+    return [];
+  }
+
+  console.log(`Dobijeno ${recommendedIds.length} preporučenih ID-jeva iz repozitorijuma.`);
+
+  const profilePromises = recommendedIds.map(id => {
+    return stakeholdersClient.getUserByUserId(id);
+  });
+
+  const recommendedUsers = await Promise.all(profilePromises);
+
+  // Filtriramo null vrednosti koje mogu doći iz klijent servisa
+  const finalUsers = recommendedUsers.filter(user => user !== null);
+
+  console.log(`Dobijeno ${finalUsers.length} validnih korisničkih profila iz klijent servisa.`);
+
+  console.log(`Završen proces preporuka za korisnika (ID: ${userId}).`);
+  return finalUsers;
+}
 
   async getFollowingsForUser(userId){
     const userExists = await stakeholdersClient.checkUserExistence(userId);

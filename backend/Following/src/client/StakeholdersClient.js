@@ -19,10 +19,6 @@ const stakeholdersClient = {
     }
   },
 
-  /**
-   * @param {string} userId 
-   * @returns {Promise<object|null>} 
-   */
   async getProfileByUserId(userId) {
     try {
       const response = await axios.get(`${STAKEHOLDERS_API_URL}/profile/${userId}`);      
@@ -33,6 +29,20 @@ const stakeholdersClient = {
         return null; 
       }
       console.error(`Greška pri dohvatanju profila za korisnika ${userId}:`, error.message);
+      throw new Error('Stakeholders servis nije dostupan ili je došlo do greške.');
+    }
+  }
+  ,
+
+  async getUserByUserId(userId) {
+    try {
+      const response = await axios.get(`${STAKEHOLDERS_API_URL}/users/${userId}`, { timeout: 5000 });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null;
+      }
+      console.error(`Greška pri komunikaciji sa Stakeholders servisom za korisnika ${userId}:`, error.message);
       throw new Error('Stakeholders servis nije dostupan ili je došlo do greške.');
     }
   }

@@ -30,7 +30,6 @@ export class RecommendationsComponent implements OnInit {
     }
   }
 
-  // Metoda koja se poziva kada stigne `follow` događaj iz kartice
   onFollow(userIdToFollow: string): void {
     if (!this.currentUserId) return;
 
@@ -40,13 +39,9 @@ export class RecommendationsComponent implements OnInit {
     };
 
     this.followingService.followUser(payload).subscribe(() => {
-      // Optimistic update: uklonimo korisnika iz liste preporuka
-      // jer ga sada pratimo. Ovo je dobar UX.
       this.recommendations = this.recommendations.filter(user => user.id !== userIdToFollow);
       alert('Korisnik uspešno zapraćen!');
     });
   }
 
-  // Metodu za unfollow nećemo implementirati ovde, jer preporuke
-  // obično ne prikazuju ljude koje već pratimo.
 }

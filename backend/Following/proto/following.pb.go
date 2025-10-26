@@ -125,32 +125,31 @@ func (x *FollowResponse) GetMessage() string {
 	return ""
 }
 
-type Profile struct {
+type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Surname       string                 `protobuf:"bytes,3,opt,name=surname,proto3" json:"surname,omitempty"`
-	Biography     string                 `protobuf:"bytes,4,opt,name=biography,proto3" json:"biography,omitempty"`
-	Moto          string                 `protobuf:"bytes,5,opt,name=moto,proto3" json:"moto,omitempty"`
-	ImageURL      string                 `protobuf:"bytes,6,opt,name=imageURL,proto3" json:"imageURL,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	Blocked       bool                   `protobuf:"varint,5,opt,name=blocked,proto3" json:"blocked,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Profile) Reset() {
-	*x = Profile{}
+func (x *User) Reset() {
+	*x = User{}
 	mi := &file_following_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Profile) String() string {
+func (x *User) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Profile) ProtoMessage() {}
+func (*User) ProtoMessage() {}
 
-func (x *Profile) ProtoReflect() protoreflect.Message {
+func (x *User) ProtoReflect() protoreflect.Message {
 	mi := &file_following_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -162,51 +161,44 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Profile.ProtoReflect.Descriptor instead.
-func (*Profile) Descriptor() ([]byte, []int) {
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
 	return file_following_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Profile) GetUserId() string {
+func (x *User) GetId() string {
 	if x != nil {
-		return x.UserId
+		return x.Id
 	}
 	return ""
 }
 
-func (x *Profile) GetName() string {
+func (x *User) GetUsername() string {
 	if x != nil {
-		return x.Name
+		return x.Username
 	}
 	return ""
 }
 
-func (x *Profile) GetSurname() string {
+func (x *User) GetEmail() string {
 	if x != nil {
-		return x.Surname
+		return x.Email
 	}
 	return ""
 }
 
-func (x *Profile) GetBiography() string {
+func (x *User) GetRole() string {
 	if x != nil {
-		return x.Biography
+		return x.Role
 	}
 	return ""
 }
 
-func (x *Profile) GetMoto() string {
+func (x *User) GetBlocked() bool {
 	if x != nil {
-		return x.Moto
+		return x.Blocked
 	}
-	return ""
-}
-
-func (x *Profile) GetImageURL() string {
-	if x != nil {
-		return x.ImageURL
-	}
-	return ""
+	return false
 }
 
 type GetRecommendationsRequest struct {
@@ -255,7 +247,7 @@ func (x *GetRecommendationsRequest) GetUserId() string {
 
 type GetRecommendationsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Profiles      []*Profile             `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -290,9 +282,9 @@ func (*GetRecommendationsResponse) Descriptor() ([]byte, []int) {
 	return file_following_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetRecommendationsResponse) GetProfiles() []*Profile {
+func (x *GetRecommendationsResponse) GetUsers() []*User {
 	if x != nil {
-		return x.Profiles
+		return x.Users
 	}
 	return nil
 }
@@ -495,18 +487,17 @@ const file_following_proto_rawDesc = "" +
 	"followedId\"B\n" +
 	"\x0eFollowResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x9d\x01\n" +
-	"\aProfile\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
-	"\asurname\x18\x03 \x01(\tR\asurname\x12\x1c\n" +
-	"\tbiography\x18\x04 \x01(\tR\tbiography\x12\x12\n" +
-	"\x04moto\x18\x05 \x01(\tR\x04moto\x12\x1a\n" +
-	"\bimageURL\x18\x06 \x01(\tR\bimageURL\"3\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"v\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12\x18\n" +
+	"\ablocked\x18\x05 \x01(\bR\ablocked\"3\n" +
 	"\x19GetRecommendationsRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\"L\n" +
-	"\x1aGetRecommendationsResponse\x12.\n" +
-	"\bprofiles\x18\x01 \x03(\v2\x12.following.ProfileR\bprofiles\"-\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\"C\n" +
+	"\x1aGetRecommendationsResponse\x12%\n" +
+	"\x05users\x18\x01 \x03(\v2\x0f.following.UserR\x05users\"-\n" +
 	"\x1bGetFollowingsForUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"0\n" +
 	"\x1cGetFollowingsForUserResponse\x12\x10\n" +
@@ -543,7 +534,7 @@ var file_following_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_following_proto_goTypes = []any{
 	(*FollowRequest)(nil),                // 0: following.FollowRequest
 	(*FollowResponse)(nil),               // 1: following.FollowResponse
-	(*Profile)(nil),                      // 2: following.Profile
+	(*User)(nil),                         // 2: following.User
 	(*GetRecommendationsRequest)(nil),    // 3: following.GetRecommendationsRequest
 	(*GetRecommendationsResponse)(nil),   // 4: following.GetRecommendationsResponse
 	(*GetFollowingsForUserRequest)(nil),  // 5: following.GetFollowingsForUserRequest
@@ -552,7 +543,7 @@ var file_following_proto_goTypes = []any{
 	(*FollowExistsResponse)(nil),         // 8: following.FollowExistsResponse
 }
 var file_following_proto_depIdxs = []int32{
-	2, // 0: following.GetRecommendationsResponse.profiles:type_name -> following.Profile
+	2, // 0: following.GetRecommendationsResponse.users:type_name -> following.User
 	0, // 1: following.FollowingService.FollowUser:input_type -> following.FollowRequest
 	3, // 2: following.FollowingService.GetRecommendations:input_type -> following.GetRecommendationsRequest
 	5, // 3: following.FollowingService.GetFollowingsForUser:input_type -> following.GetFollowingsForUserRequest

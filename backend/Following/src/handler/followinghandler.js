@@ -40,9 +40,7 @@ const followingHandler = {
       const { userId } = call.request;
 
       const profiles = await followingService.getRecommendations(userId);
-
-      callback(null, { profiles: profiles });
-
+      callback(null, { users: profiles });
     } catch (error) {
       console.error("Greška u handleru prilikom dohvatanja preporuka:", error.message);
       callback({
