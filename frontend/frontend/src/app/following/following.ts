@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { User } from '../auth/model/user.model';
 
 export interface FollowPayload {
   followerId: string;
   followedId: string;
+}
+
+export interface RecommendationsResponse {
+  users: User[];
 }
 
 @Injectable({
@@ -17,8 +21,11 @@ export class FollowingService {
   constructor(private http: HttpClient) { }
 
   getRecommendations(userId: string): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/recommendations/${userId}`);
-  }
+  return this.http.get<RecommendationsResponse>(`${this.apiUrl}/recommendations/${userId}`)
+    .pipe(
+      map(response => response.users) 
+    );
+}
 
   followUser(payload: FollowPayload): Observable<any> {
     return this.http.post(`${this.apiUrl}/follow`, payload);
