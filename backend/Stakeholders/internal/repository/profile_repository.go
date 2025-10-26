@@ -191,3 +191,41 @@ func (r *ProfileRepository) UpdateProfile(profile model.Profile, ctx context.Con
 
 	return profile, nil
 }
+func (r *ProfileRepository) DeleteProfile(userId string, ctx context.Context) error {
+	session := r.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close(ctx)
+
+	_, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `
+			MATCH (p:Person {userId: $userId})
+			DETACH DELETE p
+		`
+		params := map[string]any{
+			"userId": userId,
+		}
+
+		// Run the delete query
+		result, err := tx.Run(ctx, query, params)
+		if err != nil {
+			return nil, fmt.Errorf("failed to execute delete query: %w", err)
+		}
+
+		// Optionally check number of deleted nodes
+		summary, err := result.Consume(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to consume result: %w", err)
+		}
+
+		if summary.Counters().NodesDeleted() == 0 {
+			return nil, fmt.Errorf("no profile found with userId %s", userId)
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to delete profile: %w", err)
+	}
+
+	return nil
+}

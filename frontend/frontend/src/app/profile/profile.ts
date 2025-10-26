@@ -5,6 +5,7 @@ import { ImageService } from '../image/image.service';
 import { TokenStorage
 
  } from '../auth/jwt/token.service';
+ import { switchMap, map } from 'rxjs/operators';
  import { User } from '../auth/model/user.model';
  import { AuthService } from '../auth/auth.service';
  import { MatIconModule } from '@angular/material/icon';
@@ -21,15 +22,26 @@ import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from "@angular/material/card";
 import { MatChipsModule } from '@angular/material/chips';
+import { PurchaseService } from '../purchase/service/purchase.service';
 export interface Profile {
   userId: string;
   name: string;
   surname: string;
-  imageURL: string;
+  photoId: string;
   biography: string;
   moto: string;
  money:number;
 }
+
+
+export interface TourPurchaseToken  {
+	id : string;  
+	UserID : string;
+	tour_id : string;
+	Token : string;
+}
+
+
 @Component({
   selector: 'app-profile',
    standalone: true, 
@@ -50,14 +62,13 @@ export interface Profile {
   ]
 })
 
-
-
 export class ProfileComponent implements OnInit {
   userTours: TourInterface[] = []
   
      activeExecution: TourExecution | null = null;
 profile: Profile | null = null;
   private userId: string = "";
+  userTokens: TourPurchaseToken[] = [];  
   user: User | null = null;
   loading = true;
   error = false;
@@ -65,7 +76,7 @@ profile: Profile | null = null;
 
   constructor( private destroyRef: DestroyRef,
         private snackBar: MatSnackBar,
-        private tourExecutionService: TourExecutionService,private http: HttpClient,private tourService: TourService,   private imageService: ImageService,private authService: TokenStorage,  private auth: AuthService ) {}
+        private tourExecutionService: TourExecutionService,private http: HttpClient,private tourService: TourService,  private purchaseService: PurchaseService, private imageService: ImageService,private authService: TokenStorage,  private auth: AuthService ) {}
 
 
 
@@ -76,7 +87,7 @@ profile: Profile | null = null;
             console.log('Trenutni korisnik:', this.userId);
             console.log('Trenutni korisnik:', this.user);
         });
-    this.getAllTours()
+    this.loadUserToursWithTokens()
     this.getProfile();
   }
 
@@ -87,10 +98,11 @@ profile: Profile | null = null;
         'Authorization': `Bearer ${token}`
       } }).subscribe({
       next: (data) => {
+        console.log("PPPORFIL: ", data)
         this.profile = data;
         this.loading = false;
         this.imageService.setControllerPath('/images'); 
-       this.profileImageSrc = `http://localhost:8081/image/${this.profile.imageURL}`;
+       this.profileImageSrc = `http://localhost:8000/api/image/${this.profile.photoId}`;
        
        
       },
@@ -103,14 +115,54 @@ profile: Profile | null = null;
   }
 
 
-    getAllTours(): void {
+   /* getAllTours(): void {
+        this.purchaseService.getTokens(this.userId).pipe(takeUntilDestroyed(this.destroyRef))
         this.tourService.getAll()
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((response) => {
             this.userTours = response
             this.checkActiveExecution();
             });
-    }
+    }*/
+  private loadUserToursWithTokens(): void {
+      this.purchaseService.getTokens(this.userId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      switchMap((tokens: TourPurchaseToken[]) => {
+        this.userTokens = tokens; 
+        console.log("Tokens: ", tokens)
+        if (tokens.length === 0) {
+          return of([]);
+        }
+
+        const tourIdsFromTokens = tokens.map(token => token. tour_id);
+       
+        const uniqueTourIds = [...new Set(tourIdsFromTokens)];
+
+      
+        return this.tourService.getAll().pipe(
+          map((allTours: TourInterface[]) => {
+            console.log("AllTours: ", allTours)
+            return allTours.filter(tour => uniqueTourIds.includes(tour.id));
+          }),
+          catchError(error => {
+            console.error('Error fetching all tours:', error);
+    
+            return of([]);
+          })
+        );
+      }),
+      catchError(error => {
+        console.error('Error fetching user tokens:', error);
+    
+        return of([]);
+      })
+    ).subscribe((filteredTours: TourInterface[]) => {
+      this.userTours = filteredTours;
+      this.checkActiveExecution();
+      console.log('User-specific tours loaded:', this.userTours);
+    });
+  }
+
 
 
     checkActiveExecution(): void {

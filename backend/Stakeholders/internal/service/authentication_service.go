@@ -1,34 +1,33 @@
 package service
 
 import (
+	"context"
 	"errors"
-	//"net/http" 
+	//"net/http"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/auth"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 )
 
-
 var (
-	ErrUserNotFound          = errors.New("user not found or invalid credentials")
-	ErrUsernameNotUnique     = errors.New("username is already in use")
-	ErrInvalidArgument       = errors.New("invalid argument")
+	ErrUserNotFound      = errors.New("user not found or invalid credentials")
+	ErrUsernameNotUnique = errors.New("username is already in use")
+	ErrInvalidArgument   = errors.New("invalid argument")
 )
 
-
 type AuthenticationService struct {
-	userRepo *repository.UserRepository
-	tokenGen *auth.JWTGenerator
+	userRepo    *repository.UserRepository
+	profileRepo *repository.ProfileRepository
+	tokenGen    *auth.JWTGenerator
 }
 
-
-func NewAuthenticationService(userRepo *repository.UserRepository, tokenGen *auth.JWTGenerator) *AuthenticationService {
+func NewAuthenticationService(userRepo *repository.UserRepository, tokenGen *auth.JWTGenerator, profileRepo *repository.ProfileRepository) *AuthenticationService {
 	return &AuthenticationService{
-		userRepo: userRepo,
-		tokenGen: tokenGen,
+		userRepo:    userRepo,
+		tokenGen:    tokenGen,
+		profileRepo: profileRepo,
 	}
 }
-
 
 func (s *AuthenticationService) Login(credentials *model.CredentialsDto) (*model.AuthenticationTokensDto, error) {
 
@@ -37,11 +36,9 @@ func (s *AuthenticationService) Login(credentials *model.CredentialsDto) (*model
 		return nil, ErrUserNotFound
 	}
 
-
 	if credentials.Password != user.Password {
 		return nil, ErrUserNotFound
 	}
-	
 
 	token, err := s.tokenGen.GenerateAccessToken(user)
 	if err != nil {
@@ -52,7 +49,6 @@ func (s *AuthenticationService) Login(credentials *model.CredentialsDto) (*model
 		AccessToken: token,
 	}, nil
 }
-
 
 func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrationDto) (*model.AuthenticationTokensDto, error) {
 
@@ -69,12 +65,11 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		role = model.UserRoleAuthor
 	}
 
-
 	user := &model.User{
 		Username: account.Username,
 		Password: account.Password,
 		Email:    account.Email,
-		Role: 	  role,
+		Role:     role,
 		Blocked:  false,
 	}
 
@@ -83,6 +78,19 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		return nil, ErrInvalidArgument
 	}
 
+	defaultProfile := model.Profile{
+		UserId:    createdUser.ID,
+		Name:      createdUser.Username,
+		Surname:   "",
+		Biography: "Default biography",
+		Moto:      "Default moto",
+		PhotoId:   "",
+		Money:     20000.0,
+	}
+	_, err = s.profileRepo.CreateProfile(defaultProfile, context.Background())
+	if err != nil {
+		return nil, errors.New("failed to create default profile")
+	}
 
 	token, err := s.tokenGen.GenerateAccessToken(createdUser)
 	if err != nil {
@@ -108,7 +116,6 @@ func (s *AuthenticationService) ValidateTokenAndRole(token, requiredRole string)
 	if err != nil {
 		return nil, err
 	}
-
 
 	if claims.Role != requiredRole {
 		return nil, errors.New("rola iz tokena se ne podudara sa trazenom rolom")

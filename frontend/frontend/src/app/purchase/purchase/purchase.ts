@@ -11,6 +11,7 @@ import { Cart } from '../model/cart.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TokenStorage } from '../../auth/jwt/token.service';
+import { ProfileService } from '../../profileform/profile.service';
 
 @Component({
   standalone: true,
@@ -38,7 +39,8 @@ export class CartComponent implements OnInit {
     private authService: AuthService,
     private purchaseService: PurchaseService,
     private snackBar: MatSnackBar,
-    private tokenStorage : TokenStorage
+    private tokenStorage : TokenStorage,
+    private profileService : ProfileService
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +48,9 @@ export class CartComponent implements OnInit {
     this.authService.getUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.userId = user.id;
+        this.profileService.getProfileByUserId(this.userId).subscribe(profile=>{
+          this.userMoney = profile.money;
+        })
         this.loadCart();
       } else {
         this.snackBar.open('Morate biti ulogovani da biste videli korpu.', 'Close', { duration: 3000 });
