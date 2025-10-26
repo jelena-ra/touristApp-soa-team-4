@@ -40,9 +40,22 @@ export class PurchaseService {
   checkout(userId: string): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(`${this.baseUrl}/checkout`, { user_id: userId },  { headers: this.getAuthHeaders() });
   }
+
+  getTokens(userId: string): Observable <TourPurchaseToken[]> {
+    return this.http.get<TourPurchaseToken[]>(`${this.baseUrl}/tokens?user_id=${userId}`,  { headers: this.getAuthHeaders() });
+  }
 }
 export interface CartResponse {
   cart: Cart | null; 
   items: OrderItem[];
   total: number;
+}
+
+
+
+export interface TourPurchaseToken  {
+	id : string;  
+	UserID : string;
+	tour_id : string;
+	Token : string;
 }

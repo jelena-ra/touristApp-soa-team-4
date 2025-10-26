@@ -15,6 +15,7 @@ type Blog struct {
 	Likes     []string           `bson:"likes"`
 	Images    []string           `bson:"images"`
 	Comments  []Comment          `bson:"comments,omitempty"`
+	Deleted   bool               `bson:"deleted"`
 }
 
 type Comment struct {
@@ -23,4 +24,5 @@ type Comment struct {
 	Content      string             `bson:"content"`
 	CreatedAt    time.Time          `bson:"createdAt"`
 	LastModified time.Time          `bson:"lastModified"`
+	Deleted      bool               `bson:"deleted"`
 }

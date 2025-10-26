@@ -5,18 +5,24 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/model"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/repository"
+	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/saga"
 )
 
 type UserService struct {
-	repo *repository.UserRepository
+	repo         *repository.UserRepository
+	profileRepo  *repository.ProfileRepository // Dodaj ProfileRepository
+	orchestrator *saga.SagaOrchestrator
 }
 
-func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo *repository.UserRepository, profileRepo *repository.ProfileRepository, orchestrator *saga.SagaOrchestrator) *UserService {
+	return &UserService{
+		repo:         repo,
+		profileRepo:  profileRepo,
+		orchestrator: orchestrator,
+	}
 }
-
 func (service *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
 
 	users, err := service.repo.FindAll(ctx)
@@ -35,6 +41,7 @@ func (service *UserService) GetUser(ctx context.Context, id string) (*model.User
 	return user, nil
 }
 
+/*
 func (service *UserService) Block(id string) (*model.User, error) {
 
 	user, err := service.repo.GetByID(id)
@@ -51,6 +58,26 @@ func (service *UserService) Block(id string) (*model.User, error) {
 	}
 
 	return updatedUser, nil
+}*/
+
+func (service *UserService) Block(ctx context.Context, id string) (*model.User, string, error) {
+	userID := id
+	/*if err != nil {
+		return nil, "", fmt.Errorf("invalid user ID format: %w", err)
+	}*/
+
+	sagaID, err := service.orchestrator.InitiateUserBlockingSaga(ctx, userID)
+	if err != nil {
+		fmt.Printf("Error initiating saga for user %d: %v\n", userID, err)
+		return nil, "", fmt.Errorf("error with saga initiation: %w", err)
+	}
+
+	user, err := service.repo.GetByid(id)
+	if err != nil {
+		return nil, "", errors.New("user not found after saga initiation")
+	}
+
+	return user, sagaID, nil
 }
 
 func (service *UserService) CheckIfUserExists(id string) (bool, error) {

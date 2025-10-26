@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +15,8 @@ type CommentRepository interface {
 	CreateComment(ctx context.Context, blog *model.Comment) (*model.Comment, error)
 	Update(ctx context.Context, comment *model.Comment) (*model.Comment, error)
 	GetById(ctx context.Context, id string) (*model.Comment, error)
+	DeleteAllCommentsByUserID(ctx context.Context, userID string) error
+	DeleteComment(ctx context.Context, id string) error
 }
 
 type CommentRepositoryMongo struct {
@@ -70,4 +74,30 @@ func (r *CommentRepositoryMongo) Update(ctx context.Context, comment *model.Comm
 		return nil, err
 	}
 	return comment, nil
+}
+
+// DeleteAllCommentsByUserID briše sve komentare koje je objavio dati korisnik.
+func (r *CommentRepositoryMongo) DeleteAllCommentsByUserID(ctx context.Context, userID string) error {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	filter := bson.M{"userid": userID} // Pretpostavljamo da je UserID string
+
+	result, err := collection.DeleteMany(ctx, filter)
+	if err != nil {
+		return fmt.Errorf("failed to delete comments for user %s: %w", userID, err)
+	}
+	log.Printf("Deleted %d comments for user %s", result.DeletedCount, userID)
+	return nil
+}
+
+func (r *CommentRepositoryMongo) DeleteComment(ctx context.Context, id string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid comment ID: %w", err)
+	}
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	_, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
+	if err != nil {
+		return fmt.Errorf("failed to delete comment: %w", err)
+	}
+	return nil
 }
