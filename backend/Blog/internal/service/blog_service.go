@@ -89,6 +89,19 @@ func (s *BlogService) GetBlogById(ctx context.Context, blogId string) (*model.Bl
 	if err != nil {
 		return nil, err
 	}
+
+	comments, err := s.repoComment.GetByBlogId(ctx, blogId)
+	if err != nil {
+		return nil, err
+	}
+
+	blog.Comments = make([]model.Comment, 0, len(comments))
+	for _, comment := range comments {
+		if comment != nil {
+			blog.Comments = append(blog.Comments, *comment)
+		}
+	}
+
 	return blog, nil
 }
 

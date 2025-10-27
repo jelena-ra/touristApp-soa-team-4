@@ -32,19 +32,17 @@
     </form>
   </div>
 
-  <!-- Poruka za korisnike koji nisu ulogovani -->
   <div *ngIf="!currentUserId" class="login-prompt">
     <p>Morate biti <a routerLink="/login">ulogovani</a> da biste ostavili komentar.</p>
   </div>
 
-  <!-- Lista postojećih komentara -->
   <div class="comments-list" *ngIf="blog.comments && blog.comments.length > 0; else noComments">
     <div *ngFor="let comment of blog.comments" class="comment">
-      <p class="comment-author">Korisnik: {{ comment.user_id }}</p>
+      <p class="comment-author">Korisnik: {{ comment.userId }}</p>
       <p class="comment-content">{{ comment.content }}</p>
-      <p class="comment-date">{{ comment.created_at | date:'medium' }}</p>
+      <p class="comment-date">{{ comment.createdAt | date:'medium' }}</p>
     </div>
-  </div>
+</div>
 
   <!-- Poruka ako nema komentara -->
   <ng-template #noComments>

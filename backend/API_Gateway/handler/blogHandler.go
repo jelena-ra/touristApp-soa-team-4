@@ -195,9 +195,20 @@ func (h *BlogHandler) CreateCommentHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	blogId, ok1 := reqBody.CommentInput["blogId"].(string)
+	userId, ok2 := reqBody.CommentInput["userId"].(string)
+	content, ok3 := reqBody.CommentInput["content"].(string)
+
+	if !ok1 || !ok2 || !ok3 {
+		log.Println("One or more required fields are missing or have an incorrect type in commentInput")
+		http.Error(w, "Required fields are missing or invalid", http.StatusBadRequest)
+		return
+	}
+
 	commentInput := &blog_proto.CreateCommentInput{
-		UserId:  reqBody.CommentInput["userId"].(string),
-		Content: reqBody.CommentInput["content"].(string),
+		BlogId:  blogId,
+		UserId:  userId,
+		Content: content,
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
