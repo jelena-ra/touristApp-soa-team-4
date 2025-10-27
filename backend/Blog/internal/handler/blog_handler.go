@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"log"
 	"time"
 
 	pb "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
@@ -15,13 +18,16 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const maxImageSize = 5 << 20
+
 type BlogHandler struct {
 	blog_proto.UnimplementedBlogServiceServer
-	service *service.BlogService
+	service      *service.BlogService
+	imageService *service.ImageService
 }
 
-func NewBlogHandler(service *service.BlogService) *BlogHandler {
-	return &BlogHandler{service: service}
+func NewBlogHandler(service *service.BlogService, imageService *service.ImageService) *BlogHandler {
+	return &BlogHandler{service: service, imageService: imageService}
 }
 
 func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlogRequest) (*blog_proto.CreateBlogResponse, error) {
@@ -286,4 +292,49 @@ func (h *BlogHandler) UpdateComment(ctx context.Context, req *blog_proto.UpdateC
 	return &blog_proto.UpdateCommentResponse{
 		Comment: protoCommentRes,
 	}, nil
+}
+
+func (h *BlogHandler) UploadImage(stream pb.BlogService_UploadImageServer) error {
+	req, err := stream.Recv()
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "Ne mogu pročitati info: %v", err)
+	}
+
+	imageInfo := req.GetInfo()
+	if imageInfo == nil {
+		return status.Errorf(codes.InvalidArgument, "Prva poruka mora sadržati info")
+	}
+
+	blogID, err := primitive.ObjectIDFromHex(imageInfo.GetBlogId())
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "Nevažeći Blog ID")
+	}
+
+	imageData := bytes.Buffer{}
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return status.Errorf(codes.Internal, "Greška pri čitanju: %v", err)
+		}
+		chunk := req.GetChunkData()
+		if len(imageData.Bytes())+len(chunk) > maxImageSize {
+			return status.Errorf(codes.InvalidArgument, "Slika je prevelika")
+		}
+		imageData.Write(chunk)
+	}
+
+	fileName, err := h.imageService.SaveImage(stream.Context(), blogID, imageInfo.GetImageType(), &imageData)
+	if err != nil {
+		log.Printf("Greška pri čuvanju slike: %v", err)
+		return status.Errorf(codes.Internal, "Greška pri čuvanju slike")
+	}
+
+	res := &pb.UploadImageResponse{
+		FileName: fileName,
+		Size:     uint64(imageData.Len()),
+	}
+	return stream.SendAndClose(res)
 }

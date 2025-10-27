@@ -27,6 +27,7 @@ const (
 	BlogService_GetFeedForUser_FullMethodName = "/blog.BlogService/GetFeedForUser"
 	BlogService_CreateComment_FullMethodName  = "/blog.BlogService/CreateComment"
 	BlogService_UpdateComment_FullMethodName  = "/blog.BlogService/UpdateComment"
+	BlogService_UploadImage_FullMethodName    = "/blog.BlogService/UploadImage"
 )
 
 // BlogServiceClient is the client API for BlogService service.
@@ -41,6 +42,7 @@ type BlogServiceClient interface {
 	GetFeedForUser(ctx context.Context, in *GetFeedForUserRequest, opts ...grpc.CallOption) (*GetAllBlogsResponse, error)
 	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
+	UploadImage(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadImageRequest, UploadImageResponse], error)
 }
 
 type blogServiceClient struct {
@@ -131,6 +133,19 @@ func (c *blogServiceClient) UpdateComment(ctx context.Context, in *UpdateComment
 	return out, nil
 }
 
+func (c *blogServiceClient) UploadImage(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadImageRequest, UploadImageResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &BlogService_ServiceDesc.Streams[0], BlogService_UploadImage_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[UploadImageRequest, UploadImageResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BlogService_UploadImageClient = grpc.ClientStreamingClient[UploadImageRequest, UploadImageResponse]
+
 // BlogServiceServer is the server API for BlogService service.
 // All implementations must embed UnimplementedBlogServiceServer
 // for forward compatibility.
@@ -143,6 +158,7 @@ type BlogServiceServer interface {
 	GetFeedForUser(context.Context, *GetFeedForUserRequest) (*GetAllBlogsResponse, error)
 	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
+	UploadImage(grpc.ClientStreamingServer[UploadImageRequest, UploadImageResponse]) error
 	mustEmbedUnimplementedBlogServiceServer()
 }
 
@@ -176,6 +192,9 @@ func (UnimplementedBlogServiceServer) CreateComment(context.Context, *CreateComm
 }
 func (UnimplementedBlogServiceServer) UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateComment not implemented")
+}
+func (UnimplementedBlogServiceServer) UploadImage(grpc.ClientStreamingServer[UploadImageRequest, UploadImageResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method UploadImage not implemented")
 }
 func (UnimplementedBlogServiceServer) mustEmbedUnimplementedBlogServiceServer() {}
 func (UnimplementedBlogServiceServer) testEmbeddedByValue()                     {}
@@ -342,6 +361,13 @@ func _BlogService_UpdateComment_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlogService_UploadImage_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BlogServiceServer).UploadImage(&grpc.GenericServerStream[UploadImageRequest, UploadImageResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BlogService_UploadImageServer = grpc.ClientStreamingServer[UploadImageRequest, UploadImageResponse]
+
 // BlogService_ServiceDesc is the grpc.ServiceDesc for BlogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -382,6 +408,12 @@ var BlogService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BlogService_UpdateComment_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "UploadImage",
+			Handler:       _BlogService_UploadImage_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "blog_service.proto",
 }

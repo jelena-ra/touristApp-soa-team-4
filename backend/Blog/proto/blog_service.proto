@@ -113,6 +113,23 @@ message GetAllBlogsResponse {
   repeated Blog blogs = 1; 
 }
 
+message UploadImageRequest {
+  oneof data {
+    ImageInfo info = 1;
+    bytes chunk_data = 2;
+  }
+}
+
+message ImageInfo {
+  string blog_id = 1;
+  string image_type = 2;
+}
+
+message UploadImageResponse {
+  string file_name = 1;
+  uint64 size = 2;
+}
+
 service BlogService {
   rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
   rpc LikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
@@ -122,6 +139,7 @@ service BlogService {
   rpc GetFeedForUser (GetFeedForUserRequest) returns (GetAllBlogsResponse);
   rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
+  rpc UploadImage(stream UploadImageRequest) returns (UploadImageResponse);
 }
 
 message LikeBlogRequest {

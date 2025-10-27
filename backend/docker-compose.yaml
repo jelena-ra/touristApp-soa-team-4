@@ -45,8 +45,11 @@ services:
       - backend
     ports:
       - "8082:8082"
+      - "8086:8086"
     env_file:
       - ./Blog/.env
+    volumes:
+      - blog_images_data:/app/images
     depends_on:
       following-service:
         condition: service_started
@@ -252,3 +255,4 @@ volumes:
   following_db_data:
   tour_db_data:
   grafana_data:
+  blog_images_data:

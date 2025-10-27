@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -69,8 +70,9 @@ func main() {
 	blogRepo := repository.NewBlogRepository(mongoClient, dbName, collectionName)
 	commentRepo := repository.NewCommentRepository(mongoClient, dbName, "comments")
 	blogService := service.NewBlogService(blogRepo, commentRepo, followingClient)
+	imageService := service.NewImageService(blogRepo)
 
-	blogHandler := handler.NewBlogHandler(blogService)
+	blogHandler := handler.NewBlogHandler(blogService, imageService)
 
 	port := os.Getenv("MONGO_PORT")
 	if port == "" {
@@ -88,4 +90,15 @@ func main() {
 
 	log.Println("Blog gRPC service is running on port 8082...")
 	log.Fatal(grpcServer.Serve(listen))
+}
+
+func startImageServer() {
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir("/app/images")) // Putanja unutar kontejnera
+	mux.Handle("/images/", http.StripPrefix("/images/", fileServer))
+
+	log.Println("Pokrećem server za slike na portu :8086")
+	if err := http.ListenAndServe(":8086", mux); err != nil {
+		log.Fatalf("Nije uspelo pokretanje HTTP servera: %v", err)
+	}
 }

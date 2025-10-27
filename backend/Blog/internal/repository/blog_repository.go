@@ -15,6 +15,7 @@ type BlogRepository interface {
 	Update(ctx context.Context, blog *model.Blog) (*model.Blog, error)
 	GetAll(ctx context.Context) ([]model.Blog, error)
 	GetAllBlogsForUsers(ctx context.Context, userIds []string) ([]model.Blog, error)
+	AddImageToBlog(ctx context.Context, blogID primitive.ObjectID, fileName string) error
 }
 
 type BlogRepositoryMongo struct {
@@ -105,4 +106,16 @@ func (r *BlogRepositoryMongo) GetAllBlogsForUsers(ctx context.Context, userIds [
 	}
 
 	return blogs, nil
+}
+
+func (r *BlogRepositoryMongo) AddImageToBlog(ctx context.Context, blogID primitive.ObjectID, fileName string) error {
+	filter := bson.M{"_id": blogID}
+	update := bson.M{"$push": bson.M{"images": fileName}}
+
+	_, err := r.client.Database(r.dbName).Collection(r.collectionName).UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -11,6 +11,7 @@ replace github.com/jelena-ra/touristApp/soa-team-4/Stakeholders => ../Stakeholde
 replace github.com/jelena-ra/touristApp/soa-team-4/API_Gateway => ../API_Gateway
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/jelena-ra/touristApp/soa-team-4/Following v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.4
