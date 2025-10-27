@@ -91,6 +91,7 @@ func (r *KeyPointRepositoryMongo) UpdateKeyPoint(ctx context.Context, keyPoint *
 		"description": keyPoint.Description,
 		"longitude":   keyPoint.Longitude,
 		"latitude":    keyPoint.Latitude,
+		"image_url":   keyPoint.ImageURL,
 	}}
 
 	_, err := collection.UpdateOne(ctx, filter, update)

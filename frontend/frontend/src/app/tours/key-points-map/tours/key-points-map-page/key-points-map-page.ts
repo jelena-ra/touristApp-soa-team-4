@@ -11,6 +11,7 @@ import { MaterialModule } from '../../../../material/material.module';
 import { MatDialog } from '@angular/material/dialog';
 import { KeyPointDialog, KeyPointDialogData } from '../../../key-points-dialog/key-point-dialog/key-point-dialog';
 import { MatSpinner } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-key-points-map-page',
@@ -22,12 +23,14 @@ import { MatSpinner } from '@angular/material/progress-spinner';
 export class KeyPointsMapPageComponent implements OnInit {
   destroyRef = inject(DestroyRef);
   tour: TourInterface | null = null;
+  selectedFile: File | null = null;
   
   constructor(
     private route: ActivatedRoute,
     private tourService: TourService,
     private keyPointService: KeyPointService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -63,35 +66,73 @@ export class KeyPointsMapPageComponent implements OnInit {
     this.openKeyPointDialog(false, keyPoint);
   }
 
-  openKeyPointDialog(isNew: boolean, keyPoint: KeyPointInterface): void {
+ openKeyPointDialog(isNew: boolean, keyPoint: KeyPointInterface): void {
     const dialogRef = this.dialog.open<KeyPointDialog, KeyPointDialogData>(KeyPointDialog, {
       width: '400px',
       data: { isNew, keyPoint: { ...keyPoint } }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (!result || !this.tour) return;
+  dialogRef.afterClosed().subscribe(result => {
+    if (!result || !this.tour) return;
 
-      if (result.action === 'save') {
-        if (isNew) {
-          // this.keyPointService.createKeyPoint(result.data).subscribe(createdKP => {
-          //   this.tour!.keyPoints = [...this.tour!.keyPoints, createdKP];
-          // });
+    if (result.action === 'save') {
+      const keyPointData = result.data;
+      const file: File | null = result.file;
+
+      if (isNew) {
+        if (!file) {
+          this.snackBar.open('Morate izabrati sliku za novu ključnu tačku.', 'OK', { duration: 3000 });
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = (reader.result as string).split(',')[1];
+          this.keyPointService.createKeyPoint(keyPointData, base64String).subscribe({
+            next: (createdKP) => {
+              this.tour!.keyPoints = [...this.tour!.keyPoints, createdKP];
+              this.snackBar.open("Ključna tačka uspešno kreirana.", "OK", { duration: 2000 });
+            },
+            error: (err) => {
+              console.error("Greška pri kreiranju ključne tačke:", err);
+              this.snackBar.open("Došlo je do greške pri kreiranju.", "Zatvori", { duration: 3000 });
+            }
+          });
+        };
+        reader.readAsDataURL(file);
+
+      } else {
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64String = (reader.result as string).split(',')[1];
+            this.keyPointService.updateKeyPoint(keyPointData, base64String).subscribe(updatedKP => {
+              this.updateKeyPointInLocalArray(updatedKP);
+            });
+          };
+          reader.readAsDataURL(file);
         } else {
-          this.keyPointService.updateKeyPoint(result.data).subscribe(updatedKP => {
-             const index = this.tour!.keyPoints.findIndex(kp => kp.id === updatedKP.id);
-             if (index > -1) {
-               const updatedKeyPoints = [...this.tour!.keyPoints];
-               updatedKeyPoints[index] = updatedKP;
-               this.tour!.keyPoints = updatedKeyPoints;
-             }
+          this.keyPointService.updateKeyPoint(keyPointData, "").subscribe(updatedKP => {
+            this.updateKeyPointInLocalArray(updatedKP);
           });
         }
+      }
       } else if (result.action === 'delete') {
         this.keyPointService.deleteKeyPoint(result.data.id).subscribe(() => {
           this.tour!.keyPoints = this.tour!.keyPoints.filter(kp => kp.id !== result.data.id);
         });
       }
     });
+  }
+   private updateKeyPointInLocalArray(updatedKP: KeyPointInterface): void {
+    if (!this.tour) return;
+    const index = this.tour.keyPoints.findIndex(kp => kp.id === updatedKP.id);
+    if (index > -1) {
+      const updatedKeyPoints = [...this.tour.keyPoints];
+      updatedKeyPoints[index] = updatedKP;
+      this.tour.keyPoints = updatedKeyPoints;
+    }
+    this.selectedFile = null;
+    this.snackBar.open("Key Point Ažuriran", "OK", { duration: 2000 });
   }
 }

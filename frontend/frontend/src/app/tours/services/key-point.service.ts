@@ -32,10 +32,10 @@ export class KeyPointService {
         );
     }
 
-     updateKeyPoint(keyPoint: KeyPointInterface): Observable<KeyPointInterface> {
+     updateKeyPoint(keyPoint: KeyPointInterface, imageBase64: string): Observable<KeyPointInterface> {
         return this.http.put<{ keyPoint: KeyPointInterface }>(
             this.url, 
-            { keyPoint: keyPoint }, 
+            { keyPoint: keyPoint, imageBase64: imageBase64 }, 
             { headers: this.getHeaders() }
         ).pipe(
             map(response => response.keyPoint)

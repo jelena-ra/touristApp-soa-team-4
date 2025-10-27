@@ -1453,6 +1453,7 @@ func (x *CreateKeyPointResponse) GetKeyPoint() *KeyPoint {
 type UpdateKeyPointRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	KeyPoint      *KeyPoint              `protobuf:"bytes,1,opt,name=keyPoint,proto3" json:"keyPoint,omitempty"`
+	ImageBase64   string                 `protobuf:"bytes,2,opt,name=imageBase64,proto3" json:"imageBase64,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1492,6 +1493,13 @@ func (x *UpdateKeyPointRequest) GetKeyPoint() *KeyPoint {
 		return x.KeyPoint
 	}
 	return nil
+}
+
+func (x *UpdateKeyPointRequest) GetImageBase64() string {
+	if x != nil {
+		return x.ImageBase64
+	}
+	return ""
 }
 
 type UpdateKeyPointResponse struct {
@@ -1961,9 +1969,10 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\x12 \n" +
 	"\vimageBase64\x18\x02 \x01(\tR\vimageBase64\"D\n" +
 	"\x16CreateKeyPointResponse\x12*\n" +
-	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\"C\n" +
+	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\"e\n" +
 	"\x15UpdateKeyPointRequest\x12*\n" +
-	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\"D\n" +
+	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\x12 \n" +
+	"\vimageBase64\x18\x02 \x01(\tR\vimageBase64\"D\n" +
 	"\x16UpdateKeyPointResponse\x12*\n" +
 	"\bkeyPoint\x18\x01 \x01(\v2\x0e.tour.KeyPointR\bkeyPoint\"7\n" +
 	"\x15DeleteKeyPointRequest\x12\x1e\n" +

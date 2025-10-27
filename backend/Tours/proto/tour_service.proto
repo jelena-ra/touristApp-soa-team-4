@@ -177,6 +177,7 @@ message CreateKeyPointResponse {
 
 message UpdateKeyPointRequest {
   KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
 }
 
 message UpdateKeyPointResponse {

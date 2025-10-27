@@ -18,6 +18,24 @@
       <mat-error *ngIf="description.invalid && description.touched">Opis je obavezan.</mat-error>
     </mat-form-field>
   </form>
+
+  <label class="image-label">Izaberi sliku:</label>
+  <div class="image-upload-container">
+    <div class="image-preview">
+      <img *ngIf="filePreview; else placeholder" [src]="filePreview" alt="Preview slike">
+      <ng-template #placeholder>
+        <div class="image-placeholder">
+          <mat-icon>image</mat-icon>
+          <span>Nema slike</span>
+        </div>
+      </ng-template>
+    </div>
+    <input type="file" hidden #fileInput (change)="onFileSelected($event)">
+    <button mat-stroked-button (click)="fileInput.click()">
+      <mat-icon>upload_file</mat-icon>
+      Izaberi Fajl
+    </button>
+  </div>
    <label class="map-label">Podesi lokaciju:</label>
   <div class="map-wrapper">
     <app-mini-map
