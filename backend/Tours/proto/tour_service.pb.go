@@ -619,6 +619,7 @@ type StartTourRequest struct {
 	TourId        string                 `protobuf:"bytes,1,opt,name=tourId,proto3" json:"tourId,omitempty"`
 	Position      *TouristPosition       `protobuf:"bytes,2,opt,name=position,proto3" json:"position,omitempty"`
 	TouristId     string                 `protobuf:"bytes,3,opt,name=touristId,proto3" json:"touristId,omitempty"`
+	Token         string                 `protobuf:"bytes,4,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -670,6 +671,13 @@ func (x *StartTourRequest) GetPosition() *TouristPosition {
 func (x *StartTourRequest) GetTouristId() string {
 	if x != nil {
 		return x.TouristId
+	}
+	return ""
+}
+
+func (x *StartTourRequest) GetToken() string {
+	if x != nil {
+		return x.Token
 	}
 	return ""
 }
@@ -1918,11 +1926,12 @@ const file_Tours_proto_tour_service_proto_rawDesc = "" +
 	"\flastActivity\x18\x06 \x01(\tR\flastActivity\x12&\n" +
 	"\x0ecompletionTime\x18\a \x01(\tR\x0ecompletionTime\x12G\n" +
 	"\x12completedKeyPoints\x18\b \x03(\v2\x17.tour.CompletedKeyPointR\x12completedKeyPoints\x12?\n" +
-	"\x0fcurrentPosition\x18\t \x01(\v2\x15.tour.TouristPositionR\x0fcurrentPosition\"{\n" +
+	"\x0fcurrentPosition\x18\t \x01(\v2\x15.tour.TouristPositionR\x0fcurrentPosition\"\x91\x01\n" +
 	"\x10StartTourRequest\x12\x16\n" +
 	"\x06tourId\x18\x01 \x01(\tR\x06tourId\x121\n" +
 	"\bposition\x18\x02 \x01(\v2\x15.tour.TouristPositionR\bposition\x12\x1c\n" +
-	"\ttouristId\x18\x03 \x01(\tR\ttouristId\"D\n" +
+	"\ttouristId\x18\x03 \x01(\tR\ttouristId\x12\x14\n" +
+	"\x05token\x18\x04 \x01(\tR\x05token\"D\n" +
 	"\x14TourExecutionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
 	"\ttouristId\x18\x02 \x01(\tR\ttouristId\",\n" +

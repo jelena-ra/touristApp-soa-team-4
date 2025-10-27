@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -225,6 +226,14 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	touristId := claims.ID
+
+	authHeader := r.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+	tokenString := ""
+	if len(parts) == 2 && parts[0] == "Bearer" {
+		tokenString = parts[1]
+	}
+
 	log.Printf("[API Gateway] Received request to start tour. Tourist ID from token: %s", touristId)
 
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -245,6 +254,7 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 		TourId:    tourId,
 		Position:  &positionReq,
 		TouristId: touristId,
+		Token:     tokenString,
 	}
 
 	resp, err := h.client.StartTour(ctx, gprcRequest)
@@ -443,7 +453,7 @@ func (h *TourHandler) DeleteKeyPointHandle(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)

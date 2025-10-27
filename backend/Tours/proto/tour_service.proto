@@ -80,6 +80,7 @@ message StartTourRequest {
     string tourId = 1;
     TouristPosition position = 2;
     string touristId = 3;
+    string token = 4;
 }
 
 

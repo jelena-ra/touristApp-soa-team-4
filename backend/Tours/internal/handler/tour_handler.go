@@ -162,10 +162,11 @@ func (h *TourHandler) StartTour(ctx context.Context, req *tourProto.StartTourReq
 		return nil, status.Error(codes.InvalidArgument, "Invalid tourist ID format :)")
 	}*/
 	touristId := req.GetTouristId()
+	tokenString := req.GetToken()
 
 	position := mapper.PositionProtoToModel(req.GetPosition())
 
-	execution, err := h.executionService.StartTour(tourId, touristId, *position)
+	execution, err := h.executionService.StartTour(tourId, touristId, *position, tokenString)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
