@@ -16,7 +16,6 @@ import { BlogCardComponent } from '../blog-card/blog-card';
 })
 export class FeedComponent implements OnInit {
   allBlogs: Blog[] = [];
-  // Umesto ID-jeva autora, sada ćemo čuvati ID-jeve blogova koje pratimo
   followedBlogIds: Set<string> = new Set();
   isLoading = true;
   currentUserId: string | null = null;
@@ -29,7 +28,6 @@ export class FeedComponent implements OnInit {
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     
-    // Slučaj 1: Korisnik nije ulogovan
     if (!this.currentUserId) {
       this.blogService.getAllBlogs().subscribe(blogs => {
         this.allBlogs = blogs;
@@ -38,22 +36,25 @@ export class FeedComponent implements OnInit {
       return;
     }
     
-    // Slučaj 2: Korisnik je ulogovan, dobavljamo sve podatke
     forkJoin({
       allBlogs: this.blogService.getAllBlogs(),
       feedBlogs: this.blogService.getFeedForUser(this.currentUserId)
     }).subscribe(({ allBlogs, feedBlogs }) => {
       this.allBlogs = allBlogs;
       
-      // Kreiramo Set ID-jeva BLOGOVA iz feed-a (koje pratimo)
-      const feedBlogIds = feedBlogs.map(blog => blog.id!);
-      this.followedBlogIds = new Set(feedBlogIds);
+      if (feedBlogs && Array.isArray(feedBlogs)) {
+        const feedBlogIds = feedBlogs.map(blog => blog.id!);
+        this.followedBlogIds = new Set(feedBlogIds);
+      } else {
+        this.followedBlogIds = new Set();
+      }
 
       console.log("[DEBUG] Svi blogovi:", this.allBlogs);
-      console.log("[DEBUG] Blogovi iz feed-a:", feedBlogs);
+      console.log("[DEBUG] Blogovi iz feed-a:", feedBlogs); 
       console.log("[DEBUG] ID-jevi klikabilnih blogova:", this.followedBlogIds);
       
       this.isLoading = false;
     });
+
   }
 }
