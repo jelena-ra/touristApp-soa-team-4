@@ -52,6 +52,8 @@ export class ViewToursPage implements OnInit{
             tags: ["Nature"],
             status: "DRAFT",
             price: 0,
+            length: null,
+            travelTimes: null,
             keyPoints: []};
     
     readonly dialog = inject(MatDialog);

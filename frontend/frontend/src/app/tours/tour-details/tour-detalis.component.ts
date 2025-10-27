@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, OnInit, ViewChild } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TourService } from "../services/tour.service";
-import { TourDifficulty, TourInterface, TourTag } from "../model/tour.interface";
+import { TourDifficulty, TourInterface, TourTag, Transport } from "../model/tour.interface";
 import { KeyPointInterface } from "../model/key-point.interface";
 import { ActivatedRoute } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -13,6 +13,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatChipOption, MatChipListbox } from "@angular/material/chips";
 import { ChangeDetectorRef } from '@angular/core';
+import { MatDialog } from "@angular/material/dialog";
+import { KeyPointDialog, KeyPointDialogData } from "../key-points-dialog/key-point-dialog/key-point-dialog";
 
 @Component({
     selector: 'tour-details',
@@ -30,7 +32,15 @@ import { ChangeDetectorRef } from '@angular/core';
 ]
 })
 export class TourDetailsPage implements OnInit {
+    transportIcons: any = {
+        WALKING: 'directions_walk',   // Material Icon
+        BICYCLE: 'directions_bike',
+        CAR: 'directions_car'
+    };
+
     private _snackBar = inject(MatSnackBar);
+
+    @ViewChild(MapComponent) mapComponent!: MapComponent;
 
     tour!: TourInterface;
     editableTour!: TourInterface;
@@ -46,6 +56,7 @@ export class TourDetailsPage implements OnInit {
         imageUrl: '',
         order: 0
     };
+    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
     selectedFile: File | null = null;
 
     editMode = false;
@@ -57,12 +68,16 @@ export class TourDetailsPage implements OnInit {
     ];
     filePreview: string | null = null;
 
+    lastRouteDistanceKm: number | null = null;
+    lastRouteDurationByTransport: Record<Transport, string> | null = null;
+
     constructor(
         private tourService: TourService,
         private keyPointService: KeyPointService,
         private destroyRef: DestroyRef,
         private route: ActivatedRoute,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private dialog: MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -161,6 +176,8 @@ export class TourDetailsPage implements OnInit {
                     this.tour.keyPoints = [...this.tour.keyPoints, response];
                     this._snackBar.open("Key Point Created", "OK", { duration: 2000 });
                     this.cancelCreate();
+
+
                 });
         };
         reader.readAsDataURL(this.selectedFile);
@@ -178,6 +195,11 @@ export class TourDetailsPage implements OnInit {
             order: 0
         };
         this.selectedFile = null;
+        this.filePreview = null;
+
+        if (this.fileInput) {
+            this.fileInput.nativeElement.value = '';
+        }
     }
 
     onFileSelected(event: Event) {
@@ -193,7 +215,8 @@ export class TourDetailsPage implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
             next: (response) => {
-
+                this._snackBar.open(response, "OK", {duration:2000})
+                this.getTour();
             },
             error: (err) => {
                 console.log(err)
@@ -206,7 +229,8 @@ export class TourDetailsPage implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
             next: (response) => {
-
+                this._snackBar.open(response, "OK", {duration:2000})
+                this.getTour();
             },
             error: (err) => {
                 console.log(err)
@@ -220,5 +244,110 @@ export class TourDetailsPage implements OnInit {
 
     onTagsChanged(event: any) {
         this.tagSelection = event.source.selectedOptions.selected.map((s: any) => s.value);
+    }
+
+    onRouteCalculated(payload: { distanceKm: number, durationByTransport: Record<Transport, string> | null}) {
+        this.lastRouteDistanceKm = payload.distanceKm;
+        this.lastRouteDurationByTransport = payload.durationByTransport;
+
+        this._snackBar.open(`Route: ${payload.distanceKm.toFixed(2)} km`, 'OK', { duration: 2500 });
+
+        console.log('Route calculated (parent):', payload.distanceKm, payload.durationByTransport);
+    
+        var update = false;
+        if(this.tour.length != this.lastRouteDistanceKm) {
+            this.tour.length = this.lastRouteDistanceKm
+            update = true;
+        }
+        if(this.tour.travelTimes = this.lastRouteDurationByTransport) {
+            this.tour.travelTimes = this.lastRouteDurationByTransport
+            update = true;
+        }
+
+        if(update) {
+            this.tourService.update(this.tour)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                error: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+    }
+
+    openKeyPointDialog(isNew: boolean, keyPoint: KeyPointInterface): void {
+        const dialogRef = this.dialog.open<KeyPointDialog, KeyPointDialogData>(KeyPointDialog, {
+            width: '400px',
+            data: { isNew, keyPoint: { ...keyPoint } }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+        if (!result || !this.tour) return;
+
+        if (result.action === 'save') {
+            const keyPointData = result.data;
+            const file: File | null = result.file;
+
+            if (isNew) {
+            if (!file) {
+                this._snackBar.open('Morate izabrati sliku za novu ključnu tačku.', 'OK', { duration: 3000 });
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = (reader.result as string).split(',')[1];
+                this.keyPointService.createKeyPoint(keyPointData, base64String).subscribe({
+                next: (createdKP) => {
+                    this.tour!.keyPoints = [...this.tour!.keyPoints, createdKP];
+                    this._snackBar.open("Ključna tačka uspešno kreirana.", "OK", { duration: 2000 });
+                },
+                error: (err) => {
+                    console.error("Greška pri kreiranju ključne tačke:", err);
+                    this._snackBar.open("Došlo je do greške pri kreiranju.", "Zatvori", { duration: 3000 });
+                }
+                });
+            };
+            reader.readAsDataURL(file);
+
+            } else {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                const base64String = (reader.result as string).split(',')[1];
+                this.keyPointService.updateKeyPoint(keyPointData, base64String).subscribe(updatedKP => {
+                    this.updateKeyPointInLocalArray(updatedKP);
+                });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                this.keyPointService.updateKeyPoint(keyPointData, "").subscribe(updatedKP => {
+                this.updateKeyPointInLocalArray(updatedKP);
+                });
+            }
+            }
+            } else if (result.action === 'delete') {
+            this.keyPointService.deleteKeyPoint(result.data.id).subscribe(() => {
+                this.tour!.keyPoints = this.tour!.keyPoints.filter(kp => kp.id !== result.data.id);
+            });
+            }
+        });
+    }
+
+    private updateKeyPointInLocalArray(updatedKP: KeyPointInterface): void {
+        if (!this.tour) return;
+            const index = this.tour.keyPoints.findIndex(kp => kp.id === updatedKP.id);
+        if (index > -1) {
+            const updatedKeyPoints = [...this.tour.keyPoints];
+            updatedKeyPoints[index] = updatedKP;
+            this.tour.keyPoints = updatedKeyPoints;
+        }
+        this.selectedFile = null;
+        this._snackBar.open("Key Point Ažuriran", "OK", { duration: 2000 });
+    }
+
+    onMarkerClicked(keyPoint: KeyPointInterface): void {
+        if(this.tour.status != 'DRAFT') return;
+        this.openKeyPointDialog(false, keyPoint);
     }
 }

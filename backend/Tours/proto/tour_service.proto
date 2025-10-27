@@ -13,7 +13,7 @@ message Tour {
   repeated TourTag tags = 6;
   TourStatus status = 7;
   float price = 8;
-  map<string, float> travelTimes = 9;
+  map<string, string> travelTimes = 9;
   float length = 10;
 }
 

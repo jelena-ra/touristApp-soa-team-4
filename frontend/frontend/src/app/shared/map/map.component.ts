@@ -29,6 +29,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   
   @Output() locationSelected = new EventEmitter<{ latitude: number, longitude: number }>();
   @Output() markerClicked = new EventEmitter<KeyPointInterface>();
+  @Output() routeCalculated = new EventEmitter<{ distanceKm: number, durationByTransport: Record<Transport, string> | null }>();
 
   constructor(private service: MapService) { }
 
@@ -139,6 +140,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         const summary = e.routes[0].summary;
         this.lastRouteSummary = summary;
         console.log(`Route found: ${summary.totalDistance / 1000} km, ${Math.round(summary.totalTime / 60)} min`);
+      
+        const distanceKm = summary.totalDistance / 1000;
+        const durationByTransport = this.getDurationByTransport(); // <-- OVO MOŽE BITI NULL
+        this.routeCalculated.emit({ distanceKm, durationByTransport });
       });
       // ================================
     }
