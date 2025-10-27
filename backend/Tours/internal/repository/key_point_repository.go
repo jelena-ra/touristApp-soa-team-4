@@ -17,6 +17,8 @@ type KeyPointRepository interface {
 	GetKeyPointByTourId(ctx context.Context, tourId string) ([]*model.KeyPoint, error)
 	UpdateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error)
 	DeleteKeyPoint(ctx context.Context, id primitive.ObjectID) error
+	GetKeyPointById(ctx context.Context, id primitive.ObjectID) (*model.KeyPoint, error)
+	UpdateOrderForTour(ctx context.Context, tourId primitive.ObjectID, fromOrder int) error
 }
 
 type KeyPointRepositoryMongo struct {
@@ -115,4 +117,27 @@ func (r *KeyPointRepositoryMongo) DeleteKeyPoint(ctx context.Context, id primiti
 	}
 
 	return nil
+}
+func (r *KeyPointRepositoryMongo) GetKeyPointById(ctx context.Context, id primitive.ObjectID) (*model.KeyPoint, error) {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	var keyPoint model.KeyPoint
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&keyPoint)
+	if err != nil {
+		return nil, err
+	}
+	return &keyPoint, nil
+}
+
+func (r *KeyPointRepositoryMongo) UpdateOrderForTour(ctx context.Context, tourId primitive.ObjectID, fromOrder int) error {
+	collection := r.client.Database(r.dbName).Collection(r.collectionName)
+	filter := bson.M{
+		"tour_id": tourId,
+		"order":   bson.M{"$gt": fromOrder},
+	}
+
+	update := bson.M{
+		"$inc": bson.M{"order": -1},
+	}
+	_, err := collection.UpdateMany(ctx, filter, update)
+	return err
 }

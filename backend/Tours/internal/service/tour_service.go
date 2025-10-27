@@ -197,14 +197,40 @@ func (s *TourService) ArchiveTour(ctx context.Context, tourID string) (string, e
 	return "Tour successfully archived", nil
 }
 
+/*
 func (s *TourService) DeleteKeyPoint(ctx context.Context, id string) error {
 
+		oid, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return errors.New("invalid key point ID format")
+		}
+
+		// TODO: Provjeriti da li korisnik koji briše ima dozvolu (npr. da li je autor ture).
+
+		return s.keyPointRepo.DeleteKeyPoint(ctx, oid)
+	}
+*/
+func (s *TourService) DeleteKeyPoint(ctx context.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return errors.New("invalid key point ID format")
 	}
 
-	// TODO: Provjeriti da li korisnik koji briše ima dozvolu (npr. da li je autor ture).
+	keyPointToDelete, err := s.keyPointRepo.GetKeyPointById(ctx, oid)
+	if err != nil {
+		return errors.New("key point not found")
+	}
 
-	return s.keyPointRepo.DeleteKeyPoint(ctx, oid)
+	// TODO: Provera autorizacije (da li korisnik sme da briše ovu tačku)
+
+	err = s.keyPointRepo.DeleteKeyPoint(ctx, oid)
+	if err != nil {
+		return err
+	}
+	err = s.keyPointRepo.UpdateOrderForTour(ctx, keyPointToDelete.TourID, keyPointToDelete.Order)
+	if err != nil {
+		log.Printf("ERROR: Failed to reorder key points for tour %s after deleting key point %s: %v", keyPointToDelete.TourID.Hex(), id, err)
+	}
+
+	return nil
 }
