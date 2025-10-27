@@ -173,9 +173,9 @@ func main() {
 	router.Handle("/api/comments", http.HandlerFunc(blogHandler.CreateCommentHandler)).Methods("POST")
 	router.Handle("/api/comments/update", http.HandlerFunc(blogHandler.UpdateCommentHandler)).Methods("POST")
 	router.Handle(
-		"/api/feed/{userId}",
-		authenticationMiddleware.AuthenticationPolicy()(http.HandlerFunc(blogHandler.GetFeedForUserHandler)),
+		"/api/feed/{userId}", http.HandlerFunc(blogHandler.GetFeedForUserHandler),
 	).Methods("GET", "OPTIONS")
+
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.GetAllToursHandle)).Methods("GET")
 	router.Handle("/api/tours/{tourId}", http.HandlerFunc(tourHandler.GetByIdHandle)).Methods("GET")
 	//router.Handle("/api/tours", http.HandlerFunc(tourHandler.CreateTourHandle)).Methods("POST")

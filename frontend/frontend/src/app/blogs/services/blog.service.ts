@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Blog } from '../models/Blog';
 import { Comment } from '../models/Comment';
+import { map } from 'rxjs/operators';
 
 export interface BlogPayload {
   blogInput: {
@@ -25,24 +26,24 @@ export interface CommentPayload {
   providedIn: 'root'
 })
 export class BlogService {
-  private apiUrl = 'http://localhost:8000/api/blogs';
+  private apiUrl = 'http://localhost:8000/api';
 
   constructor(private http: HttpClient) { }
 
   createBlog(blogData: BlogPayload): Observable<Blog> {
-    return this.http.post<Blog>(this.apiUrl, blogData);
+    return this.http.post<Blog>(`${this.apiUrl}/blogs`, blogData);
   }
 
   getBlogById(blogId: string): Observable<Blog> {
-    return this.http.get<Blog>(`${this.apiUrl}/${blogId}`);
+    return this.http.get<Blog>(`${this.apiUrl}/blogs/${blogId}`);
   }
 
   likeBlog(blogId: string, userId: string): Observable<Blog> {
-    return this.http.put<Blog>(`${this.apiUrl}/${blogId}/like/${userId}`, {});
+    return this.http.put<Blog>(`${this.apiUrl}/blogs/${blogId}/like/${userId}`, {});
   }
 
   unlikeBlog(blogId: string, userId: string): Observable<Blog> {
-    return this.http.delete<Blog>(`${this.apiUrl}/${blogId}/unlike/${userId}`);
+    return this.http.delete<Blog>(`${this.apiUrl}/blogs/${blogId}/unlike/${userId}`);
   }
 
   createComment(commentData: CommentPayload): Observable<Comment> {
@@ -54,6 +55,6 @@ export class BlogService {
   }
 
   getAllBlogs(): Observable<Blog[]> { // izmeniti!
-    return this.http.get<Blog[]>(this.apiUrl);
+    return this.http.get<Blog[]>(`${this.apiUrl}/blogs`);
   }
 }

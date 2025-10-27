@@ -4,7 +4,7 @@ import { forkJoin } from 'rxjs';
 import { Blog } from '../../blogs/models/Blog';
 import { BlogService } from '../../blogs/services/blog.service';
 import { AuthService } from '../../auth/auth.service';
-import { FollowingService } from '../../following/following';
+// FollowingService nam više ne treba ovde
 import { BlogCardComponent } from '../blog-card/blog-card';
 
 @Component({
@@ -16,14 +16,14 @@ import { BlogCardComponent } from '../blog-card/blog-card';
 })
 export class FeedComponent implements OnInit {
   allBlogs: Blog[] = [];
-  followingAuthorIds: Set<string> = new Set();
+  // Umesto ID-jeva autora, sada ćemo čuvati ID-jeve blogova koje pratimo
+  followedBlogIds: Set<string> = new Set();
   isLoading = true;
   currentUserId: string | null = null;
 
   constructor(
     private blogService: BlogService,
     private authService: AuthService,
-    private followingService: FollowingService // Injektujte FollowingService
   ) {}
 
   ngOnInit(): void {
@@ -40,12 +40,19 @@ export class FeedComponent implements OnInit {
     
     // Slučaj 2: Korisnik je ulogovan, dobavljamo sve podatke
     forkJoin({
-      blogs: this.blogService.getAllBlogs(),
-      followingResponse: this.followingService.getFollowings(this.currentUserId)
-    }).subscribe(({ blogs, followingResponse }) => {
-      this.allBlogs = blogs;
-      // Kreiramo Set ID-jeva autora koje pratimo
-      this.followingAuthorIds = new Set(followingResponse.ids);
+      allBlogs: this.blogService.getAllBlogs(),
+      feedBlogs: this.blogService.getFeedForUser(this.currentUserId)
+    }).subscribe(({ allBlogs, feedBlogs }) => {
+      this.allBlogs = allBlogs;
+      
+      // Kreiramo Set ID-jeva BLOGOVA iz feed-a (koje pratimo)
+      const feedBlogIds = feedBlogs.map(blog => blog.id!);
+      this.followedBlogIds = new Set(feedBlogIds);
+
+      console.log("[DEBUG] Svi blogovi:", this.allBlogs);
+      console.log("[DEBUG] Blogovi iz feed-a:", feedBlogs);
+      console.log("[DEBUG] ID-jevi klikabilnih blogova:", this.followedBlogIds);
+      
       this.isLoading = false;
     });
   }
