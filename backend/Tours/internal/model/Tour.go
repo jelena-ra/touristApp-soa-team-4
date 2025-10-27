@@ -7,18 +7,18 @@ import (
 )
 
 type Tour struct {
-	ID          primitive.ObjectID    `bson:"_id,omitempty"`
-	AuthorId    string                `bson:"authorId"`
-	Name        string                `bson:"name"`
-	Description string                `bson:"description"`
-	Difficulty  TourDifficulty        `bson:"difficulty"`
-	Tags        []TourTag             `bson:"tags"`
-	Status      TourStatus            `bson:"status"`
-	Price       float64               `bson:"price"`
-	TravelTimes map[Transport]float64 `bson:"travelTimes"`
-	PublishedAt *time.Time            `bson:"publishedAt,omitempty"`
-	ArchivedAt  *time.Time            `bson:"archivedAt,omitempty"`
-	Length      float64               `bson:"length"`
+	ID          primitive.ObjectID   `bson:"_id,omitempty"`
+	AuthorId    string               `bson:"authorId"`
+	Name        string               `bson:"name"`
+	Description string               `bson:"description"`
+	Difficulty  TourDifficulty       `bson:"difficulty"`
+	Tags        []TourTag            `bson:"tags"`
+	Status      TourStatus           `bson:"status"`
+	Price       float64              `bson:"price"`
+	TravelTimes map[Transport]string `bson:"travelTimes"`
+	PublishedAt *time.Time           `bson:"publishedAt,omitempty"`
+	ArchivedAt  *time.Time           `bson:"archivedAt,omitempty"`
+	Length      float64              `bson:"length"`
 }
 
 type TourDifficulty string

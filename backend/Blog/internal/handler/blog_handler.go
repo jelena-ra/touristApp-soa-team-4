@@ -50,6 +50,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Images:        createdBlog.Images,
 		NumberOfLikes: 0,
 		Comments:      make([]*blog_proto.Comment, 0),
+		Deleted:       false,
 	}
 
 	return &blog_proto.CreateBlogResponse{
@@ -144,6 +145,7 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 			AuthorId:      blog.AuthorID,
 			Images:        blog.Images,
 			NumberOfLikes: int32(len(blog.Likes)),
+			Deleted:       blog.Deleted,
 		}
 		protoBlogs = append(protoBlogs, protoBlog)
 	}

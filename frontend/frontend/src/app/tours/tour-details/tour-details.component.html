@@ -2,6 +2,7 @@
   <!-- 1️⃣ Tour Details -->
   <mat-card class="tour-card mat-elevation-z2">
     <mat-card-content>
+      <h2>Tour Details</h2>
       <div class="tour-header">
         <mat-form-field class="flex-item">
           <mat-label>Name</mat-label>
@@ -21,7 +22,16 @@
         </mat-form-field>
       </div>
 
+      <!-- <div>
+        <h2>Price</h2>
+        <mat-form-field class="flex-item">
+          <mat-label>Price</mat-label>
+          <input matInput [(ngModel)]="price" [readonly]="!editMode">
+        </mat-form-field>
+      </div> -->
+
       <div class="tags-row">
+        <h2>Tour Tags</h2>
         <mat-chip-listbox
             [(ngModel)]="tagSelection"
             multiple
@@ -34,7 +44,36 @@
             {{ tag }}
             </mat-chip-option>
         </mat-chip-listbox>
-        </div>
+      </div>
+
+      <div style="margin: 2% 0;">
+        <h2 style="margin-bottom: 0%;">Travel Times</h2>
+        <p style="margin-bottom: 0%;">Tour Length (km): {{tour.length || 'N/A'}}</p>
+        @if (tour.travelTimes) {
+          <div style="display: flex; gap: 1rem;">
+            <p>
+              <mat-icon style="vertical-align: middle; margin-right: 4px;">
+                {{ transportIcons.WALKING }}
+              </mat-icon>
+              Walking: {{ tour.travelTimes.WALKING || 'N/A' }}
+            </p>
+            <p>
+              <mat-icon style="vertical-align: middle; margin-right: 4px;">
+                {{ transportIcons.BICYCLE }}
+              </mat-icon>
+              Bicycle: {{ tour.travelTimes.BICYCLE || 'N/A' }}
+            </p>
+            <p>
+              <mat-icon style="vertical-align: middle; margin-right: 4px;">
+                {{ transportIcons.CAR }}
+              </mat-icon>
+              Car: {{ tour.travelTimes.CAR || 'N/A' }}
+            </p>
+          </div>
+        } @else {
+          <p>No travel times available.</p>
+        }
+      </div>
 
 
       <div class="action-buttons">
@@ -66,44 +105,48 @@
   <!-- 2️⃣ KeyPoint creation & Map -->
   <mat-card class="keypoint-section mat-elevation-z2">
     <div class="keypoint-wrapper">
-      <div class="keypoint-form">
-        <h3>Create Key Point</h3>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Name</mat-label>
-          <input matInput [(ngModel)]="newKeyPoint.name">
-        </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Description</mat-label>
-          <textarea matInput [(ngModel)]="newKeyPoint.description"></textarea>
-        </mat-form-field>
-
-        <input type="file" (change)="onFileSelected($event)">
-
-        <div class="popup-image-container">
-          <img *ngIf="filePreview; else placeholder" [src]="filePreview" alt="Preview">
-          <ng-template #placeholder>
-            <div class="image-placeholder">
-              <span>Select an image</span>
-            </div>
-          </ng-template>
+      @if(tour.status === "DRAFT") {
+        <div class="keypoint-form">
+          <h3>Create Key Point</h3>
+  
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="newKeyPoint.name">
+          </mat-form-field>
+  
+          <mat-form-field appearance="fill">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="newKeyPoint.description"></textarea>
+          </mat-form-field>
+  
+          <input type="file" (change)="onFileSelected($event)">
+  
+          <div class="popup-image-container">
+            <img *ngIf="filePreview; else placeholder" [src]="filePreview" alt="Preview">
+            <ng-template #placeholder>
+              <div class="image-placeholder">
+                <span>Select an image</span>
+              </div>
+            </ng-template>
+          </div>
+  
+          <div class="form-buttons">
+            <button mat-flat-button color="primary"
+              [disabled]="!newKeyPoint.name || !newKeyPoint.description || !newKeyPoint.latitude || !selectedFile"
+              (click)="createKeyPoint()">
+              Create
+            </button>
+            <button mat-flat-button color="warn" (click)="cancelCreate()">Cancel</button>
+          </div>
         </div>
-
-        <div class="form-buttons">
-          <button mat-flat-button color="primary"
-            [disabled]="!newKeyPoint.name || !newKeyPoint.description || !newKeyPoint.latitude || !selectedFile"
-            (click)="createKeyPoint()">
-            Create
-          </button>
-          <button mat-flat-button color="warn" (click)="cancelCreate()">Cancel</button>
-        </div>
-      </div>
+      }
 
       <div class="keypoint-map">
         <app-map
-          [registerClick]="true"
+          [registerClick]="tour.status === 'DRAFT' ? true : false"
           (locationSelected)="onLocationSelected($event)"
+          (routeCalculated)="onRouteCalculated($event)"
+          (markerClicked)="onMarkerClicked($event)"
           [showKeyPoints]="true"
           [keyPoints]="tour.keyPoints">
         </app-map>
@@ -113,7 +156,7 @@
 
   <!-- 3️⃣ KeyPoints List -->
   <div class="keypoints-list">
-    <div class="keypoint-card" *ngFor="let kp of sortedKeyPoints">
+    <div class="keypoint-card" *ngFor="let kp of sortedKeyPoints" (click)="onMarkerClicked(kp)">
       <div class="popup-image-container">
         <img [src]="kp.imageUrl" [alt]="kp.name">
       </div>

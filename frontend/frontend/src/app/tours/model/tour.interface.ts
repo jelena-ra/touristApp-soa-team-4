@@ -10,8 +10,8 @@ export interface TourInterface {
     status: TourStatus;
     price: number;
     keyPoints: KeyPointInterface[];
-    length?: number;
-    travelTimes?: Record<Transport, number>;
+    length: number | null;
+    travelTimes: Record<Transport, string> | null;
 }
 
 export type TourDifficulty = 
