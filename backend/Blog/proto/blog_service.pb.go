@@ -117,6 +117,7 @@ type BlogFull struct {
 	Comments      []*Comment             `protobuf:"bytes,7,rep,name=comments,proto3" json:"comments,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
+	Deleted       bool
 }
 
 func (x *BlogFull) Reset() {

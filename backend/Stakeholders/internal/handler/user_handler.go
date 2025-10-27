@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 type UserHandler struct {
 	//stakeholder_proto.UnimplementedStakeholderServiceServer
 	service *service.UserService
@@ -54,7 +53,6 @@ func (h *UserHandler) GetUser(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
-
 func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -64,7 +62,7 @@ func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedUser, err := h.service.Block(id)
+	_, updatedUser, err := h.service.Block((r.Context()), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -34,6 +34,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Content:  blogReq.Content,
 		AuthorID: blogReq.GetAuthorId(),
 		Images:   blogReq.GetImages(),
+		Deleted:  false,
 	}
 	createdBlog, err := h.service.CreateBlog(ctx, blog)
 
@@ -83,6 +84,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
+		Deleted:       false,
 	}
 
 	LikedBlogResponse := &blog_proto.LikeBlogResponse{

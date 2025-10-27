@@ -6,6 +6,6 @@ type Profile struct {
 	Surname   string  `json:"surname"`
 	Biography string  `json:"biography"`
 	Moto      string  `json:"moto"`
-	PhotoId   string  `json:"imageURL"`
+	PhotoId   string  `json:"photoId"`
 	Money     float64 `json:"money"`
 }

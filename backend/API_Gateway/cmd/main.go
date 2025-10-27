@@ -137,7 +137,6 @@ func main() {
 		"/api/users/{id}/block",
 		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),
 	).Methods("PUT", "OPTIONS")
-	router.Handle("/api/image", (http.StripPrefix("/api", stakeholdersProxy))).Methods("POST")
 	router.Handle("/api/image/{id}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
 	router.Handle("/api/image/filename/{filename}", (http.StripPrefix("/api", stakeholdersProxy))).Methods("GET")
 	router.Handle("/api/users/login", stakeholdersProxy).Methods("POST", "OPTIONS")

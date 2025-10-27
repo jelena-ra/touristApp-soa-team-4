@@ -1,11 +1,34 @@
 version: "3.7"
 services:
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "5672:5672" # Standardni AMQP port
+      - "15672:15672" # Management UI port (opciono, ali korisno za debagovanje)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest # Ili postavite na sigurnije
+      RABBITMQ_DEFAULT_PASS: guest # Ili postavite na sigurnije
+    volumes: # <--- DODAJ OVO
+      - rabbitmq_data:/var/lib/rabbitmq # Mapiranje za trajno skladištenje podataka
+    command: sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server" # service that first sets the correct permissions and then starts RabbitMQ. The rabbitmq user typically has a UID of 999.
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   stakeholder-service:
     image: stakeholder-service:compose_build
     build:
-      context: ./Stakeholders
-      dockerfile: Dockerfile
+      #context: ./Stakeholders
+      #dockerfile: Dockerfile
+      context: .        # <---- UMESTO ./Stakeholders
+      dockerfile: ./Stakeholders/Dockerfile
     restart: unless-stopped
     networks:
       - backend
@@ -16,7 +39,11 @@ services:
     env_file:
       - ./Stakeholders/.env
     depends_on:
+      rabbitmq: # Sada je 'rabbitmq' ključ u mapi
+        condition: service_healthy
       stakeholders-db:
+        condition: service_healthy
+      saga-db:
         condition: service_healthy
 
   stakeholders-db:
@@ -42,11 +69,33 @@ services:
       retries: 15         # Povećano sa 5 na 15
       start_period: 60s
 
+  saga-db:
+    image: postgres:15
+    container_name: saga-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super
+      POSTGRES_DB: saga
+    ports:
+      - "5443:5432"
+    volumes:
+      - saga_db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d saga"]
+      interval: 10s
+      timeout: 15s
+      retries: 15
+      start_period: 60s
+
+
   blog-service:
     image: blog-service:compose_build
     build:
-      context: ./Blog
-      dockerfile: Dockerfile
+      #context: ./Blog
+      context: .
+      dockerfile:  ./Blog/Dockerfile
     networks:
       - backend
     ports:
@@ -54,6 +103,8 @@ services:
     env_file:
       - ./Blog/.env
     depends_on:
+      rabbitmq: # Sada je 'rabbitmq' ključ u mapi
+        condition: service_healthy
       following-service:
         condition: service_started
       blog-db:          
@@ -312,3 +363,5 @@ volumes:
   grafana_data:
   stakeholder_images_data:
   tours_uploads_data:
+  saga_db_data:
+  rabbitmq_data:

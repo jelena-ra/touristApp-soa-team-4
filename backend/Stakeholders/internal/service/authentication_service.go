@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	//"net/http"
 	"github.com/jelena-ra/touristApp/soa-team-4/Stakeholders/internal/auth"
@@ -15,14 +16,16 @@ var (
 )
 
 type AuthenticationService struct {
-	userRepo *repository.UserRepository
-	tokenGen *auth.JWTGenerator
+	userRepo    *repository.UserRepository
+	profileRepo *repository.ProfileRepository
+	tokenGen    *auth.JWTGenerator
 }
 
-func NewAuthenticationService(userRepo *repository.UserRepository, tokenGen *auth.JWTGenerator) *AuthenticationService {
+func NewAuthenticationService(userRepo *repository.UserRepository, tokenGen *auth.JWTGenerator, profileRepo *repository.ProfileRepository) *AuthenticationService {
 	return &AuthenticationService{
-		userRepo: userRepo,
-		tokenGen: tokenGen,
+		userRepo:    userRepo,
+		tokenGen:    tokenGen,
+		profileRepo: profileRepo,
 	}
 }
 
@@ -49,19 +52,6 @@ func (s *AuthenticationService) Login(credentials *model.CredentialsDto) (*model
 
 func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrationDto) (*model.AuthenticationTokensDto, error) {
 
-	/*exists, _ := s.userRepo.Exists(account.Username)
-	if exists {
-		return nil, ErrUsernameNotUnique
-	}
-
-	var role string
-
-	if account.Role == "turista" {
-		role = model.UserRoleTourist
-	} else {
-		role = model.UserRoleAuthor
-	}*/
-
 	if account == nil {
 		return nil, ErrInvalidArgument
 	}
@@ -77,6 +67,7 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 	}
 
 	var role string
+
 	if account.Role == "turista" {
 		role = model.UserRoleTourist
 	} else {
@@ -96,10 +87,24 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		return nil, ErrInvalidArgument
 	}
 
-	//token, err := s.tokenGen.GenerateAccessToken(createdUser)
-	if err != nil {
-		return nil, errors.New("failed to generate access token")
+	defaultProfile := model.Profile{
+		UserId:    createdUser.ID,
+		Name:      createdUser.Username,
+		Surname:   "",
+		Biography: "Default biography",
+		Moto:      "Default moto",
+		PhotoId:   "",
+		Money:     20000.0,
 	}
+	_, err = s.profileRepo.CreateProfile(defaultProfile, context.Background())
+	if err != nil {
+		return nil, errors.New("failed to create default profile")
+	}
+
+	//token, err := s.tokenGen.GenerateAccessToken(createdUser)
+	/*if err != nil {
+		return nil, errors.New("failed to generate access token")
+	}*/
 
 	return &model.AuthenticationTokensDto{
 		createdUser.Username,
