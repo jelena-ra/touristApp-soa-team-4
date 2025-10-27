@@ -35,6 +35,9 @@
                     </div>
                 </mat-card-content>
                 <mat-card-actions class="tour-action">
+                    @if(user?.role !== 'author') {
+                        <button mat-button (click)="openTourDetailsDialog(tour)">View Details</button>
+                    }
                     <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">View Details</button>
                     <button *ngIf="!activeExecution && user?.role !== 'author'" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
                         Start Tour

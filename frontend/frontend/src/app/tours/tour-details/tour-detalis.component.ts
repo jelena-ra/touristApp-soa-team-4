@@ -106,6 +106,9 @@ export class TourDetailsPage implements OnInit {
     get tourDescription() { return this.editableTour.description; }
     set tourDescription(value: string) { this.editableTour.description = value; }
 
+    get tourPrice() { return this.editableTour.price; }
+    set tourPrice(value: number) { this.editableTour.price = value; }
+
     get tourDifficulty() { return this.editableTour.difficulty; }
     set tourDifficulty(value: TourDifficulty) { this.editableTour.difficulty = value; }
 
