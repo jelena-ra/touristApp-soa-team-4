@@ -14,14 +14,19 @@ import { FeedComponent } from './blogs/feed/feed';
 import { RecommendationsComponent } from './following/pages/recommendations/recommendations';
 import { UserListComponent } from './following/pages/user-list/user-list';
 import { BlogDetailComponent } from './blogs/blog-detail/blog-detail';
+import { CartComponent } from './purchase/purchase/purchase';
+import { KeyPointsMapPageComponent } from './tours/key-points-map/tours/key-points-map-page/key-points-map-page';
+import { roleGuard } from './guards/role-guard';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: Home },
-  { path: 'create-profile', component: Profileform },
+  { path: 'cart', component: CartComponent, canActivate: [authGuard, roleGuard(['tourist'])] },
+  { path: 'create-profile/:flag', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },
-  { path: 'usersList', component: UsersList },
+  { path: 'usersList', component: UsersList, canActivate: [authGuard, roleGuard(['administrator'])] },
   { path: 'login', component: LoginComponent },
   { path: 'tourist-location', component: TouristLocationComponent },
   { path: 'tours', component: ViewToursPage },
@@ -31,5 +36,7 @@ export const routes: Routes = [
   ,{ path: 'blogs/feed', component: FeedComponent }
   ,{ path: 'blogs/:id', component: BlogDetailComponent }
   ,{ path: 'following/recommendations', component: RecommendationsComponent }
-  ,{ path: 'following/users', component: UserListComponent }
+  ,{ path: 'following/users', component: UserListComponent },
+  { path: 'tour-execution/:id', component: TourExecutionPageComponent, canActivate: [authGuard, roleGuard(['tourist'])] },
+  { path: 'tours/:id/map-editor', component: KeyPointsMapPageComponent }
 ];

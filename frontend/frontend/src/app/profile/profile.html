@@ -9,9 +9,13 @@
       <p><strong>Prezime:</strong> {{ profile.surname }}</p>
       <p><strong>Biografija:</strong> {{ profile.biography }}</p>
       <p><strong>Moto:</strong> "{{ profile.moto }}"</p>
+      <p>
+      <span ><strong>Stanje na racunu:</strong> {{ profile.money | currency:'USD':'symbol':'1.2-2' }}</span><mat-icon>account_balance_wallet</mat-icon></p>
+    <button  mat-button [routerLink]="['/create-profile', true]">Edit</button>
     </div>
   </div>
 </div>
+
 
 <div class="loading" *ngIf="loading">
   Učitavanje profila...
@@ -19,3 +23,51 @@
 <div class="error" *ngIf="error">
   Greška pri učitavanju profila.
 </div>
+
+
+<div class="tours-section-wrapper" *ngIf="!loading && !error">
+  <div class="tours-container">
+    <h2>Moje Ture</h2>
+    
+    <div class="tours-horizontal-scrolling">
+      <div *ngIf="userTours && userTours.length > 0; else noTours">
+        <div *ngFor="let tour of userTours; let i = index" class="tour-card">
+          <div class="card-content">
+            <h3 class="card-title">{{ tour.name }}</h3>
+            <div class="card-meta">
+              <span class="difficulty">{{ tour.difficulty }}</span>
+              <span class="price">{{ tour.price === 0 ? 'Besplatno' : tour.price + ' RSD' }}</span>
+            </div>
+            <p class="tour-description">{{ tour.description | slice:0:100 }}...</p> 
+            <div class="tags">
+                <ng-container *ngFor="let tag of tour.tags | slice:0:3">
+                    <mat-chip>{{ tag }}</mat-chip>
+                </ng-container>
+                <mat-chip *ngIf="tour.tags.length > 3">
+                    +{{ tour.tags.length - 3 }}
+                </mat-chip>
+                <mat-card-actions class="tour-action">
+                    <button mat-button (click)="openTourDetailsDialog(tour)">View Details</button>
+                    <button *ngIf="!activeExecution" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
+                        Start Tour
+                    </button>
+                    <ng-container *ngIf="activeExecution">
+                        <button *ngIf="activeExecution.tourId === tour.id" mat-flat-button color="accent" [routerLink]="['/tour-execution', tour.id]">
+                            Continue Tour
+                        </button>
+                        <button *ngIf="activeExecution.tourId !== tour.id" mat-flat-button color="primary" disabled title="You already have an active tour">
+                            Start Tour
+                        </button>
+                    </ng-container>
+                </mat-card-actions>
+            </div>
+          </div>
+          <div class="card-glow"></div>
+        </div>
+      </div>
+      <ng-template #noTours>
+        <p class="no-tours">Još uvek nemate kupljenih tura.</p>
+      </ng-template>
+    </div>
+  </div>
+  </div>

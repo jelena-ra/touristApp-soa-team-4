@@ -46,7 +46,9 @@ export class CreateTourDialog {
         keyPoints: [],
         price: 0,
         status: "DRAFT",
-        tags: []
+        tags: [],
+        length: null,
+        travelTimes: null
     }
 
     difficulties: TourDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];

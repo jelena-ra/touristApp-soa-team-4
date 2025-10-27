@@ -2,8 +2,10 @@ go 1.25.0
 
 use (
 	API_Gateway
-	Tours
 	Blog
-	Following
+	Messages
+	Purchase
 	Stakeholders
+	Tours
+	Following
 )

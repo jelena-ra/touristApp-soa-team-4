@@ -13,7 +13,7 @@ message Tour {
   repeated TourTag tags = 6;
   TourStatus status = 7;
   float price = 8;
-  map<string, float> travelTimes = 9;
+  map<string, string> travelTimes = 9;
   float length = 10;
 }
 
@@ -48,7 +48,7 @@ message KeyPoint {
   float latitude = 4;
   string name = 5;
   string description = 6;
-  string imageId = 7;
+  string imageUrl = 7;
   int64 order = 8;
 }
 
@@ -80,6 +80,7 @@ message StartTourRequest {
     string tourId = 1;
     TouristPosition position = 2;
     string touristId = 3;
+    string token = 4;
 }
 
 
@@ -102,6 +103,24 @@ service TourService {
   rpc GetActiveTour (GetActiveTourRequest) returns (TourExecutionResponse);
   rpc CreateRecension(CreateRecensionRequest) returns (RecensionResponse);
   rpc GetRecensionsByTourID(TourIDRequest) returns (RecensionListResponse);
+  rpc PublishTour(PublishTourRequest) returns (PublishTourResponse);
+  rpc ArchiveTour(ArchiveTourRequest) returns (ArchiveTourResponse);
+}
+
+message ArchiveTourRequest {
+  string tourId = 1;
+}
+
+message ArchiveTourResponse {
+  string message = 1;
+}
+
+message PublishTourRequest {
+  string tourId = 1;
+}
+
+message PublishTourResponse {
+  string message = 1;
 }
 
 message Empty {
@@ -150,6 +169,7 @@ message UpdateTourResponse {
 
 message CreateKeyPointRequest {
   KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
 }
 
 message CreateKeyPointResponse {
@@ -158,6 +178,7 @@ message CreateKeyPointResponse {
 
 message UpdateKeyPointRequest {
   KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
 }
 
 message UpdateKeyPointResponse {
@@ -165,7 +186,7 @@ message UpdateKeyPointResponse {
 }
 
 message DeleteKeyPointRequest {
-  int64 keyPointId = 1;
+  string keyPointId = 1;
 }
 
 message DeleteKeyPointResponse {

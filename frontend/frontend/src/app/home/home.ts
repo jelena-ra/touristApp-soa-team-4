@@ -12,7 +12,7 @@ export class Home {
     constructor(private router: Router) {}
 
   createProfile(): void {
-    this.router.navigate(['create-profile']);
+    this.router.navigate(['create-profile', false]);
   }
 
   seeProfile(): void {

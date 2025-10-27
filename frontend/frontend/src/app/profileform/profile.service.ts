@@ -10,7 +10,8 @@ export interface Profile {
   surname: string;
   biography: string;
   moto: string;
-  imageURL: string; // ovo je imageID
+  photoId: string; 
+  money: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,19 @@ export class ProfileService {
   createProfile(profile: Profile): Observable<Profile> {
        const token = this.authService.getAccessToken();
     return this.http.post<Profile>(this.baseUrl, profile, { headers: {
+        'Authorization': `Bearer ${token}`
+      } });
+  }
+   updateProfile(profile: Profile): Observable<Profile> {
+       const token = this.authService.getAccessToken();
+    return this.http.post<Profile>('http://localhost:8000/api/profile-update', profile, { headers: {
+        'Authorization': `Bearer ${token}`
+      } });
+  }
+
+  getProfileByUserId(userId: string): Observable<Profile> {
+    const token = this.authService.getAccessToken();
+    return this.http.get<Profile>(`${this.baseUrl}/${userId}`, { headers: {
         'Authorization': `Bearer ${token}`
       } });
   }

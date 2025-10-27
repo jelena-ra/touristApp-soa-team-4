@@ -70,18 +70,18 @@ func convertTagsProtoToModel(tags []tourProto.TourTag) []model.TourTag {
 	return out
 }
 
-func convertTravelTimesModelToProto(times map[model.Transport]float64) map[string]float32 {
-	out := make(map[string]float32, len(times))
+func convertTravelTimesModelToProto(times map[model.Transport]string) map[string]string {
+	out := make(map[string]string, len(times))
 	for k, v := range times {
-		out[string(k)] = float32(v)
+		out[string(k)] = v
 	}
 	return out
 }
 
-func convertTravelTimesProtoToModel(times map[string]float32) map[model.Transport]float64 {
-	out := make(map[model.Transport]float64, len(times))
+func convertTravelTimesProtoToModel(times map[string]string) map[model.Transport]string {
+	out := make(map[model.Transport]string, len(times))
 	for k, v := range times {
-		out[model.Transport(k)] = float64(v)
+		out[model.Transport(k)] = v
 	}
 	return out
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/google/uuid"
 
@@ -122,7 +123,7 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 			RETURN s
 		`
 		params := map[string]any{"id": id}
-
+		log.Printf("LOOKING FOR USER IN THIS METHOD: Executing query: %s with params: %v", query, params)
 		records, err := tx.Run(ctx, query, params)
 		if err != nil {
 			return nil, err
@@ -143,7 +144,7 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 			}
 			return &user, nil
 		}
-
+		log.Printf("No user found for ID BUT IN WORNG METHOD SEARCHING: %s", id)
 		return nil, errors.New("user not found")
 	})
 
@@ -157,7 +158,54 @@ func (repo *UserRepository) GetByID(id string) (*model.User, error) {
 
 	return result.(*model.User), nil
 }
+func (repo *UserRepository) GetByid(id string) (*model.User, error) {
+	ctx := context.Background()
+	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
 
+	result, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `
+			MATCH (s:User)
+			WHERE s.id = $id 
+			RETURN s
+		`
+		params := map[string]any{"id": id}
+		log.Printf("UserRepository.GetByid: Executing query: %s with params: %v", query, params)
+		records, err := tx.Run(ctx, query, params)
+		if err != nil {
+			log.Printf("UserRepository.GetByid: Query execution failed: %v", err)
+			return nil, err
+		}
+
+		if records.Next(ctx) {
+			record := records.Record()
+			node := record.Values[0].(neo4j.Node)
+			props := node.Props
+			log.Printf("UserRepository.GetByid: User found! Props: %v", props)
+			user := model.User{
+				ID:       props["id"].(string),
+				Username: props["username"].(string),
+				Password: props["password"].(string),
+				Email:    props["email"].(string),
+				Role:     props["role"].(string),
+				Blocked:  props["blocked"].(bool),
+			}
+			return &user, nil
+		}
+		log.Printf("UserRepository.GetByid: No user found for ID: %s", id)
+		return nil, errors.New("user not found")
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if result == nil {
+		return nil, errors.New("user not found")
+	}
+
+	return result.(*model.User), nil
+}
 func (repo *UserRepository) Exists(username string) (bool, error) {
 	ctx := context.Background()
 	session := repo.dbDriver.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})

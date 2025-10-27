@@ -10,6 +10,8 @@ export interface TourInterface {
     status: TourStatus;
     price: number;
     keyPoints: KeyPointInterface[];
+    length: number | null;
+    travelTimes: Record<Transport, string> | null;
 }
 
 export type TourDifficulty = 
@@ -28,4 +30,15 @@ export type TourTag =
   | 'Mountain'
   | 'Urban';
 
-export type TourStatus = 'DRAFT';
+export type TourStatus = 'DRAFT' 
+  | 'PUBLISHED'
+  | 'ARCHIVED';
+
+export type Transport = 'WALKING' 
+  | 'BICYCLE' 
+  | 'CAR';
+
+export interface RouteInfo {
+  distanceKm: number;
+  durationByTransport: Record<Transport, string>;
+}

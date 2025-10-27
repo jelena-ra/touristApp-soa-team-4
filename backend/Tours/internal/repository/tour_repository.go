@@ -13,6 +13,7 @@ import (
 type TourRepository interface {
 	GetAll(ctx context.Context) ([]*model.Tour, error)
 	GetByID(ctx context.Context, id string) (*model.Tour, error)
+	GetByIDVerified(ctx context.Context, id primitive.ObjectID) (*model.Tour, error)
 	CreateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
 	UpdateTour(ctx context.Context, tour *model.Tour) (*model.Tour, error)
 }
@@ -61,6 +62,15 @@ func (t TourRepositoryMongo) CreateTour(ctx context.Context, tour *model.Tour) (
 	tour.ID = newTour.InsertedID.(primitive.ObjectID)
 	return tour, nil
 }
+func (t TourRepositoryMongo) GetByIDVerified(ctx context.Context, id primitive.ObjectID) (*model.Tour, error) {
+	var tour model.Tour
+	collection := t.client.Database(t.dbName).Collection(t.collectionName)
+	if err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&tour); err != nil {
+		return nil, err
+	}
+
+	return &tour, nil
+}
 
 func (t TourRepositoryMongo) GetByID(ctx context.Context, id string) (*model.Tour, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
@@ -84,7 +94,23 @@ func (t TourRepositoryMongo) UpdateTour(ctx context.Context, tour *model.Tour) (
 	}
 
 	collection := t.client.Database(t.dbName).Collection(t.collectionName)
-	if _, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, tour); err != nil {
+
+	update := bson.M{
+		"$set": bson.M{
+			"name":        tour.Name,
+			"description": tour.Description,
+			"price":       tour.Price,
+			"difficulty":  tour.Difficulty,
+			"tags":        tour.Tags,
+			"length":      tour.Length,
+			"travelTimes": tour.TravelTimes,
+			"status":      tour.Status,
+			"publishedAt": tour.PublishedAt,
+			"archivedAt":  tour.ArchivedAt,
+		},
+	}
+
+	if _, err := collection.UpdateOne(ctx, bson.M{"_id": oid}, update); err != nil {
 		return nil, err
 	}
 

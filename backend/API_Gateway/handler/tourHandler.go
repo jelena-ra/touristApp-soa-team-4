@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -135,8 +136,20 @@ func (h *TourHandler) UpdateTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Failed to read request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
 	var updateTourRequest tourProto.UpdateTourRequest
-	if err := json.NewDecoder(r.Body).Decode(&updateTourRequest); err != nil {
+	unmarshaler := protojson.UnmarshalOptions{
+		AllowPartial:   true,
+		DiscardUnknown: true,
+	}
+
+	if err := unmarshaler.Unmarshal(bodyBytes, &updateTourRequest); err != nil {
 		log.Printf("Failed to decode request body: %v", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -213,6 +226,14 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	touristId := claims.ID
+
+	authHeader := r.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+	tokenString := ""
+	if len(parts) == 2 && parts[0] == "Bearer" {
+		tokenString = parts[1]
+	}
+
 	log.Printf("[API Gateway] Received request to start tour. Tourist ID from token: %s", touristId)
 
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -233,6 +254,7 @@ func (h *TourHandler) StartTourHandle(w http.ResponseWriter, r *http.Request) {
 		TourId:    tourId,
 		Position:  &positionReq,
 		TouristId: touristId,
+		Token:     tokenString,
 	}
 
 	resp, err := h.client.StartTour(ctx, gprcRequest)
@@ -332,7 +354,7 @@ func (h *TourHandler) AbandonTourHandle(w http.ResponseWriter, r *http.Request) 
 func (h *TourHandler) GetActiveTourHandle(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	
+
 	claims, ok := r.Context().Value("user").(*jwt.Claims)
 	if !ok {
 		http.Error(w, "User claims not found in context", http.StatusUnauthorized)
@@ -369,4 +391,124 @@ func (h *TourHandler) GetActiveTourHandle(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
+}
+func (h *TourHandler) UpdateKeyPointHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var keyPointReq tourProto.UpdateKeyPointRequest
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err := unmarshaler.Unmarshal(bodyBytes, &keyPointReq); err != nil {
+		log.Printf("Failed to decode UpdateKeyPoint request body: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.client.UpdateKeyPoint(ctx, &keyPointReq)
+	if err != nil {
+		log.Printf("Failed to update key point via gRPC: %v", err)
+		http.Error(w, "Failed to update key point", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal UpdateKeyPoint response to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (h *TourHandler) DeleteKeyPointHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	keyPointId := vars["id"]
+
+	gprcRequest := &tourProto.DeleteKeyPointRequest{KeyPointId: keyPointId}
+
+	resp, err := h.client.DeleteKeyPoint(ctx, gprcRequest)
+	if err != nil {
+		log.Printf("Failed to delete key point via gRPC: %v", err)
+		http.Error(w, "Failed to delete key point", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{EmitUnpopulated: true}
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal DeleteKeyPoint response to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (h *TourHandler) PublishTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	resp, err := h.client.PublishTour(ctx, &tourProto.PublishTourRequest{TourId: tourId})
+	if err != nil {
+		log.Printf("Failed to publish tour via gRPC: %v", err)
+		http.Error(w, "Failed to publish tour", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"message": resp.Message,
+	})
+	if err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *TourHandler) ArchiveTourHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	resp, err := h.client.ArchiveTour(ctx, &tourProto.ArchiveTourRequest{TourId: tourId})
+	if err != nil {
+		log.Printf("Failed to archive tour via gRPC: %v", err)
+		http.Error(w, "Failed to archive tour", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"message": resp.Message,
+	})
+	if err != nil {
+		log.Printf("Failed to encode response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

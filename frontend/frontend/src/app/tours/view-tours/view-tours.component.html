@@ -1,5 +1,9 @@
 <div class="container">
     <h1>All tours</h1>
+    <div *ngIf="openBuyDialog" class="buydialog">
+        <p>Are you sure you want to buy this tour?</p>
+        <div class="confirmbuttons"> <button mat-flat-button color="primary" (click)="buyTour()">Yes</button> <button  (click)="cancelBuying()" mat-flat-button color="primary">No</button></div>
+    </div>
     <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Add Tour</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
@@ -31,18 +35,29 @@
                     </div>
                 </mat-card-content>
                 <mat-card-actions class="tour-action">
+                    @if(user?.role !== 'author') {
+                        <button mat-button (click)="openTourDetailsDialog(tour)">View Details</button>
+                    }
                     <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">View Details</button>
-                    <button *ngIf="!activeExecution" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
+                    <button *ngIf="!activeExecution && user?.role !== 'author'" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
                         Start Tour
                     </button>
-                    <ng-container *ngIf="activeExecution">
-                        <button *ngIf="activeExecution.tourId === tour.id" mat-flat-button color="accent" [routerLink]="['/tour-execution', tour.id]">
+                    @if (user?.role !== 'author') {
+                        <button  mat-flat-button color="primary"  (click)="openbuyTour(tour)">
+                           Buy Tour
+                       </button>
+                    }
+                 <button *ngIf="false" mat-button [routerLink]="['/tours', tour.id, 'map-editor']">
+                Edit Key Points
+                </button>
+                    <!-- <ng-container *ngIf="activeExecution"> -->
+                        <!-- <button *ngIf="activeExecution.tourId === tour.id && user?.role !== 'author'" mat-flat-button color="accent" [routerLink]="['/tour-execution', tour.id]">
                             Continue Tour
-                        </button>
-                        <button *ngIf="activeExecution.tourId !== tour.id" mat-flat-button color="primary" disabled title="You already have an active tour">
+                        </button> -->
+                        <!-- <button *ngIf="activeExecution.tourId !== tour.id && user?.role !== 'author'" mat-flat-button color="primary" disabled title="You already have an active tour">
                             Start Tour
-                        </button>
-                    </ng-container>
+                        </button> -->
+                    <!-- </ng-container> -->
                 </mat-card-actions>
             </mat-card>
         </div>

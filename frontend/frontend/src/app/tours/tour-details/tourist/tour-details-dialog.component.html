@@ -1,0 +1,62 @@
+<mat-dialog-content class="dialog-content">
+  <mat-card-title>Tour Details</mat-card-title>
+  <mat-card class="tour-info mat-elevation-z2">
+    <mat-card-content>
+      <p><strong>Name:</strong> {{ tour.name }}</p>
+      <p><strong>Description:</strong> {{ tour.description }}</p>
+      <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
+    </mat-card-content>
+  </mat-card>
+  
+  <mat-card class="travel-times mat-elevation-z2">
+    <mat-card-content>
+      <p><strong>Length (km):</strong> {{ tour.length || 'N/A' }}</p>
+      <h3>Travel Times</h3>
+      <div class="travel-time-items">
+        @if(tour.travelTimes) {
+          <p>
+            <mat-icon>{{ transportIcons.WALKING }}</mat-icon>
+            Walking: {{ tour.travelTimes.WALKING || 'N/A' }}
+          </p>
+          <p>
+            <mat-icon>{{ transportIcons.BICYCLE }}</mat-icon>
+            Bicycle: {{ tour.travelTimes.BICYCLE || 'N/A' }}
+          </p>
+          <p>
+            <mat-icon>{{ transportIcons.CAR }}</mat-icon>
+            Car: {{ tour.travelTimes.CAR || 'N/A' }}
+          </p>
+        } @else {
+          <p>No travel times available.</p>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="tour-tags mat-elevation-z2">
+    <mat-card-content>
+      <h3>Tags</h3>
+      @if(tour.tags?.length) {
+          <mat-chip-set multiple>
+            @for(tag of tour.tags; track tag) {
+              <mat-chip>{{tag}}</mat-chip>
+            }
+          </mat-chip-set>
+        } @else {
+          <p>No tags available.</p>
+        }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <app-map
+      [registerClick]="false"
+      [showKeyPoints]="true"
+      [keyPoints]="[tour.keyPoints[0]]">
+    </app-map>
+  </mat-card>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="dialogRef.close()">Close</button>
+  </mat-dialog-actions>
+</mat-dialog-content>

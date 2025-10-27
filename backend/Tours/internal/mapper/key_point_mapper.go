@@ -16,7 +16,7 @@ func KeyPointModelToProto(kp *model.KeyPoint) *tourProto.KeyPoint {
 		Latitude:    float32(kp.Latitude),
 		Name:        kp.Name,
 		Description: kp.Description,
-		ImageId:     kp.ImageID.Hex(),
+		ImageUrl:    kp.ImageURL,
 		Order:       int64(kp.Order),
 	}
 }
@@ -24,6 +24,14 @@ func KeyPointModelToProto(kp *model.KeyPoint) *tourProto.KeyPoint {
 func KeyPointProtoToModel(kp *tourProto.KeyPoint) (*model.KeyPoint, error) {
 	m := &model.KeyPoint{}
 	var err error
+
+	// Set ID if provided
+	if kp.Id != "" {
+		m.ID, err = primitive.ObjectIDFromHex(kp.Id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid keypoint ID format")
+		}
+	}
 
 	m.TourID, err = primitive.ObjectIDFromHex(kp.TourId)
 	if err != nil {
@@ -35,6 +43,7 @@ func KeyPointProtoToModel(kp *tourProto.KeyPoint) (*model.KeyPoint, error) {
 	m.Name = kp.Name
 	m.Description = kp.Description
 	m.Order = int(kp.Order)
+	m.ImageURL = kp.ImageUrl
 
 	return m, nil
 }

@@ -131,6 +131,10 @@ func main() {
 	}(stakeholdersConn)
 
 	stakeholdersClient := stakeholdersProto.NewStakeholderServiceClient(stakeholdersConn)
+	purchaseServiceAddress := os.Getenv("PURCHASE_SERVICE_ADDRESS")
+	if purchaseServiceAddress == "" {
+		purchaseServiceAddress = "http://localhost:8085"
+	}
 
 	tourRepo := repository.NewTourRepository(client, dbName, tourCollectionName)
 	keyPointRepo := repository.NewKeyPointRepositoryMongo(client, dbName, keyPointCollectionName)
@@ -138,7 +142,8 @@ func main() {
 	tourExecutionRepo := repository.NewTourExecutionRepository(client, dbName, tourExecutionCollectionName)
 	recensionRepo := repository.NewRecensionRepository(client, dbName, recensionCollectionName)
 	tourService := service.NewTourService(tourRepo, keyPointRepo, recensionRepo)
-	tourExecutionService := service.NewTourExecutionService(tourExecutionRepo, tourService)
+	//tourExecutionService := service.NewTourExecutionService(tourExecutionRepo, tourService)
+	tourExecutionService := service.NewTourExecutionService(tourExecutionRepo, tourService, purchaseServiceAddress)
 	tourHandler := handler.NewTourHandler(tourService, stakeholdersClient, tourExecutionService)
 
 	port := os.Getenv("PORT")
@@ -157,6 +162,8 @@ func main() {
 	)
 
 	tourProto.RegisterTourServiceServer(grpcServer, tourHandler)
+
+	log.Println("BBBBBBBBB")
 
 	log.Println("Tour gRPC service is running on port 8083...")
 	log.Fatal(grpcServer.Serve(listen))

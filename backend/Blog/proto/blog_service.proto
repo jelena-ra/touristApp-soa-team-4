@@ -1,7 +1,8 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "../proto";
+//option go_package = "../proto";
+option go_package = "./;proto";
 
 package blog;
 
@@ -12,6 +13,7 @@ message Blog {
   string author_id = 4;
   repeated string images = 5;
   int32 number_of_likes = 6;
+  bool deleted = 7;
 }
 
 message BlogFull {
@@ -22,7 +24,8 @@ message BlogFull {
   repeated string images = 5;
   int32 number_of_likes = 6;
   repeated Comment comments = 7;
-  repeated string likes = 8;
+  bool deleted = 8;
+  repeated string likes = 9;
 }
 
 message Comment {

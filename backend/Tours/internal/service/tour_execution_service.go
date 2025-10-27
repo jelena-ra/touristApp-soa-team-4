@@ -3,9 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"math"
+	"net/http"
 	"time"
 
+	"github.com/jelena-ra/touristApp/soa-team-4/Tours/client"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/model"
 	"github.com/jelena-ra/touristApp/soa-team-4/Tours/internal/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,14 +18,18 @@ import (
 const PROXIMITY_RADIUS_METERS = 50.0
 
 type TourExecutionService struct {
-	ExecutionRepo *repository.TourExecutionRepository
-	TourServ      *TourService
+	ExecutionRepo          *repository.TourExecutionRepository
+	TourServ               *TourService
+	HttpClient             *http.Client
+	PurchaseServiceAddress string
 }
 
-func NewTourExecutionService(executionRepo *repository.TourExecutionRepository, tourServ *TourService) *TourExecutionService {
+func NewTourExecutionService(executionRepo *repository.TourExecutionRepository, tourServ *TourService, purchaseAddr string) *TourExecutionService {
 	return &TourExecutionService{
-		ExecutionRepo: executionRepo,
-		TourServ:      tourServ,
+		ExecutionRepo:          executionRepo,
+		TourServ:               tourServ,
+		HttpClient:             &http.Client{},
+		PurchaseServiceAddress: purchaseAddr,
 	}
 }
 
@@ -51,11 +59,45 @@ func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId st
 		return execution, nil
 	}
 */
-func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId string, startPosition model.TouristPosition) (*model.TourExecution, error) {
+func (s *TourExecutionService) StartTour(tourId primitive.ObjectID, touristId string, startPosition model.TouristPosition, authToken string) (*model.TourExecution, error) {
 
 	ctx := context.Background()
 
-	_, err := s.ExecutionRepo.GetActiveByTourist(touristId)
+	log.Printf("[DEBUG] Provera kupovine za Turistu ID: %s", touristId)
+	log.Printf("[DEBUG] Pozivam Purchase servis da dobijem kupljene ture...")
+	purchasedTokens, err := client.PurchasedToursForUser(s.HttpClient, s.PurchaseServiceAddress, touristId, authToken)
+	if err != nil {
+		log.Printf("[ERROR] Greška pri komunikaciji sa Purchase servisom: %v", err)
+		return nil, fmt.Errorf("error checking purchased tours: %w", err)
+	}
+
+	if len(purchasedTokens) > 0 {
+		var purchasedTourIDs []string
+		for _, token := range purchasedTokens {
+			purchasedTourIDs = append(purchasedTourIDs, token.TourID)
+		}
+		log.Printf("[DEBUG] ID-jevi kupljenih tura: %v", purchasedTourIDs)
+	}
+
+	isTourPurchased := false
+	tourIdToStart := tourId.Hex()
+	log.Printf("[DEBUG] Tura koju pokušavamo da startujemo ima ID: %s", tourIdToStart)
+
+	for _, token := range purchasedTokens {
+		log.Printf("[DEBUG] ... poredim sa kupljenom turom ID: %s", token.TourID)
+		if token.TourID == tourIdToStart {
+			isTourPurchased = true
+			log.Printf("[DEBUG] POKLAPANJE PRONAĐENO! Tura je kupljena.")
+			break
+		}
+	}
+
+	if !isTourPurchased {
+		log.Printf("[INFO] Tura sa ID-jem %s NIJE pronađena u listi kupljenih tura. Pristup odbijen.", tourIdToStart)
+		return nil, errors.New("tour has not been purchased by the user")
+	}
+
+	_, err = s.ExecutionRepo.GetActiveByTourist(touristId)
 	if err == nil {
 		return nil, errors.New("user already has an active tour session running")
 	}
@@ -125,7 +167,7 @@ func (s *TourExecutionService) AbandonTour(executionId primitive.ObjectID, touri
 	return execution, err
 }
 
-func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
+/*func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
 
 	execution, err := s.ExecutionRepo.GetById(executionId)
 	if err != nil {
@@ -156,6 +198,71 @@ func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, to
 				execution.CompletedKeyPoints = append(execution.CompletedKeyPoints, completedKP)
 			}
 		}
+	}
+
+	if len(execution.CompletedKeyPoints) == len(keyPoints) {
+		now := time.Now().UTC()
+		execution.Status = model.StatusCompleted
+		execution.CompletionTime = &now
+	}
+
+	err = s.ExecutionRepo.Update(execution)
+	return execution, err
+}
+
+func isKeyPointCompleted(keyPointId primitive.ObjectID, completedKeyPoints []model.CompletedKeyPoint) bool {
+	for _, ckp := range completedKeyPoints {
+		if ckp.KeyPointId == keyPointId {
+			return true
+		}
+	}
+	return false
+}*/
+
+func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
+
+	execution, err := s.ExecutionRepo.GetById(executionId)
+	if err != nil {
+		return nil, errors.New("tour execution not found")
+	}
+
+	if execution.TouristId != touristId {
+		return nil, errors.New("this is not your tour execution")
+	}
+
+	execution.LastActivity = time.Now().UTC()
+	execution.CurrentPosition = position
+
+	ctx := context.Background()
+	keyPoints, err := s.TourServ.GetKeyPoints(ctx, execution.TourId.Hex())
+	if err != nil {
+		return nil, err
+	}
+	if len(keyPoints) == 0 {
+		err = s.ExecutionRepo.Update(execution)
+		return execution, err
+	}
+
+	var nextKeyPoint *model.KeyPoint
+	for _, kp := range keyPoints {
+		if !isKeyPointCompleted(kp.ID, execution.CompletedKeyPoints) {
+			nextKeyPoint = kp
+			break
+		}
+	}
+
+	if nextKeyPoint == nil {
+		err = s.ExecutionRepo.Update(execution)
+		return execution, err
+	}
+	distance := calculateDistance(position.Latitude, position.Longitude, nextKeyPoint.Latitude, nextKeyPoint.Longitude)
+
+	if distance <= PROXIMITY_RADIUS_METERS {
+		completedKP := model.CompletedKeyPoint{
+			KeyPointId:     nextKeyPoint.ID,
+			CompletionTime: time.Now().UTC(),
+		}
+		execution.CompletedKeyPoints = append(execution.CompletedKeyPoints, completedKP)
 	}
 
 	if len(execution.CompletedKeyPoints) == len(keyPoints) {

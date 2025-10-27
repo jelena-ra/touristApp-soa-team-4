@@ -42,6 +42,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Content:  blogReq.Content,
 		AuthorID: blogReq.GetAuthorId(),
 		Images:   blogReq.GetImages(),
+		Deleted:  false,
 	}
 	createdBlog, err := h.service.CreateBlog(ctx, blog)
 
@@ -57,6 +58,7 @@ func (h *BlogHandler) CreateBlog(ctx context.Context, req *blog_proto.CreateBlog
 		Images:        createdBlog.Images,
 		NumberOfLikes: 0,
 		Comments:      make([]*blog_proto.Comment, 0),
+		Deleted:       false,
 		Likes:         createdBlog.Likes,
 	}
 
@@ -93,6 +95,7 @@ func (h *BlogHandler) LikeBlog(ctx context.Context, req *blog_proto.LikeBlogRequ
 		Images:        likedBlog.Images,
 		NumberOfLikes: int32(len(likedBlog.Likes)),
 		Comments:      protoComments,
+		Deleted:       false,
 		Likes:         likedBlog.Likes,
 	}
 
@@ -155,6 +158,7 @@ func (h *BlogHandler) GetAllBlogs(ctx context.Context, req *blog_proto.GetAllBlo
 			AuthorId:      blog.AuthorID,
 			Images:        blog.Images,
 			NumberOfLikes: int32(len(blog.Likes)),
+			Deleted:       blog.Deleted,
 		}
 		protoBlogs = append(protoBlogs, protoBlog)
 	}

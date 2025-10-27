@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/jelena-ra/touristApp/soa-team-4/Blog/internal/model"
@@ -176,4 +178,65 @@ func (s *BlogService) UpdateComment(ctx context.Context, commentId string, userI
 		return nil, err
 	}
 	return comment, nil
+}
+
+func (s *BlogService) DeleteUserData(ctx context.Context, userID string) error {
+	log.Printf("Attempting to delete all user data for UserID: %s", userID)
+
+	err := s.repo.DeleteAllBlogsByUserID(ctx, userID)
+	if err != nil {
+		log.Printf("Error deleting blogs for user %s: %v", userID, err)
+		return fmt.Errorf("failed to delete blogs: %w", err)
+	}
+	log.Printf("Successfully deleted blogs for user %s", userID)
+
+	/*	err = s.repoComment.DeleteAllCommentsByUserID(ctx, userID)
+		if err != nil {
+			log.Printf("Error deleting comments for user %s: %v", userID, err)
+			return fmt.Errorf("failed to delete comments: %w", err)
+		}
+		log.Printf("Successfully deleted comments for user %s", userID)
+
+		err = s.repo.RemoveUserLikesFromAllBlogs(ctx, userID)
+		if err != nil {
+			log.Printf("Error removing user %s likes from all blogs: %v", userID, err)
+			return fmt.Errorf("failed to remove user likes: %w", err)
+		}
+		log.Printf("Successfully removed likes from all blogs for user %s", userID)*/
+
+	return nil
+}
+
+func (s *BlogService) RecoverUserData(ctx context.Context, userID string) error {
+	log.Printf("Attempting to recover all user data for UserID: %s", userID)
+
+	err := s.repo.RecoverAllBlogsByUserID(ctx, userID)
+	if err != nil {
+		log.Printf("Error recovering blogs for user %s: %v", userID, err)
+		return fmt.Errorf("failed to recover blogs: %w", err)
+	}
+	log.Printf("Successfully recovered blogs for user %s", userID)
+
+	/*	err = s.repoComment.DeleteAllCommentsByUserID(ctx, userID)
+		if err != nil {
+			log.Printf("Error deleting comments for user %s: %v", userID, err)
+			return fmt.Errorf("failed to delete comments: %w", err)
+		}
+		log.Printf("Successfully deleted comments for user %s", userID)
+
+		err = s.repo.RemoveUserLikesFromAllBlogs(ctx, userID)
+		if err != nil {
+			log.Printf("Error removing user %s likes from all blogs: %v", userID, err)
+			return fmt.Errorf("failed to remove user likes: %w", err)
+		}
+		log.Printf("Successfully removed likes from all blogs for user %s", userID)*/
+
+	return nil
+}
+func (s *BlogService) GetBlogById(ctx context.Context, id string) (*model.Blog, error) {
+	return s.repo.GetById(ctx, id)
+}
+
+func (s *BlogService) DeleteBlog(ctx context.Context, id string) error {
+	return s.repo.DeleteBlog(ctx, id)
 }
