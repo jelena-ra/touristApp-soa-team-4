@@ -202,7 +202,16 @@ export class TourDetailsPage implements OnInit {
     }
 
     archiveTour() {
-        this.tourService.archive(this.tour.id);
+        this.tourService.archive(this.tour.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+            next: (response) => {
+
+            },
+            error: (err) => {
+                console.log(err)
+            }
+        })
     }
 
     get sortedKeyPoints() {

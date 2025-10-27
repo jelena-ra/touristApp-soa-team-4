@@ -1,0 +1,32 @@
+<div class="page-container">
+  <div class="content-wrapper">
+    
+    <div *ngIf="!tour" class="loading-container">
+      <div class="cosmic-glow">
+        <mat-spinner diameter="80"></mat-spinner>
+      </div>
+      <h1 class="loading-title animate-glow">Učitavanje Mape...</h1>
+    </div>
+
+    @if(tour) {
+    
+      <div class="header-constellation">
+        <h1 class="header-title animate-glow">Editor Mape: {{ tour.name }}</h1>
+        <div class="cosmic-line"></div>
+        <p class="header-subtitle">
+          Kliknite na mapu da dodate novu tačku, ili na postojeći marker da ga izmenite.
+        </p>
+      </div>
+
+      <div class="map-constellation">
+        <app-map
+            [registerClick]="true"
+            (locationSelected)="onLocationSelected($event)"
+            (markerClicked)="onMarkerClicked($event)"
+            [showKeyPoints]="true"
+            [keyPoints]="tour.keyPoints">
+        </app-map>
+      </div>
+    }
+  </div>
+</div>

@@ -162,71 +162,17 @@ func (h *TourHandler) StartTour(ctx context.Context, req *tourProto.StartTourReq
 		return nil, status.Error(codes.InvalidArgument, "Invalid tourist ID format :)")
 	}*/
 	touristId := req.GetTouristId()
+	tokenString := req.GetToken()
 
 	position := mapper.PositionProtoToModel(req.GetPosition())
 
-	execution, err := h.executionService.StartTour(tourId, touristId, *position)
+	execution, err := h.executionService.StartTour(tourId, touristId, *position, tokenString)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return mapper.TourExecutionModelToProto(execution), nil
 }
-
-/*func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckProximityRequest) (*tourProto.TourExecutionResponse, error) {
-
-	if req.GetId() == "" {
-		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
-	}
-	if req.GetPosition() == nil {
-		return nil, status.Error(codes.InvalidArgument, "Position is required")
-	}
-
-	executionId, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
-	}
-
-	touristIdStr := "60d5ec49e0f3e82a8b4104a3"
-	touristId, err := primitive.ObjectIDFromHex(touristIdStr)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid user ID")
-	}
-
-	position := mapper.PositionProtoToModel(req.GetPosition())
-
-	execution, err := h.executionService.CheckProximity(executionId, touristId, *position)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return mapper.TourExecutionModelToProto(execution), nil
-}
-
-func (h *TourHandler) AbandonTour(ctx context.Context, req *tourProto.TourExecutionRequest) (*tourProto.TourExecutionResponse, error) {
-
-	if req.GetId() == "" {
-		return nil, status.Error(codes.InvalidArgument, "Execution ID is required")
-	}
-
-	executionId, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "Invalid execution ID format")
-	}
-
-	touristIdStr := "60d5ec49e0f3e82a8b4104a3"
-	touristId, err := primitive.ObjectIDFromHex(touristIdStr)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid user ID")
-	}
-
-	execution, err := h.executionService.AbandonTour(executionId, touristId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return mapper.TourExecutionModelToProto(execution), nil
-}*/
 
 func (h *TourHandler) CheckProximity(ctx context.Context, req *tourProto.CheckProximityRequest) (*tourProto.TourExecutionResponse, error) {
 
@@ -353,4 +299,69 @@ func (h *TourHandler) ArchiveTour(ctx context.Context, req *tourProto.ArchiveTou
 
 	message := must(h.server.ArchiveTour(ctx, tourID))
 	return &tourProto.ArchiveTourResponse{Message: message}, nil
+}
+
+func (h *TourHandler) UpdateKeyPoint(ctx context.Context, req *tourProto.UpdateKeyPointRequest) (*tourProto.UpdateKeyPointResponse, error) {
+
+	if req.GetKeyPoint() == nil {
+		return nil, status.Error(codes.InvalidArgument, "KeyPoint information is required")
+	}
+
+	modelUpdateInfo, err := mapper.KeyPointProtoToModel(req.GetKeyPoint())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if req.ImageBase64 != "" {
+		log.Println("Image base64 length:", len(req.ImageBase64))
+	} else {
+		log.Println("No image received")
+	}
+
+	if req.GetImageBase64() != "" {
+		data, err := base64.StdEncoding.DecodeString(req.GetImageBase64())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid base64 image")
+		}
+
+		newID := primitive.NewObjectID()
+		filename := fmt.Sprintf("%s.jpg", newID.Hex())
+		dir := fmt.Sprintf("/app/uploads/keypoints/%s", newID.Hex())
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return nil, err
+		}
+
+		filePath := path.Join(dir, filename)
+		err = os.WriteFile(filePath, data, 0644)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "Failed to save image")
+		}
+
+		modelUpdateInfo.ImageURL = fmt.Sprintf("http://localhost:8000/uploads/keypoints/%s/%s", newID.Hex(), filename)
+	}
+
+	updatedKeyPoint, err := h.server.UpdateKeyPoint(ctx, modelUpdateInfo)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	protoKeyPoint := mapper.KeyPointModelToProto(updatedKeyPoint)
+
+	return &tourProto.UpdateKeyPointResponse{KeyPoint: protoKeyPoint}, nil
+}
+
+func (h *TourHandler) DeleteKeyPoint(ctx context.Context, req *tourProto.DeleteKeyPointRequest) (*tourProto.DeleteKeyPointResponse, error) {
+
+	keyPointId := req.GetKeyPointId()
+	if keyPointId == "" {
+		return nil, status.Error(codes.InvalidArgument, "KeyPoint ID is required")
+	}
+
+	err := h.server.DeleteKeyPoint(ctx, keyPointId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &tourProto.DeleteKeyPointResponse{Message: "Key point successfully deleted"}, nil
 }

@@ -1,0 +1,68 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.map-label {
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.6);
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.map-wrapper {
+  height: 250px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+  position: relative;
+  min-height: 250px; 
+  border-radius: 8px;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  // Ensure the map container has proper dimensions
+  ::ng-deep #map {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 10px;
+  }
+  
+  // Style the mini-map component specifically
+  ::ng-deep app-mini-map {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+// Add some spacing and styling to the coordinate display
+p {
+  background-color: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #34AB45;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+

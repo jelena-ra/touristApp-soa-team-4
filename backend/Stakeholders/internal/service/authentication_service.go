@@ -52,7 +52,16 @@ func (s *AuthenticationService) Login(credentials *model.CredentialsDto) (*model
 
 func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrationDto) (*model.AuthenticationTokensDto, error) {
 
-	exists, _ := s.userRepo.Exists(account.Username)
+	if account == nil {
+		return nil, ErrInvalidArgument
+	}
+	if account.Username == "" || account.Password == "" || account.Email == "" {
+		return nil, ErrInvalidArgument
+	}
+	exists, err := s.userRepo.Exists(account.Username)
+	if err != nil {
+		return nil, errors.New("database error")
+	}
 	if exists {
 		return nil, ErrUsernameNotUnique
 	}
@@ -92,13 +101,13 @@ func (s *AuthenticationService) RegisterTourist(account *model.AccountRegistrati
 		return nil, errors.New("failed to create default profile")
 	}
 
-	token, err := s.tokenGen.GenerateAccessToken(createdUser)
-	if err != nil {
+	//token, err := s.tokenGen.GenerateAccessToken(createdUser)
+	/*if err != nil {
 		return nil, errors.New("failed to generate access token")
-	}
+	}*/
 
 	return &model.AuthenticationTokensDto{
-		AccessToken: token,
+		createdUser.Username,
 	}, nil
 }
 

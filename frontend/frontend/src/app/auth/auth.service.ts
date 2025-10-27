@@ -49,8 +49,8 @@ export class AuthService {
       .pipe(
         tap((authenticationResponse) => {
          
-          this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
-          this.setUser();
+          //this.tokenStorage.saveAccessToken(authenticationResponse.accessToken);
+          //this.setUser();
         }),
         catchError((error: HttpErrorResponse) => {
           console.error('Došlo je do greške prilikom registracije:', error.message);

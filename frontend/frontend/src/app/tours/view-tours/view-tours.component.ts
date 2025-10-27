@@ -88,7 +88,7 @@ export class ViewToursPage implements OnInit{
                 })
             } else {
                 this.tours = response.filter(t => {
-                    t.status == 'PUBLISHED'
+                    return t.status === "PUBLISHED"
                 })
             }
             this.checkActiveExecution();

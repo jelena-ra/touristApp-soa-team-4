@@ -10,11 +10,14 @@ import { ViewToursPage } from './tours/view-tours/view-tours.component';
 import { TourDetailsPage } from './tours/tour-details/tour-detalis.component';
 import { TourExecutionPageComponent } from './tours/tour-execution/tour-execution-page/tour-execution-page';
 import { CartComponent } from './purchase/purchase/purchase';
+import { KeyPointsMapPageComponent } from './tours/key-points-map/tours/key-points-map-page/key-points-map-page';
+import { roleGuard } from './guards/role-guard';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: Home },
-  { path: 'cart', component: CartComponent },
+  { path: 'cart', component: CartComponent, canActivate: [authGuard, roleGuard(['tourist'])] },
   { path: 'create-profile/:flag', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },
@@ -23,5 +26,6 @@ export const routes: Routes = [
   { path: 'tourist-location', component: TouristLocationComponent },
   { path: 'tours', component: ViewToursPage },
   { path: 'tours/:id', component: TourDetailsPage },
-    { path: 'tour-execution/:id', component: TourExecutionPageComponent }
+  { path: 'tour-execution/:id', component: TourExecutionPageComponent },
+  { path: 'tours/:id/map-editor', component: KeyPointsMapPageComponent }
 ];

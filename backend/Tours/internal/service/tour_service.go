@@ -104,6 +104,26 @@ func (s *TourService) GetRecensionsByTourID(ctx context.Context, tourID string) 
 
 	return s.recensionRepo.GetByTourID(ctx, tourID)
 }
+func (s *TourService) UpdateKeyPoint(ctx context.Context, keyPoint *model.KeyPoint) (*model.KeyPoint, error) {
+	if keyPoint == nil {
+		return nil, errors.New("keyPoint cannot be nil")
+	}
+
+	if keyPoint.Name == "" {
+		return nil, errors.New("key point name cannot be empty")
+	}
+	if keyPoint.Description == "" {
+		return nil, errors.New("key point description cannot be empty")
+	}
+
+	if keyPoint.Latitude < -90 || keyPoint.Latitude > 90 {
+		return nil, errors.New("invalid latitude: must be between -90 and 90")
+	}
+	if keyPoint.Longitude < -180 || keyPoint.Longitude > 180 {
+		return nil, errors.New("invalid longitude: must be between -180 and 180")
+	}
+	return s.keyPointRepo.UpdateKeyPoint(ctx, keyPoint)
+}
 
 func (s *TourService) PublishTour(ctx context.Context, tourID string) (string, error) {
 	log.Println("Uslo u publish")
@@ -150,6 +170,8 @@ func (s *TourService) ArchiveTour(ctx context.Context, tourID string) (string, e
 	if err != nil {
 		return "", errors.New("invalid tour ID")
 	}
+	//log.Printf("[Archive tour] Status: %s", tour.Status)
+	log.Printf("[Archive tour] ID: %s", tourID)
 
 	tour, err := s.tourRepo.GetByID(ctx, oid.Hex())
 	if err != nil {
@@ -159,6 +181,7 @@ func (s *TourService) ArchiveTour(ctx context.Context, tourID string) (string, e
 	if tour.Status != model.Published {
 		return "", errors.New("tour cannot be archived")
 	}
+	log.Println("Publisovana je sad je setujem na archived")
 
 	tour.Status = model.Archived
 	t := time.Now()
@@ -168,6 +191,20 @@ func (s *TourService) ArchiveTour(ctx context.Context, tourID string) (string, e
 	if err != nil {
 		return "", err
 	}
+	log.Printf("[Archive tour] Status: %s", tour.Status)
+	log.Printf("[Archive tour] ID: %s", tour.ID)
 
 	return "Tour successfully archived", nil
+}
+
+func (s *TourService) DeleteKeyPoint(ctx context.Context, id string) error {
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("invalid key point ID format")
+	}
+
+	// TODO: Provjeriti da li korisnik koji briše ima dozvolu (npr. da li je autor ture).
+
+	return s.keyPointRepo.DeleteKeyPoint(ctx, oid)
 }

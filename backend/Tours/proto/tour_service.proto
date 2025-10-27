@@ -80,6 +80,7 @@ message StartTourRequest {
     string tourId = 1;
     TouristPosition position = 2;
     string touristId = 3;
+    string token = 4;
 }
 
 
@@ -177,6 +178,7 @@ message CreateKeyPointResponse {
 
 message UpdateKeyPointRequest {
   KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
 }
 
 message UpdateKeyPointResponse {
@@ -184,7 +186,7 @@ message UpdateKeyPointResponse {
 }
 
 message DeleteKeyPointRequest {
-  int64 keyPointId = 1;
+  string keyPointId = 1;
 }
 
 message DeleteKeyPointResponse {
