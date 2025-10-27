@@ -127,7 +127,7 @@ func (r *BlogRepositoryMongo) GetAllBlogsForUsers(ctx context.Context, userIds [
 	}
 */
 func (r *BlogRepositoryMongo) DeleteAllBlogsByUserID(ctx context.Context, userID string) error {
-	filter := bson.M{"author_id": userID} // Koristi "author_id" kako je definisano u modelu
+	filter := bson.M{"authorId": userID} // Koristi "author_id" kako je definisano u modelu
 	update := bson.M{
 		"$set": bson.M{
 			"deleted": true,
@@ -145,8 +145,8 @@ func (r *BlogRepositoryMongo) DeleteAllBlogsByUserID(ctx context.Context, userID
 func (r *BlogRepositoryMongo) RecoverAllBlogsByUserID(ctx context.Context, userID string) error {
 	// Pronađi sve blogove ovog korisnika koji su označeni kao "deleted: true"
 	filter := bson.M{
-		"author_id": userID,
-		"deleted":   true,
+		"authorId": userID,
+		"deleted":  true,
 	}
 
 	// Postavi "deleted" na false i ažuriraj "updated_at"
