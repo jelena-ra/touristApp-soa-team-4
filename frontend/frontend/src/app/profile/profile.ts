@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ImageService } from '../image/image.service';
@@ -23,6 +23,8 @@ import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle } from "@angular/material/card";
 import { MatChipsModule } from '@angular/material/chips';
 import { PurchaseService } from '../purchase/service/purchase.service';
+import { TourDetailsDialogComponent } from '../tours/tour-details/tourist/tour-details-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 export interface Profile {
   userId: string;
   name: string;
@@ -73,6 +75,7 @@ profile: Profile | null = null;
   loading = true;
   error = false;
   profileImageSrc: string | null = null;
+  readonly dialog = inject(MatDialog);
 
   constructor( private destroyRef: DestroyRef,
         private snackBar: MatSnackBar,
@@ -174,4 +177,18 @@ profile: Profile | null = null;
             console.log('Aktivna tura:', this.activeExecution);
         });
     }
+
+    openTourDetailsDialog(tour: TourInterface): void {
+            if (!tour) return;
+            this.tourService.getById(tour.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (response) => {
+                this.dialog.open(TourDetailsDialogComponent, {
+                    data: response
+                });
+              }
+            })
+
+        }
 }

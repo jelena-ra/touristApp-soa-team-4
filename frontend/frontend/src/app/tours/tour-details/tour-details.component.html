@@ -20,6 +20,11 @@
             <mat-option *ngFor="let diff of difficulties" [value]="diff">{{ diff }}</mat-option>
           </mat-select>
         </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Price</mat-label>
+          <input type="number" min="0" matInput [(ngModel)]="tourPrice" [readonly]="!editMode">
+        </mat-form-field>
       </div>
 
       <!-- <div>

@@ -1,0 +1,66 @@
+::ng-deep .mat-dialog-container {
+  width: 600px;      /* Povećava širinu dialoga */
+  max-width: 90vw;   /* Responsive za male ekrane */
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+:host {
+    width: 100%;
+    height: 100%;
+    margin: 0%;
+    padding: 0%;
+    --background-color: #0f172a;
+    --panel-background: rgba(30, 41, 59, 0.4);
+    --border-color: rgba(148, 163, 184, 0.2);
+    --primary-glow: rgba(96, 165, 250, 0.5);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  word-wrap: break-word;   /* Wrapuje dug tekst */
+  overflow-wrap: break-word;
+}
+
+mat-card {
+  background: var(--background-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 16px;
+  word-wrap: break-word;       /* Tekst unutar kartica */
+  overflow-wrap: break-word;
+}
+
+.travel-time-items {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    word-break: break-word;   /* Tekst se wrapuje po potrebi */
+  }
+
+  mat-icon {
+    font-size: 20px;
+  }
+}
+
+mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  mat-chip {
+    background-color: var(--text-secondary);
+    color: var(--text-primary);
+    white-space: normal; /* Wrap unutar chip-a ako je dug */
+  }
+}

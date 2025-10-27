@@ -19,6 +19,7 @@ import { User } from "../../auth/model/user.model";
 import { PurchaseService } from "../../purchase/service/purchase.service";
 import { OrderItem } from "../../purchase/model/order-item.interface";
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TourDetailsDialogComponent } from "../tour-details/tourist/tour-details-dialog.component";
 
 
 @Component({
@@ -159,4 +160,18 @@ export class ViewToursPage implements OnInit{
             console.log('Aktivna tura:', this.activeExecution);
         });
     }
+
+       openTourDetailsDialog(tour: TourInterface): void {
+            if (!tour) return;
+            this.tourService.getById(tour.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (response) => {
+                this.dialog.open(TourDetailsDialogComponent, {
+                    data: response
+                });
+              }
+            })
+
+        }
 }
