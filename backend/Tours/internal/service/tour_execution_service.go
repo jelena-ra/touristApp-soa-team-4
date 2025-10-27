@@ -167,7 +167,7 @@ func (s *TourExecutionService) AbandonTour(executionId primitive.ObjectID, touri
 	return execution, err
 }
 
-func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
+/*func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
 
 	execution, err := s.ExecutionRepo.GetById(executionId)
 	if err != nil {
@@ -198,6 +198,71 @@ func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, to
 				execution.CompletedKeyPoints = append(execution.CompletedKeyPoints, completedKP)
 			}
 		}
+	}
+
+	if len(execution.CompletedKeyPoints) == len(keyPoints) {
+		now := time.Now().UTC()
+		execution.Status = model.StatusCompleted
+		execution.CompletionTime = &now
+	}
+
+	err = s.ExecutionRepo.Update(execution)
+	return execution, err
+}
+
+func isKeyPointCompleted(keyPointId primitive.ObjectID, completedKeyPoints []model.CompletedKeyPoint) bool {
+	for _, ckp := range completedKeyPoints {
+		if ckp.KeyPointId == keyPointId {
+			return true
+		}
+	}
+	return false
+}*/
+
+func (s *TourExecutionService) CheckProximity(executionId primitive.ObjectID, touristId string, position model.TouristPosition) (*model.TourExecution, error) {
+
+	execution, err := s.ExecutionRepo.GetById(executionId)
+	if err != nil {
+		return nil, errors.New("tour execution not found")
+	}
+
+	if execution.TouristId != touristId {
+		return nil, errors.New("this is not your tour execution")
+	}
+
+	execution.LastActivity = time.Now().UTC()
+	execution.CurrentPosition = position
+
+	ctx := context.Background()
+	keyPoints, err := s.TourServ.GetKeyPoints(ctx, execution.TourId.Hex())
+	if err != nil {
+		return nil, err
+	}
+	if len(keyPoints) == 0 {
+		err = s.ExecutionRepo.Update(execution)
+		return execution, err
+	}
+
+	var nextKeyPoint *model.KeyPoint
+	for _, kp := range keyPoints {
+		if !isKeyPointCompleted(kp.ID, execution.CompletedKeyPoints) {
+			nextKeyPoint = kp
+			break
+		}
+	}
+
+	if nextKeyPoint == nil {
+		err = s.ExecutionRepo.Update(execution)
+		return execution, err
+	}
+	distance := calculateDistance(position.Latitude, position.Longitude, nextKeyPoint.Latitude, nextKeyPoint.Longitude)
+
+	if distance <= PROXIMITY_RADIUS_METERS {
+		completedKP := model.CompletedKeyPoint{
+			KeyPointId:     nextKeyPoint.ID,
+			CompletionTime: time.Now().UTC(),
+		}
+		execution.CompletedKeyPoints = append(execution.CompletedKeyPoints, completedKP)
 	}
 
 	if len(execution.CompletedKeyPoints) == len(keyPoints) {

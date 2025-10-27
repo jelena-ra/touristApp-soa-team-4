@@ -44,7 +44,7 @@
                            Buy Tour
                        </button>
                     }
-                 <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id, 'map-editor']">
+                 <button *ngIf="this.user?.role === 'author' && tour.status === 'DRAFT'" mat-button [routerLink]="['/tours', tour.id, 'map-editor']">
                 Edit Key Points
                 </button>
                     <!-- <ng-container *ngIf="activeExecution"> -->
