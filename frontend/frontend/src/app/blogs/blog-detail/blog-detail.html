@@ -1,10 +1,11 @@
 <div class="blog-container" *ngIf="blog; else loading">
-  <!-- Prikaz slika (primer sa prvom slikom kao glavnom) -->
-  <img *ngIf="blog.images && blog.images.length > 0" [src]="blog.images[0]" alt="Blog image" class="main-image">
-
+  <div class="image-gallery" *ngIf="blog.images && blog.images.length > 0">
+  <div class="thumbnail-container" *ngIf="blog.images.length > 1">
+    <img *ngFor="let imageName of blog.images" [src]="imageBaseUrl + imageName" alt="Slika bloga" class="thumbnail-image">
+  </div>
+</div>
   <h1>{{ blog.title }}</h1>
   
-  <!-- Ovde se dešava magija za Markdown -->
   <markdown class="blog-content" [data]="blog.content"></markdown>
   
   <hr>

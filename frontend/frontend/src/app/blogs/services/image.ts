@@ -1,29 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-// Interface za odgovor sa servera nakon uploada
 export interface ImageUploadResponse {
-  url: string;
+  fileName: string;
+  size: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
+  private apiUrl = 'http://localhost:8000/api';
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
-  // Kasnije će ova metoda slati pravi HTTP POST zahtev
-  uploadImage(file: File): Observable<ImageUploadResponse> {
-    console.log(`Pravim se da uploadujem fajl: ${file.name}`);
-
-    // LAŽIRAMO ODGOVOR SA SERVERA
-    // Vraćamo lažni URL nakon "uploada" koji traje 1 sekundu
-    const fakeResponse: ImageUploadResponse = {
-      url: `https://fake-server.com/images/${file.name}`
-    };
-
-    return of(fakeResponse).pipe(delay(1000));
+    uploadImage(blogId: string, file: File): Observable<ImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('image', file, file.name);
+    const uploadUrl = `${this.apiUrl}/blogs/${blogId}/images`;
+    return this.http.post<ImageUploadResponse>(uploadUrl, formData);
   }
 }

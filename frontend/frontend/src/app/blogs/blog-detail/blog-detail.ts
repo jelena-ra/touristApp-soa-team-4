@@ -23,6 +23,7 @@ export class BlogDetailComponent implements OnInit {
   currentUserId: string | null = null;
   isLiking = false; 
   commentForm!: FormGroup;
+  readonly imageBaseUrl = 'http://localhost:8086/images/';
 
   constructor(
     private route: ActivatedRoute,

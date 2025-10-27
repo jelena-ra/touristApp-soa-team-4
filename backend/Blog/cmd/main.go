@@ -21,6 +21,33 @@ import (
 	blog_proto "github.com/jelena-ra/touristApp/soa-team-4/Blog/proto"
 )
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func startImageServer() {
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir("/app/images"))
+	mux.Handle("/images/", http.StripPrefix("/images/", fileServer))
+
+	log.Println("Pokrećem server za slike na portu :8086 sa CORS podrškom")
+
+	if err := http.ListenAndServe(":8086", corsMiddleware(mux)); err != nil {
+		log.Fatalf("Nije uspelo pokretanje HTTP servera: %v", err)
+	}
+}
+
 func main() {
 
 	err := godotenv.Load()
@@ -74,6 +101,8 @@ func main() {
 
 	blogHandler := handler.NewBlogHandler(blogService, imageService)
 
+	go startImageServer()
+
 	port := os.Getenv("MONGO_PORT")
 	if port == "" {
 		port = "8082"
@@ -90,15 +119,4 @@ func main() {
 
 	log.Println("Blog gRPC service is running on port 8082...")
 	log.Fatal(grpcServer.Serve(listen))
-}
-
-func startImageServer() {
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir("/app/images")) // Putanja unutar kontejnera
-	mux.Handle("/images/", http.StripPrefix("/images/", fileServer))
-
-	log.Println("Pokrećem server za slike na portu :8086")
-	if err := http.ListenAndServe(":8086", mux); err != nil {
-		log.Fatalf("Nije uspelo pokretanje HTTP servera: %v", err)
-	}
 }
