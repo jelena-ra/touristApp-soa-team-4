@@ -26,6 +26,9 @@ func NewBlogService(repo repository.BlogRepository, repoComment repository.Comme
 
 func (s *BlogService) CreateBlog(ctx context.Context, blog *model.Blog) (*model.Blog, error) {
 	blog.CreatedAt = time.Now()
+	if blog.Images == nil {
+		blog.Images = make([]string, 0)
+	}
 	createdBlog, err := s.repo.CreateBlog(ctx, blog)
 	if err != nil {
 		return nil, err

@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -302,4 +304,93 @@ func (h *BlogHandler) GetFeedForUserHandler(w http.ResponseWriter, r *http.Reque
 		log.Printf("Failed to encode response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
+}
+
+func (h *BlogHandler) UploadImageHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. Dobavi blogId iz URL-a
+	vars := mux.Vars(r)
+	blogID, ok := vars["blogId"]
+	if !ok {
+		http.Error(w, "Blog ID is missing in URL", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Parsiraj multipart formu. 10 << 20 limitira upload na 10 MB.
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "Image is too large", http.StatusBadRequest)
+		return
+	}
+
+	// 3. Dobavi fajl iz forme. "image" je ključ (name) u form-data.
+	file, handler, err := r.FormFile("image")
+	if err != nil {
+		http.Error(w, "Failed to retrieve image from request", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// 4. Pokreni gRPC stream ka blog-servisu
+	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second) // Duži timeout za upload
+	defer cancel()
+
+	stream, err := h.client.UploadImage(ctx)
+	if err != nil {
+		log.Printf("Failed to start gRPC stream: %v", err)
+		http.Error(w, "Failed to connect to image service", http.StatusInternalServerError)
+		return
+	}
+
+	// 5. Pošalji prvu poruku sa metapodacima (info)
+	imageType := filepath.Ext(handler.Filename) // Dobavlja ekstenziju, npr. ".jpg"
+	req := &blog_proto.UploadImageRequest{
+		Data: &blog_proto.UploadImageRequest_Info{
+			Info: &blog_proto.ImageInfo{
+				BlogId:    blogID,
+				ImageType: imageType[1:], // Uklanjamo tačku sa početka
+			},
+		},
+	}
+	if err := stream.Send(req); err != nil {
+		log.Printf("Failed to send image info: %v", err)
+		http.Error(w, "Failed to send image metadata", http.StatusInternalServerError)
+		return
+	}
+
+	// 6. Čitaj fajl u delovima (chunks) i šalji preko streama
+	buffer := make([]byte, 1024) // 1 KB buffer
+	for {
+		n, err := file.Read(buffer)
+		if err == io.EOF {
+			break // Stigli smo do kraja fajla
+		}
+		if err != nil {
+			log.Printf("Failed to read chunk from file: %v", err)
+			http.Error(w, "Failed to process image", http.StatusInternalServerError)
+			return
+		}
+
+		req = &blog_proto.UploadImageRequest{
+			Data: &blog_proto.UploadImageRequest_ChunkData{
+				ChunkData: buffer[:n],
+			},
+		}
+		if err := stream.Send(req); err != nil {
+			log.Printf("Failed to send chunk: %v", err)
+			http.Error(w, "Failed to upload image chunk", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// 7. Zatvori stream i primi odgovor od servera
+	resp, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Printf("Failed to close stream and receive response: %v", err)
+		http.Error(w, "Failed to finalize image upload", http.StatusInternalServerError)
+		return
+	}
+
+	// 8. Pošalji uspešan odgovor klijentu
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(resp)
 }

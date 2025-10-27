@@ -175,6 +175,7 @@ func main() {
 	router.Handle(
 		"/api/feed/{userId}", http.HandlerFunc(blogHandler.GetFeedForUserHandler),
 	).Methods("GET", "OPTIONS")
+	router.Handle("/api/blogs/{blogId}/images", http.HandlerFunc(blogHandler.UploadImageHandler)).Methods("POST")
 
 	router.Handle("/api/tours", http.HandlerFunc(tourHandler.GetAllToursHandle)).Methods("GET")
 	router.Handle("/api/tours/{tourId}", http.HandlerFunc(tourHandler.GetByIdHandle)).Methods("GET")
