@@ -18,8 +18,8 @@
             <input type="text" id="moto" matInput formControlName="moto" placeholder="Vaš životni moto">
         </div>
         <div *ngIf="!showImageUpload; else imageUploadTemplate" class="object-image-container">
-        <img *ngIf="profile?.imageURL" [src]="profile.imageURL" alt="{{ profile.imageURL }}" class="object-image" />
-        <img *ngIf="!profile?.imageURL" src="assets/default-image.png" alt="The image does not exist." class="object-image" />
+        <img *ngIf="profile?.photoId" [src]="profile.photoId" alt="{{ profile.photoId }}" class="object-image" />
+        <img *ngIf="!profile?.photoId" src="assets/default-image.png" alt="The image does not exist." class="object-image" />
         <button (click)="changeImage()" type="button" mat-raised-button color="button">Change image</button>
       </div>
       

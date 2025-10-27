@@ -133,6 +133,7 @@ func main() {
 	router.Handle("/api/cart/remove", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
 	router.Handle("/api/cart/view", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("GET")
 	router.Handle("/api/cart/checkout", authenticationMiddleware.AuthenticationPolicy()(http.StripPrefix("/api/cart", purchaseProxy))).Methods("POST")
+	router.Handle("/api/image", (http.StripPrefix("/api", stakeholdersProxy))).Methods("POST")
 	router.Handle(
 		"/api/users/{id}/block",
 		authenticationMiddleware.AuthenticationPolicy()(authorizationMiddleware.AdministratorPolicy()(http.StripPrefix("/api", stakeholdersProxy))),

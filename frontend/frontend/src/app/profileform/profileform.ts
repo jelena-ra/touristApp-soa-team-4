@@ -15,7 +15,7 @@ export interface Profile {
   userId: string;
   name: string;
   surname: string;
-  imageURL: string;
+  photoId: string;
   biography: string;
   moto: string;
   money: number;
@@ -54,7 +54,7 @@ flag:boolean=false;
     userId: '',
     name: '',
     surname: '',
-    imageURL: '',
+    photoId: '',
     biography: '',
     moto: '',
     money: 0,
@@ -72,7 +72,7 @@ imagePreviewUrl: string | ArrayBuffer | null = null;
     userId:  new FormControl(''), 
     name: new FormControl('', [Validators.required]),
     surname: new FormControl('', [Validators.required]),
-    imageURL: new FormControl(''),
+    photoId: new FormControl(''),
     biography: new FormControl(''),
     moto: new FormControl(''),
     money:new FormControl(0)
@@ -96,9 +96,9 @@ imagePreviewUrl: string | ArrayBuffer | null = null;
               next: (profile: Profile) => {
                 this.populateForm(profile); 
                 this.moneyy = profile.money;
-                console.log('Profile imageURL:', profile.imageURL);
-                if (profile.imageURL) {
-                  this.imagePreviewUrl = `http://localhost:8081/image/filename/${profile.imageURL}`;
+                console.log('Profile photoId:', profile.photoId);
+                if (profile.photoId) {
+                  this.imagePreviewUrl = `http://localhost:8081/image/filename/${profile.photoId}`;
                 }
             },
           error: (err) => {
@@ -121,7 +121,7 @@ imagePreviewUrl: string | ArrayBuffer | null = null;
       userId: profile.userId,
       name: profile.name,
       surname: profile.surname,
-      imageURL: profile.imageURL, 
+      photoId: profile.photoId,
       biography: profile.biography,
       moto: profile.moto
     });
@@ -191,7 +191,7 @@ onFileSelected(file: File): void {
       // BITNO: Inicijaliziramo imageURL s postojećom vrijednošću iz forme.
       // Ako korisnik UPLOAD-a novu sliku, ova će se vrijednost PREGAZITI
       // unutar subscribe bloka imageService-a.
-      imageURL: this.userProfileForm.value.imageURL || "", 
+      photoId: this.userProfileForm.value.photoId || "", 
       biography: this.userProfileForm.value.biography || "",
       moto: this.userProfileForm.value.moto || "",
       money: this.moneyy
@@ -224,7 +224,7 @@ onFileSelected(file: File): void {
       this.imageService.uploadImage(this.selectedFile).subscribe({
         next: (imageId: number) => {
           this.imageService.getImage(imageId);
-          userProfile.imageURL = imageId.toString(); // <--- OVDJE se imageURL postavlja na ID uploaded slike
+          userProfile.photoId = imageId.toString(); // <--- OVDJE se photoId postavlja na ID uploaded slike
           saveProfile(userProfile); // <--- TEK NAKON što je slika uploaded, spremi profil
         },
         error: (err) => {
