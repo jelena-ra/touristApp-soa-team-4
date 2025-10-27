@@ -197,4 +197,21 @@ export class AuthService {
 //     );
 //   }
 
+
+ checkIfUserExists(): void {
+    const accessToken = this.tokenStorage.getAccessToken();
+
+    if (!accessToken) {
+      return;
+    }
+    const jwtHelper = new JwtHelperService();
+    if (jwtHelper.isTokenExpired(accessToken)) {
+      console.log("Pronađen je token, ali je istekao. Logout.");
+      this.logout();
+    } else {
+      console.log("Pronađen je validan token, postavljam korisnika.");
+      this.setUser();
+    }
+  }
+
 }

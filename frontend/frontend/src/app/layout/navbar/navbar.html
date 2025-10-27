@@ -6,13 +6,24 @@
       <span>TouristApp</span>
     </a>
 
-    <!-- Navigacioni linkovi (za ulogovane korisnike) -->
-    <div class="nav-links" *ngIf="(authService.user$ | async)?.id !== '0'">
-      <a mat-button routerLink="/tours" routerLinkActive="active-link">Ture</a>
+    <div class="nav-links" *ngIf="authService.user$ | async as user">
+      <!-- Uslov: Prikazujemo linkove samo ako korisnik nije 'gost' (id != '0') -->
+      <ng-container *ngIf="user.id !== '0'">
+        <a mat-button routerLink="/tours" routerLinkActive="active-link">Ture</a>
+        
+        <!-- === DODAJ OVAJ DEO === -->
+        <!-- Prikazujemo link za listu korisnika SAMO AKO je uloga 'administrator' -->
+        <a *ngIf="user.role === 'administrator'" 
+           mat-button 
+           routerLink="/usersList" 
+           routerLinkActive="active-link">
+          Korisnici
+        </a>
+        <!-- ======================= -->
 
-      <!-- Dodaj ostale linkove po potrebi -->
-      <!-- <a mat-button routerLink="/blog" routerLinkActive="active-link">Blog</a> -->
+      </ng-container>
     </div>
+    
 
     <!-- Spacer da gurne desni deo do kraja -->
     <span class="spacer"></span>
@@ -30,7 +41,7 @@
       <!-- Ako KORISNIK JESTE ulogovan -->
       <ng-template #userMenu>
         <div *ngIf="user$ | async as user">
-          <a mat-button routerLink="/cart">Cart</a>
+          <a mat-button routerLink="/cart" color="accent">Cart</a>
           <button mat-icon-button [matMenuTriggerFor]="menu" class="user-avatar-button">
             
             <div class="avatar">

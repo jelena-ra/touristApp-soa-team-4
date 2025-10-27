@@ -10,7 +10,7 @@ export interface Profile {
   surname: string;
   biography: string;
   moto: string;
-  imageURL: string; 
+  photoId: string; 
   money: number;
 }
 

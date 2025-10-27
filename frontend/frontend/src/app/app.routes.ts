@@ -21,11 +21,11 @@ export const routes: Routes = [
   { path: 'create-profile/:flag', component: Profileform },
   { path: 'profile', component: ProfileComponent },
   { path: 'registration', component: RegistrationComponent },
-  { path: 'usersList', component: UsersList },
+  { path: 'usersList', component: UsersList, canActivate: [authGuard, roleGuard(['administrator'])] },
   { path: 'login', component: LoginComponent },
   { path: 'tourist-location', component: TouristLocationComponent },
   { path: 'tours', component: ViewToursPage },
   { path: 'tours/:id', component: TourDetailsPage },
-  { path: 'tour-execution/:id', component: TourExecutionPageComponent },
+  { path: 'tour-execution/:id', component: TourExecutionPageComponent, canActivate: [authGuard, roleGuard(['tourist'])] },
   { path: 'tours/:id/map-editor', component: KeyPointsMapPageComponent }
 ];
