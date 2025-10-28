@@ -6,13 +6,8 @@
     <span>Zapratite autora da biste videli ceo blog</span>
   </div>
 
-  <img *ngIf="blog.images && blog.images.length > 0" [src]="blog.images[0]" alt="Blog slika" class="card-image">
   <div class="card-content">
     <h3 class="card-title">{{ blog.title }}</h3>
     <p class="card-excerpt">{{ blog.content | slice:0:100 }}...</p>
-    <div class="card-footer">
-      <span class="likes">👍 {{ blog.likes?.length || 0 }}</span>
-      <span class="comments">💬 {{ blog.comments?.length || 0 }}</span>
-    </div>
   </div>
 </div>
