@@ -1,0 +1,51 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Recenzije</h2>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body" *ngIf="recensions$ | async as recensions; else loading">
+      <div *ngIf="recensions.length > 0; else noRecensions">
+        
+        <div *ngFor="let rec of recensions" class="recension-card">
+          <!-- Korisnik i ocena -->
+          <div class="recension-header">
+            <span class="author">Korisnik: {{ rec.authorId | slice:0:8 }}...</span>
+            <div class="rating">
+              <mat-icon *ngFor="let _ of getStars(rec.rating)" class="star filled">star</mat-icon>
+              <mat-icon *ngFor="let _ of getEmptyStars(rec.rating)" class="star">star_border</mat-icon>
+            </div>
+          </div>
+
+          <!-- Komentar -->
+          <p class="comment">{{ rec.comment }}</p>
+          
+          <!-- Galerija slika -->
+          <div *ngIf="rec.pictures && rec.pictures.length > 0" class="gallery">
+            <button class="nav-arrow prev" (click)="prevImage(rec)" [disabled]="rec.currentImageIndex === 0">‹</button>
+            <img [src]="rec.pictures[rec.currentImageIndex]" alt="Slika recenzije">
+            <button class="nav-arrow next" (click)="nextImage(rec)" [disabled]="rec.currentImageIndex === rec.pictures.length - 1">›</button>
+            <div class="image-counter">{{ rec.currentImageIndex + 1 }} / {{ rec.pictures.length }}</div>
+          </div>
+          
+          <!-- Datumi -->
+          <div class="dates">
+            <span class="visit-date">Poseta: {{ rec.visitDate | date:'longDate' }}</span>
+            <span class="created-date">Objavljeno: {{ rec.createdAt | date:'short' }}</span>
+          </div>
+        </div>
+
+      </div>
+      
+      <ng-template #noRecensions>
+        <p>Nema recenzija za ovu turu.</p>
+      </ng-template>
+    </div>
+
+    <ng-template #loading>
+      <p>Učitavanje recenzija...</p>
+    </ng-template>
+
+  </div>
+</div>

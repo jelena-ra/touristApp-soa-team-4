@@ -20,6 +20,7 @@ import { PurchaseService, TourPurchaseToken } from "../../purchase/service/purch
 import { OrderItem } from "../../purchase/model/order-item.interface";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TourDetailsDialogComponent } from "../tour-details/tourist/tour-details-dialog.component";
+import { RecensionListComponent } from "../recension-list/recension-list";
 
 
 @Component({
@@ -37,12 +38,15 @@ import { TourDetailsDialogComponent } from "../tour-details/tourist/tour-details
     MatCardActions,
     MatButton,
     RouterLink,
-    MatDialogModule
+    MatDialogModule,
+    RecensionListComponent
 ]
 })
 export class ViewToursPage implements OnInit{
     tours: TourInterface[] = []
     openBuyDialog: boolean = false;
+    isRecensionListVisible = false;
+    selectedTourIdForRecensions: string | null = null;
 
     tourSelected:TourInterface={
         id: "",
@@ -225,5 +229,15 @@ export class ViewToursPage implements OnInit{
         })
         if(t) return true;
         return false;
+    }
+
+    openRecensionListModal(tour: TourInterface): void {
+        this.selectedTourIdForRecensions = tour.id;
+        this.isRecensionListVisible = true;
+    }
+
+    onRecensionListModalClose(): void {
+        this.isRecensionListVisible = false;
+        this.selectedTourIdForRecensions = null;
     }
 }

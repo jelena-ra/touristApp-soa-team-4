@@ -74,9 +74,10 @@ export class TourService {
     }
 
     createRecension(payload: RecensionPayload): Observable<any> { 
-    return this.http.post(`http://localhost:8000/api/recensions`, payload);
-  }
-  getRecensionsForTour(tourId: string): Observable<any> { 
-    return this.http.get(`http://localhost:8000/api/recensions/${tourId}`);
-  }
+        return this.http.post(`http://localhost:8000/api/recensions`, payload);
+    }
+    
+    getRecensionsForTour(tourId: string): Observable<any> { 
+        return this.http.get(`http://localhost:8000/api/recensions/${tourId}`);
+    }
 }
