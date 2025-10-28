@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs'; 
 import { Blog } from '../../blogs/models/Blog';
 import { BlogService } from '../../blogs/services/blog.service';
@@ -11,7 +14,7 @@ import { map } from 'rxjs/operators';
 @Component({
   selector: 'app-feed',
   standalone: true,
-  imports: [CommonModule, BlogCardComponent],
+  imports: [CommonModule, BlogCardComponent, RouterModule, MatButtonModule, MatIconModule],
   templateUrl: './feed.html',
   styleUrls: ['./feed.css']
 })

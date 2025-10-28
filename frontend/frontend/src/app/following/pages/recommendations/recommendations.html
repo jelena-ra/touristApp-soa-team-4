@@ -1,7 +1,13 @@
 <div class="recommendations-container">
-  <h2>Preporuke za praćenje</h2>
+  <div class="recommendations-header">
+    <h2>Preporuke za praćenje</h2>
+    <button mat-raised-button color="primary" routerLink="/following/users">
+      <mat-icon>people</mat-icon>
+      Svi korisnici
+    </button>
+  </div>
   
-  <div *ngIf="recommendations.length > 0; else noRecommendations">
+  <div *ngIf="recommendations && recommendations.length > 0; else noRecommendations">
     <app-user-card 
       *ngFor="let user of recommendations"
       [user]="user"

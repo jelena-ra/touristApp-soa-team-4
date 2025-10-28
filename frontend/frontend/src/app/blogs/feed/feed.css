@@ -1,0 +1,22 @@
+.feed-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.feed-header h2 {
+  margin: 0;
+}
+
+.feed-header button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

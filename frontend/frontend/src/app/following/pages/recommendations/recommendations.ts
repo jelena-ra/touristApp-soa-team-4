@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { User } from '../../../auth/model/user.model';
 import { AuthService } from '../../../auth/auth.service';
 import { FollowingService, FollowPayload } from '../../following';
@@ -8,7 +11,7 @@ import { UserCardComponent } from '../../user-card/user-card';
 @Component({
   selector: 'app-recommendations',
   standalone: true,
-  imports: [CommonModule, UserCardComponent], // Dodajte UserCardComponent
+  imports: [CommonModule, UserCardComponent, RouterModule, MatButtonModule, MatIconModule], // Dodajte UserCardComponent
   templateUrl: './recommendations.html',
   styleUrls: ['./recommendations.css']
 })

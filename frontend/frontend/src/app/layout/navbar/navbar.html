@@ -10,6 +10,8 @@
       <!-- Uslov: Prikazujemo linkove samo ako korisnik nije 'gost' (id != '0') -->
       <ng-container *ngIf="user.id !== '0'">
         <a mat-button routerLink="/tours" routerLinkActive="active-link">Ture</a>
+        <a mat-button routerLink="/blogs/feed" routerLinkActive="active-link">Blogovi</a>
+        <a mat-button routerLink="/following/users" routerLinkActive="active-link">Korisnici</a>
         
         <!-- === DODAJ OVAJ DEO === -->
         <!-- Prikazujemo link za listu korisnika SAMO AKO je uloga 'administrator' -->

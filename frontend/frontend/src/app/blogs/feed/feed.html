@@ -1,5 +1,11 @@
 <div class="feed-container">
-  <h2>Najnovije objave</h2>
+  <div class="feed-header">
+    <h2>Najnovije objave</h2>
+    <button mat-raised-button color="primary" routerLink="/blogs/create">
+      <mat-icon>add</mat-icon>
+      Kreiraj Blog
+    </button>
+  </div>
 
   <div *ngIf="isLoading">
     <p>Učitavanje blogova...</p>

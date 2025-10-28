@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { User } from '../../../auth/model/user.model';
 import { AuthService } from '../../../auth/auth.service';
@@ -10,7 +13,7 @@ import { map } from 'rxjs/operators';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, UserCardComponent],
+  imports: [CommonModule, UserCardComponent, RouterModule, MatButtonModule, MatIconModule],
   templateUrl: './user-list.html',
   styleUrls: ['./user-list.css']
 })

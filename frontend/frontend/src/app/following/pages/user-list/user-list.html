@@ -1,5 +1,11 @@
 <div class="user-list-container">
-  <h2>Svi korisnici</h2>
+  <div class="user-list-header">
+    <h2>Svi korisnici</h2>
+    <button mat-raised-button color="primary" routerLink="/following/recommendations">
+      <mat-icon>recommend</mat-icon>
+      Preporučeni korisnici
+    </button>
+  </div>
 
   <div *ngIf="isLoading">
     <p>Učitavanje korisnika...</p>
