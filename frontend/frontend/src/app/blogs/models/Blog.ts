@@ -7,4 +7,5 @@ export interface Blog {
   likes?: string[];
   images: string[]; 
   comments?: any[]; 
+  deleted: boolean;
 }

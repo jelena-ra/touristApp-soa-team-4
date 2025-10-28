@@ -6,6 +6,7 @@ import { BlogService } from '../../blogs/services/blog.service';
 import { AuthService } from '../../auth/auth.service';
 // FollowingService nam više ne treba ovde
 import { BlogCardComponent } from '../blog-card/blog-card';
+import { map } from 'rxjs/operators'; 
 
 @Component({
   selector: 'app-feed',
@@ -30,14 +31,16 @@ export class FeedComponent implements OnInit {
     
     if (!this.currentUserId) {
       this.blogService.getAllBlogs().subscribe(blogs => {
-        this.allBlogs = blogs;
+        console.log("Deleted: ", blogs.forEach(blog => blog.deleted))
+        this.allBlogs = blogs.filter(blog => !blog.deleted);
         this.isLoading = false;
       });
       return;
     }
     
     forkJoin({
-      allBlogs: this.blogService.getAllBlogs(),
+      allBlogs: this.blogService.getAllBlogs().pipe(map(blogs => blogs.filter(blog => !blog.deleted))),
+
       feedBlogs: this.blogService.getFeedForUser(this.currentUserId)
     }).subscribe(({ allBlogs, feedBlogs }) => {
       this.allBlogs = allBlogs;
