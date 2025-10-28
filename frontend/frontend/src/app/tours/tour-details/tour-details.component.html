@@ -2,27 +2,27 @@
   <!-- 1️⃣ Tour Details -->
   <mat-card class="tour-card mat-elevation-z2">
     <mat-card-content>
-      <h2>Tour Details</h2>
+      <h2>Detalji Ture</h2>
       <div class="tour-header">
         <mat-form-field class="flex-item">
-          <mat-label>Name</mat-label>
+          <mat-label>Ime</mat-label>
           <input matInput [(ngModel)]="tourName" [readonly]="!editMode">
         </mat-form-field>
 
         <mat-form-field class="flex-item">
-          <mat-label>Description</mat-label>
+          <mat-label>Opis</mat-label>
           <textarea matInput [(ngModel)]="tourDescription" [readonly]="!editMode"></textarea>
         </mat-form-field>
 
         <mat-form-field class="flex-item">
-          <mat-label>Difficulty</mat-label>
+          <mat-label>Težina</mat-label>
           <mat-select [(ngModel)]="tourDifficulty" [disabled]="!editMode">
             <mat-option *ngFor="let diff of difficulties" [value]="diff">{{ diff }}</mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field>
-          <mat-label>Price</mat-label>
+          <mat-label>Cena</mat-label>
           <input type="number" min="0" matInput [(ngModel)]="tourPrice" [readonly]="!editMode">
         </mat-form-field>
       </div>
@@ -36,7 +36,7 @@
       </div> -->
 
       <div class="tags-row">
-        <h2>Tour Tags</h2>
+        <h2>Tagovi Ture</h2>
         <mat-chip-listbox
             [(ngModel)]="tagSelection"
             multiple
@@ -52,8 +52,8 @@
       </div>
 
       <div style="margin: 2% 0;">
-        <h2 style="margin-bottom: 0%;">Travel Times</h2>
-        <p style="margin-bottom: 0%;">Tour Length (km): {{tour.length || 'N/A'}}</p>
+        <h2 style="margin-bottom: 0%;">Vreme i dužina</h2>
+        <p style="margin-bottom: 0%;">Dužina ture (km): {{tour.length || 'N/A'}}</p>
         @if (tour.travelTimes) {
           <div style="display: flex; gap: 1rem;">
             <p>
@@ -76,19 +76,19 @@
             </p>
           </div>
         } @else {
-          <p>No travel times available.</p>
+          <p>Trenutno nema vreme ture.</p>
         }
       </div>
 
 
       <div class="action-buttons">
         <ng-container *ngIf="editMode">
-            <button mat-flat-button color="primary" (click)="saveTour()">Save</button>
-            <button mat-flat-button color="warn" (click)="cancelEdit()">Cancel</button>
+            <button mat-flat-button color="primary" (click)="saveTour()">Sačuvaj</button>
+            <button mat-flat-button color="warn" (click)="cancelEdit()">Odustani</button>
         </ng-container>
 
         <ng-container *ngIf="!editMode">
-            <button mat-flat-button color="primary" *ngIf="tour.status === 'DRAFT'" (click)="startEdit()">Update</button>
+            <button mat-flat-button color="primary" *ngIf="tour.status === 'DRAFT'" (click)="startEdit()">Ažuriraj</button>
 
             <button mat-flat-button color="primary"
             *ngIf="(tour.status === 'DRAFT' || tour.status === 'ARCHIVED') && tour.keyPoints.length >= 2"
@@ -112,15 +112,15 @@
     <div class="keypoint-wrapper">
       @if(tour.status === "DRAFT") {
         <div class="keypoint-form">
-          <h3>Create Key Point</h3>
+          <h3>Kreiraj Ključnu Tačku</h3>
   
           <mat-form-field appearance="fill">
-            <mat-label>Name</mat-label>
+            <mat-label>Ime</mat-label>
             <input matInput [(ngModel)]="newKeyPoint.name">
           </mat-form-field>
   
           <mat-form-field appearance="fill">
-            <mat-label>Description</mat-label>
+            <mat-label>Opis</mat-label>
             <textarea matInput [(ngModel)]="newKeyPoint.description"></textarea>
           </mat-form-field>
   
@@ -130,7 +130,7 @@
             <img *ngIf="filePreview; else placeholder" [src]="filePreview" alt="Preview">
             <ng-template #placeholder>
               <div class="image-placeholder">
-                <span>Select an image</span>
+                <span>Izaberite sliku</span>
               </div>
             </ng-template>
           </div>
@@ -139,9 +139,9 @@
             <button mat-flat-button color="primary"
               [disabled]="!newKeyPoint.name || !newKeyPoint.description || !newKeyPoint.latitude || !selectedFile"
               (click)="createKeyPoint()">
-              Create
+              Kreiraj
             </button>
-            <button mat-flat-button color="warn" (click)="cancelCreate()">Cancel</button>
+            <button mat-flat-button color="warn" (click)="cancelCreate()">Odustani</button>
           </div>
         </div>
       }

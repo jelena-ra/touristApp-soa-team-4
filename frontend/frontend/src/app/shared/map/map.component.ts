@@ -81,7 +81,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.updateMapDisplay(); 
   }
 
-  private updateMapDisplay(): void {
+  updateMapDisplay(): void {
     if (this.routeControl) {
       this.map.removeControl(this.routeControl);
       this.routeControl = null;

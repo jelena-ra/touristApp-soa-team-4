@@ -178,16 +178,26 @@ profile: Profile | null = null;
         });
     }
 
+    isBought(id: string): boolean {
+        let t = this.userTours.find(t => {
+            return t.id == id;
+        })
+        if(t) return true;
+        return false;
+    }
+
     openTourDetailsDialog(tour: TourInterface): void {
             if (!tour) return;
             this.tourService.getById(tour.id)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (response) => {
-                // TODO VIDI sve KP
-                // POPRAVI view tours
+                var bought = this.isBought(tour.id);
                 this.dialog.open(TourDetailsDialogComponent, {
-                    data: response
+                    data: {
+                      tour: response,
+                      bought: bought
+                    }
                 });
               }
             })

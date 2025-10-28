@@ -119,3 +119,15 @@
     align-items: center;
     margin-bottom: 20px;
 }
+
+.tour-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+.tour-price {
+  font-weight: bold;
+  color: #73b15a; 
+}

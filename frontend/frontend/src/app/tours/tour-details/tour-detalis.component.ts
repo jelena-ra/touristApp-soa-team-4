@@ -15,6 +15,12 @@ import { MatChipOption, MatChipListbox } from "@angular/material/chips";
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from "@angular/material/dialog";
 import { KeyPointDialog, KeyPointDialogData } from "../key-points-dialog/key-point-dialog/key-point-dialog";
+import { AuthService } from "../../auth/auth.service";
+import { User } from "../../auth/model/user.model";
+import { TourPurchaseToken } from "../../profile/profile";
+import { PurchaseService } from "../../purchase/service/purchase.service";
+import { catchError, map, of, switchMap } from "rxjs";
+import { TourExecutionService } from "../services/tour-execution.service";
 
 @Component({
     selector: 'tour-details',
@@ -77,7 +83,10 @@ export class TourDetailsPage implements OnInit {
         private destroyRef: DestroyRef,
         private route: ActivatedRoute,
         private cdr: ChangeDetectorRef,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private auth: AuthService,
+        private purchaseService: PurchaseService,
+        private tourExecutionService: TourExecutionService
     ) {}
 
     ngOnInit(): void {
@@ -350,6 +359,18 @@ export class TourDetailsPage implements OnInit {
                     if(this.tour.travelTimes = this.lastRouteDurationByTransport) {
                         this.tour.travelTimes = this.lastRouteDurationByTransport
                         update = true;
+                    }
+
+                    if(this.tour.keyPoints.length <= 1) {
+                        update = true;
+                        this.lastRouteDistanceKm = 0;
+                        this.lastRouteDurationByTransport = {
+                            WALKING: "",
+                            BICYCLE: "",
+                            CAR: ""
+                        };
+                        this.tour.length = this.lastRouteDistanceKm
+                        this.tour.travelTimes = this.lastRouteDurationByTransport
                     }
 
                     if(update) {

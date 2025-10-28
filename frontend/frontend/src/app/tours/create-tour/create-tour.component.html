@@ -1,12 +1,12 @@
 <div class="container">
-    <h1>Create Tour</h1>
+    <h1>Kreiraj Turu</h1>
     <div class="new-tour-fields">
         <mat-form-field>
-            <mat-label>Name</mat-label>
+            <mat-label>Ime</mat-label>
             <input type="text" matInput [(ngModel)]="newTour.name">
         </mat-form-field>
         <mat-form-field>
-            <mat-label>Description</mat-label>
+            <mat-label>Opis</mat-label>
             <textarea matInput [(ngModel)]="newTour.description"></textarea>
         </mat-form-field>
 
@@ -22,9 +22,9 @@
             </mat-chip-option>
         </mat-chip-listbox>
 
-        <div>
-            <button mat-flat-button (click)="createTour()">Create</button>
-            <button mat-flat-button (click)="onNoClick()">Cancel</button>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button mat-flat-button (click)="createTour()">Kreiraj</button>
+            <button mat-flat-button (click)="onNoClick()">Odustani</button>
         </div>
     </div>
 </div>

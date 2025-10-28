@@ -1,15 +1,22 @@
 <div class="container">
-    <h1>All tours</h1>
+    <h1>Sve ture</h1>
     <div *ngIf="openBuyDialog" class="buydialog">
-        <p>Are you sure you want to buy this tour?</p>
-        <div class="confirmbuttons"> <button mat-flat-button color="primary" (click)="buyTour()">Yes</button> <button  (click)="cancelBuying()" mat-flat-button color="primary">No</button></div>
+        <p>Da li ste sigurni da želite da kupite ovu turu?</p>
+        <div class="confirmbuttons"> <button mat-flat-button color="primary" (click)="buyTour()">Da</button> <button  (click)="cancelBuying()" mat-flat-button color="primary">Ne</button></div>
     </div>
-    <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Add Tour</button>
+    <button *ngIf="this.user?.role === 'author'" mat-flat-button (click)="openCreateTour()">Kreiraj Turu</button>
     <div  class="all-tours">
         <div *ngFor="let tour of tours">
             <mat-card class="tour">
                 <mat-card-header class="tour-header">
-                    <mat-card-title>{{ tour.name }}</mat-card-title>
+                    <mat-card-title class="tour-title">
+                    <span class="tour-name">{{ tour.name }}</span>
+                    @if(tour.price) {
+                        <span class="tour-price">RSD {{ tour.price }}</span>
+                    } @else {
+                        <span class="tour-price">BESPLATNO</span>
+                    }
+                    </mat-card-title>
                     <div class="tour-difficulty" [ngClass]="tour.difficulty.toLowerCase()">
                         <mat-card-subtitle>
                             @if(tour.difficulty == 'EASY'){
@@ -36,15 +43,15 @@
                 </mat-card-content>
                 <mat-card-actions class="tour-action">
                     @if(user?.role !== 'author') {
-                        <button mat-button (click)="openTourDetailsDialog(tour)">View Details</button>
+                        <button mat-button (click)="openTourDetailsDialog(tour)">Pogledaj detalje</button>
                     }
-                    <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">View Details</button>
+                    <button *ngIf="this.user?.role === 'author'" mat-button [routerLink]="['/tours', tour.id]">Pogledaj detalje</button>
                     <!-- <button *ngIf="!activeExecution && user?.role !== 'author'" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
                         Start Tour
                     </button> -->
                     @if (user?.role !== 'author') {
-                        <button  mat-flat-button color="primary"  (click)="openbuyTour(tour)">
-                           Buy Tour
+                        <button [hidden]="isBought(tour.id)" mat-flat-button color="primary"  (click)="openbuyTour(tour)">
+                           Kupi turu
                        </button>
                     }
                  <button *ngIf="false" mat-button [routerLink]="['/tours', tour.id, 'map-editor']">

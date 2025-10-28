@@ -19,8 +19,7 @@ export class TourDetailsDialogComponent {
     CAR: 'directions_car'
   };
 
-  constructor(
-    public dialogRef: MatDialogRef<TourDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public tour: TourInterface
-  ) {console.log("====", tour)}
+  constructor(public dialogRef: MatDialogRef<TourDetailsDialogComponent>, 
+    @Inject(MAT_DIALOG_DATA) 
+    public data: { tour: TourInterface; bought: boolean }) {}
 }

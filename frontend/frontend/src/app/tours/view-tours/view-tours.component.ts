@@ -13,10 +13,10 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { TourExecution } from "../model/tour-execution.interface";
 import { TourExecutionService } from "../services/tour-execution.service";
 import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthService } from "../../auth/auth.service";
 import { User } from "../../auth/model/user.model";
-import { PurchaseService } from "../../purchase/service/purchase.service";
+import { PurchaseService, TourPurchaseToken } from "../../purchase/service/purchase.service";
 import { OrderItem } from "../../purchase/model/order-item.interface";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TourDetailsDialogComponent } from "../tour-details/tourist/tour-details-dialog.component";
@@ -59,8 +59,11 @@ export class ViewToursPage implements OnInit{
     
     readonly dialog = inject(MatDialog);
     activeExecution: TourExecution | null = null;
+    
     private userId: string = "";
+    userTokens: TourPurchaseToken[] = [];  
     user: User | null = null;
+    userTours: TourInterface[] = []
 
     constructor(private tourService: TourService,
         private destroyRef: DestroyRef,
@@ -77,6 +80,7 @@ export class ViewToursPage implements OnInit{
             this.user = user;
             console.log('Trenutni korisnik:', this.userId);
             console.log('Trenutni korisnik:', this.user);
+            this.loadUserToursWithTokens();
         });
     }
 
@@ -136,7 +140,6 @@ export class ViewToursPage implements OnInit{
         this.tourSelected =itemSelected;
     }
     openCreateTour(): void {
-        // TODO provera da li je korisnik ulogovan i da li je autor
         if(this.userId === '' || this.userId === '0') {
             alert('You must be logged in to create a tour.');
             return;
@@ -161,17 +164,66 @@ export class ViewToursPage implements OnInit{
         });
     }
 
-       openTourDetailsDialog(tour: TourInterface): void {
-            if (!tour) return;
-            this.tourService.getById(tour.id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: (response) => {
-                this.dialog.open(TourDetailsDialogComponent, {
-                    data: response
-                });
-              }
-            })
-
+    openTourDetailsDialog(tour: TourInterface): void {
+        if (!tour) return;
+        this.tourService.getById(tour.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+        next: (response) => {
+            var bought = this.isBought(tour.id);
+            this.dialog.open(TourDetailsDialogComponent, {
+                data: {
+                    tour: response,
+                    bought: bought
+                }
+            });
         }
+        })
+    }
+
+    private loadUserToursWithTokens(): void {
+        this.purchaseService.getTokens(this.userId).pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap((tokens: TourPurchaseToken[]) => {
+            this.userTokens = tokens; 
+            console.log("Tokens: ", tokens)
+            if (tokens.length === 0) {
+            return of([]);
+            }
+
+            const tourIdsFromTokens = tokens.map(token => token. tour_id);
+        
+            const uniqueTourIds = [...new Set(tourIdsFromTokens)];
+
+        
+            return this.tourService.getAll().pipe(
+            map((allTours: TourInterface[]) => {
+                console.log("AllTours: ", allTours)
+                return allTours.filter(tour => uniqueTourIds.includes(tour.id));
+            }),
+            catchError(error => {
+                console.error('Error fetching all tours:', error);
+        
+                return of([]);
+            })
+            );
+        }),
+        catchError(error => {
+            console.error('Error fetching user tokens:', error);
+        
+            return of([]);
+        })
+        ).subscribe((filteredTours: TourInterface[]) => {
+            this.userTours = filteredTours;
+            console.log('User-specific tours loaded:', this.userTours);
+        });
+    }
+
+    isBought(id: string): boolean {
+        let t = this.userTours.find(t => {
+            return t.id == id;
+        })
+        if(t) return true;
+        return false;
+    }
 }

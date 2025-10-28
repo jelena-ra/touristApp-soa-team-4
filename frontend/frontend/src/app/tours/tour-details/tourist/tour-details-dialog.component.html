@@ -2,29 +2,29 @@
   <mat-card-title>Tour Details</mat-card-title>
   <mat-card class="tour-info mat-elevation-z2">
     <mat-card-content>
-      <p><strong>Name:</strong> {{ tour.name }}</p>
-      <p><strong>Description:</strong> {{ tour.description }}</p>
-      <p><strong>Difficulty:</strong> {{ tour.difficulty }}</p>
+      <p><strong>Name:</strong> {{ data.tour.name }}</p>
+      <p><strong>Description:</strong> {{ data.tour.description }}</p>
+      <p><strong>Difficulty:</strong> {{ data.tour.difficulty }}</p>
     </mat-card-content>
   </mat-card>
   
   <mat-card class="travel-times mat-elevation-z2">
     <mat-card-content>
-      <p><strong>Length (km):</strong> {{ tour.length || 'N/A' }}</p>
+      <p><strong>Length (km):</strong> {{ data.tour.length || 'N/A' }}</p>
       <h3>Travel Times</h3>
       <div class="travel-time-items">
-        @if(tour.travelTimes) {
+        @if(data.tour.travelTimes) {
           <p>
             <mat-icon>{{ transportIcons.WALKING }}</mat-icon>
-            Walking: {{ tour.travelTimes.WALKING || 'N/A' }}
+            Walking: {{ data.tour.travelTimes.WALKING || 'N/A' }}
           </p>
           <p>
             <mat-icon>{{ transportIcons.BICYCLE }}</mat-icon>
-            Bicycle: {{ tour.travelTimes.BICYCLE || 'N/A' }}
+            Bicycle: {{ data.tour.travelTimes.BICYCLE || 'N/A' }}
           </p>
           <p>
             <mat-icon>{{ transportIcons.CAR }}</mat-icon>
-            Car: {{ tour.travelTimes.CAR || 'N/A' }}
+            Car: {{ data.tour.travelTimes.CAR || 'N/A' }}
           </p>
         } @else {
           <p>No travel times available.</p>
@@ -36,9 +36,9 @@
   <mat-card class="tour-tags mat-elevation-z2">
     <mat-card-content>
       <h3>Tags</h3>
-      @if(tour.tags?.length) {
+      @if(data.tour.tags?.length) {
           <mat-chip-set multiple>
-            @for(tag of tour.tags; track tag) {
+            @for(tag of data.tour.tags; track tag) {
               <mat-chip>{{tag}}</mat-chip>
             }
           </mat-chip-set>
@@ -49,11 +49,19 @@
   </mat-card>
 
   <mat-card>
-    <app-map
-      [registerClick]="false"
-      [showKeyPoints]="true"
-      [keyPoints]="[tour.keyPoints[0]]">
-    </app-map>
+    @if(data.bought) {
+      <app-map
+        [registerClick]="false"
+        [showKeyPoints]="true"
+        [keyPoints]="data.tour.keyPoints">
+      </app-map>
+    } @else {
+      <app-map
+        [registerClick]="false"
+        [showKeyPoints]="true"
+        [keyPoints]="[data.tour.keyPoints[0]]">
+      </app-map>
+    }
   </mat-card>
 
   <mat-dialog-actions align="end">
