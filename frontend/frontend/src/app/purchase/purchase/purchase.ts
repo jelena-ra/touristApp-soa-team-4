@@ -48,16 +48,18 @@ export class CartComponent implements OnInit {
     this.authService.getUser().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.userId = user.id;
-        this.profileService.getProfileByUserId(this.userId).subscribe(profile=>{
-          this.userMoney = profile.money;
-        })
+        this.loadProfile();
         this.loadCart();
       } else {
         this.snackBar.open('Morate biti ulogovani da biste videli korpu.', 'Close', { duration: 3000 });
       }
     });
   }
-
+loadProfile(): void {
+   this.profileService.getProfileByUserId(this.userId).subscribe(profile=>{
+          this.userMoney = profile.money;
+        })
+}
   loadCart(): void {
     if (!this.userId) return;
 
@@ -133,6 +135,7 @@ export class CartComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Checkout successful:', response);
+          this.loadProfile();
           this.snackBar.open('Usesno kupljene ture!', 'Close', { duration: 5000 });
           this.loadCart(); 
         },

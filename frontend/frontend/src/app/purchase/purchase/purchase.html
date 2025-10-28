@@ -23,6 +23,7 @@
       <mat-card *ngFor="let item of cartItems" class="cart-item-card">
         <mat-card-header>
           <mat-card-title>{{ item.name }}</mat-card-title>
+          <mat-card-subtitle>ID: {{ item.id }}</mat-card-subtitle>
           <mat-card-subtitle>Cena: {{ item.price | currency:'USD':'symbol':'1.2-2' }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-actions >

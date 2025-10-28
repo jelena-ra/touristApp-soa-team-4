@@ -233,9 +233,6 @@ func (s *BlogService) RecoverUserData(ctx context.Context, userID string) error 
 
 	return nil
 }
-func (s *BlogService) GetBlogById(ctx context.Context, id string) (*model.Blog, error) {
-	return s.repo.GetById(ctx, id)
-}
 
 func (s *BlogService) DeleteBlog(ctx context.Context, id string) error {
 	return s.repo.DeleteBlog(ctx, id)

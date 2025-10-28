@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+option go_package = "./Tours/proto";
+
+package tour;
+
+message Tour {
+  string id = 1;
+  string authorId = 2;
+  string name = 3;
+  string description = 4;
+  TourDifficulty difficulty = 5;
+  repeated TourTag tags = 6;
+  TourStatus status = 7;
+  float price = 8;
+  map<string, string> travelTimes = 9;
+  float length = 10;
+}
+
+enum TourDifficulty {
+  EASY = 0;
+  MEDIUM = 1;
+  HARD = 2;
+}
+
+enum TourTag {
+  Nature = 0;
+  Historical = 1;
+  Adventure = 2;
+  Cultural = 3;
+  Wildlife = 4;
+  Relaxation = 5;
+  Beach = 6;
+  Mountain = 7;
+  Urban = 8;
+}
+
+enum TourStatus {
+  DRAFT = 0;
+  PUBLISHED = 1;
+  ARCHIVED = 2;
+}
+
+message KeyPoint {
+  string id = 1;
+  string tourId = 2;
+  float longitude = 3;
+  float latitude = 4;
+  string name = 5;
+  string description = 6;
+  string imageUrl = 7;
+  int64 order = 8;
+}
+
+message TouristPosition {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message CompletedKeyPoint {
+    string keyPointId = 1;
+    string completionTime = 2;
+}
+
+
+message TourExecutionResponse {
+    string id = 1;
+    string tourId = 2;
+    string touristId = 3;
+    string status = 4;
+    string startTime = 5;
+    string lastActivity = 6;
+    string completionTime = 7;
+    repeated CompletedKeyPoint completedKeyPoints = 8;
+    TouristPosition currentPosition = 9;
+}
+
+
+message StartTourRequest {
+    string tourId = 1;
+    TouristPosition position = 2;
+    string touristId = 3;
+    string token = 4;
+}
+
+
+message TourExecutionRequest {
+    string id = 1;
+    string touristId = 2;
+}
+
+service TourService {
+  rpc GetAllTours(Empty) returns (TourListResponse);
+  rpc GetTourByID(TourIDRequest) returns (DetailedTourResponse);
+  rpc CreateTour(CreateTourRequest) returns (TourResponse);
+  rpc UpdateTour(UpdateTourRequest) returns (UpdateTourResponse);
+  rpc CreateKeyPoint(CreateKeyPointRequest) returns (CreateKeyPointResponse);
+  rpc UpdateKeyPoint(UpdateKeyPointRequest) returns (UpdateKeyPointResponse);
+  rpc DeleteKeyPoint(DeleteKeyPointRequest) returns (DeleteKeyPointResponse);
+  rpc StartTour (StartTourRequest) returns (TourExecutionResponse);
+  rpc CheckProximity (CheckProximityRequest) returns (TourExecutionResponse);
+  rpc AbandonTour (TourExecutionRequest) returns (TourExecutionResponse);
+  rpc GetActiveTour (GetActiveTourRequest) returns (TourExecutionResponse);
+  rpc CreateRecension(CreateRecensionRequest) returns (RecensionResponse);
+  rpc GetRecensionsByTourID(TourIDRequest) returns (RecensionListResponse);
+  rpc PublishTour(PublishTourRequest) returns (PublishTourResponse);
+  rpc ArchiveTour(ArchiveTourRequest) returns (ArchiveTourResponse);
+}
+
+message ArchiveTourRequest {
+  string tourId = 1;
+}
+
+message ArchiveTourResponse {
+  string message = 1;
+}
+
+message PublishTourRequest {
+  string tourId = 1;
+}
+
+message PublishTourResponse {
+  string message = 1;
+}
+
+message Empty {
+
+}
+
+message Recension {
+ string id = 1;
+ string authorId = 2;
+ string tourId = 3;
+ int32 rating = 4;
+ string visitDate = 5;
+ string comment = 6;
+ string createdAt = 7;
+ repeated string pictures = 8;
+}
+
+message TourListResponse {
+  repeated Tour tours = 1;
+}
+
+message TourIDRequest {
+  string id = 1;
+}
+
+message DetailedTourResponse {
+  Tour tour = 1;
+  repeated KeyPoint keyPoints = 2;
+}
+
+message  TourResponse {
+  Tour tour = 1;
+}
+
+message CreateTourRequest {
+  Tour tour = 1;
+}
+
+message UpdateTourRequest {
+  Tour tour = 1;
+}
+
+message UpdateTourResponse {
+  Tour tour = 1;
+}
+
+message CreateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
+}
+
+message CreateKeyPointResponse {
+  KeyPoint keyPoint = 1;
+}
+
+message UpdateKeyPointRequest {
+  KeyPoint keyPoint = 1;
+  string imageBase64 = 2;
+}
+
+message UpdateKeyPointResponse {
+  KeyPoint keyPoint = 1;
+}
+
+message DeleteKeyPointRequest {
+  string keyPointId = 1;
+}
+
+message DeleteKeyPointResponse {
+  string message = 1;
+}
+message CheckProximityRequest {
+  string id = 1;
+  TouristPosition position = 2;
+  string touristId = 3;
+}
+message GetActiveTourRequest {
+  string touristId = 1;
+}
+
+message CreateRecensionRequest {
+ Recension recension = 1;
+}
+
+
+message RecensionResponse {
+ Recension recension = 1;
+}
+
+
+message RecensionListResponse {
+ repeated Recension recensions = 1;
+}

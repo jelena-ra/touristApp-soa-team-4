@@ -331,8 +331,37 @@ export class TourDetailsPage implements OnInit {
             }
             } else if (result.action === 'delete') {
             this.keyPointService.deleteKeyPoint(result.data.id).subscribe(() => {
-                this.tour!.keyPoints = this.tour!.keyPoints.filter(kp => kp.id !== result.data.id);
-            });
+                    this.tour!.keyPoints = this.tour!.keyPoints.filter(kp => kp.id !== result.data.id);
+                    
+                    // TODO VIDI STA JE
+
+                    this.lastRouteDistanceKm = this.mapComponent.getDistanceKm()
+                    this.lastRouteDurationByTransport = this.mapComponent.getDurationByTransport()
+
+                    // this._snackBar.open(`Route: ${this.lastRouteDistanceKm.toFixed(2)} km`, 'OK', { duration: 2500 });
+
+                    // console.log('Route calculated (parent):', payload.distanceKm, payload.durationByTransport);
+                
+                    var update = false;
+                    if(this.tour.length != this.lastRouteDistanceKm) {
+                        this.tour.length = this.lastRouteDistanceKm
+                        update = true;
+                    }
+                    if(this.tour.travelTimes = this.lastRouteDurationByTransport) {
+                        this.tour.travelTimes = this.lastRouteDurationByTransport
+                        update = true;
+                    }
+
+                    if(update) {
+                        this.tourService.update(this.tour)
+                        .pipe(takeUntilDestroyed(this.destroyRef))
+                        .subscribe({
+                            error: (err) => {
+                                console.log(err)
+                            }
+                        })
+                    }
+                });
             }
         });
     }

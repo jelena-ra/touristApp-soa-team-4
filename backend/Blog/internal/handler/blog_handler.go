@@ -230,6 +230,7 @@ func (h *BlogHandler) GetFeedForUser(ctx context.Context, req *blog_proto.GetFee
 			AuthorId:      blog.AuthorID,
 			Images:        blog.Images,
 			NumberOfLikes: int32(len(blog.Likes)),
+			Deleted:       blog.Deleted,
 		}
 		protoBlogs = append(protoBlogs, protoBlog)
 	}

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package following;
+option go_package = "github.com/jelena-ra/touristApp/soa-team-4/Following/proto";
+
+service FollowingService {
+  rpc FollowUser(FollowRequest) returns (FollowResponse) {}
+  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse){}
+  rpc GetFollowingsForUser(GetFollowingsForUserRequest) returns (GetFollowingsForUserResponse){}
+  rpc FollowExists(FollowExistsRequest) returns (FollowExistsResponse){}
+}
+ 
+message FollowRequest {
+  string followerId = 1; // ID korisnika koji prati
+  string followedId = 2; // ID korisnika koji je praćen
+}
+
+message FollowResponse {
+  string status = 1;
+  string message = 2;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string role = 4;
+  bool blocked = 5;
+}
+
+message GetRecommendationsRequest {
+  string userId = 1;
+}
+
+message GetRecommendationsResponse {
+  repeated User users = 1;
+}
+
+message GetFollowingsForUserRequest {
+  string id = 1;
+}
+
+message GetFollowingsForUserResponse{
+  repeated string ids = 1;
+}
+
+message FollowExistsRequest {
+  string followerId = 1;
+  string followedId = 2;
+}
+
+message FollowExistsResponse {
+  bool exists = 1; 
+}

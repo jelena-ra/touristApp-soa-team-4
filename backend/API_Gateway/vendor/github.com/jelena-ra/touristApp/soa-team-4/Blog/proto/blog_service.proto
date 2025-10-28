@@ -1,0 +1,155 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+//option go_package = "../proto";
+option go_package = "./;proto";
+
+package blog;
+
+message Blog {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string author_id = 4;
+  repeated string images = 5;
+  int32 number_of_likes = 6;
+  bool deleted = 7;
+}
+
+message BlogFull {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string author_id = 4;
+  repeated string images = 5;
+  int32 number_of_likes = 6;
+  repeated Comment comments = 7;
+  bool deleted = 8;
+  repeated string likes = 9;
+}
+
+message Comment {
+  string id = 1;
+  string blog_id = 2;
+  string user_id = 3;
+  string content = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp last_modified = 6;
+}
+
+message CreateBlogInput {
+  string title = 1;
+  string content = 2;
+  string author_id = 3;
+  repeated string images = 4;
+}
+
+message CreateCommentInput {
+  string blog_id = 1;
+  string user_id = 2;
+  string content = 3;
+}
+
+message UpdateCommentInput {
+  string user_id = 1;
+  string comment_id = 2;
+  string content = 3;
+  string blog_id = 4;
+}
+
+message CreateBlogRequest {
+  CreateBlogInput blog_input = 1;
+}
+
+message CreateCommentRequest {
+  CreateCommentInput comment_input = 1;
+}
+
+message UpdateCommentRequest {
+  UpdateCommentInput comment_input = 1;
+}
+
+message CreateBlogResponse {
+  BlogFull blog_post = 1;
+}
+
+message CreateCommentResponse {
+  Comment comment = 1;
+}
+
+message UpdateCommentResponse {
+  Comment comment = 1;
+}
+
+message GetBlogRequest {
+  string id = 1;
+}
+
+message GetBlogResponse {
+  BlogFull blog_post = 1;
+}
+
+message UpdateBlogRequest {
+  Blog blog_post = 1;
+}
+
+message UpdateBlogResponse {
+  Blog blog_post = 1;
+}
+
+message DeleteBlogRequest {
+  string id = 1;
+}
+
+message DeleteBlogResponse {
+  bool success = 1;
+}
+
+message GetAllBlogsRequest {
+}
+
+message GetFeedForUserRequest {
+  string userId = 1;
+}
+
+message GetAllBlogsResponse {
+  repeated Blog blogs = 1; 
+}
+
+message UploadImageRequest {
+  oneof data {
+    ImageInfo info = 1;
+    bytes chunk_data = 2;
+  }
+}
+
+message ImageInfo {
+  string blog_id = 1;
+  string image_type = 2;
+}
+
+message UploadImageResponse {
+  string file_name = 1;
+  uint64 size = 2;
+}
+
+service BlogService {
+  rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+  rpc LikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
+  rpc UnlikeBlog (LikeBlogRequest) returns (LikeBlogResponse);
+  rpc GetAllBlogs (GetAllBlogsRequest) returns (GetAllBlogsResponse);
+  rpc GetBlogById (GetBlogRequest) returns (GetBlogResponse);
+  rpc GetFeedForUser (GetFeedForUserRequest) returns (GetAllBlogsResponse);
+  rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
+  rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
+  rpc UploadImage(stream UploadImageRequest) returns (UploadImageResponse);
+}
+
+message LikeBlogRequest {
+  string blog_id = 1;
+  string user_id = 2;
+}
+
+message LikeBlogResponse {
+  BlogFull blog_post = 1;
+}

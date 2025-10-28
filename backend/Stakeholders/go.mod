@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jelena-ra/touristApp/soa-team-4/Messages v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
 	github.com/neo4j/neo4j-go-driver/v5 v5.28.2
 	github.com/streadway/amqp v1.1.0
 	google.golang.org/grpc v1.75.1

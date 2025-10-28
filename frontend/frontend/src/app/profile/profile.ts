@@ -184,6 +184,8 @@ profile: Profile | null = null;
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (response) => {
+                // TODO VIDI sve KP
+                // POPRAVI view tours
                 this.dialog.open(TourDetailsDialogComponent, {
                     data: response
                 });
