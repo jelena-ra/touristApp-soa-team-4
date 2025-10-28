@@ -48,6 +48,7 @@
                 </mat-chip>
                 <mat-card-actions class="tour-action">
                     <button mat-button (click)="openTourDetailsDialog(tour)">View Details</button>
+                    <button mat-button (click)="openRecensionModal(tour)">Leave recension</button>
                     <button *ngIf="!activeExecution" mat-flat-button color="primary" [routerLink]="['/tour-execution', tour.id]">
                         Start Tour
                     </button>
@@ -71,3 +72,10 @@
     </div>
   </div>
   </div>
+
+
+  <app-recension-form
+  *ngIf="isRecensionModalVisible && selectedTourIdForRecension"
+  [tourId]="selectedTourIdForRecension"
+  (close)="onRecensionModalClose($event)"
+></app-recension-form>

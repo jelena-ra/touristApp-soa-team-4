@@ -25,6 +25,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { PurchaseService } from '../purchase/service/purchase.service';
 import { TourDetailsDialogComponent } from '../tours/tour-details/tourist/tour-details-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { RecensionFormComponent } from '../tours/recension-form/recension-form';
+
 export interface Profile {
   userId: string;
   name: string;
@@ -60,7 +62,8 @@ export interface TourPurchaseToken  {
     MatCardSubtitle,
     MatCardContent,
     MatChipsModule,
-    MatCardActions
+    MatCardActions,
+    RecensionFormComponent 
   ]
 })
 
@@ -68,7 +71,7 @@ export class ProfileComponent implements OnInit {
   userTours: TourInterface[] = []
   
      activeExecution: TourExecution | null = null;
-profile: Profile | null = null;
+  profile: Profile | null = null;
   private userId: string = "";
   userTokens: TourPurchaseToken[] = [];  
   user: User | null = null;
@@ -76,6 +79,8 @@ profile: Profile | null = null;
   error = false;
   profileImageSrc: string | null = null;
   readonly dialog = inject(MatDialog);
+  isRecensionModalVisible = false;
+  selectedTourIdForRecension: string | null = null;
 
   constructor( private destroyRef: DestroyRef,
         private snackBar: MatSnackBar,
@@ -203,4 +208,19 @@ profile: Profile | null = null;
             })
 
         }
+
+  openRecensionModal(tour: TourInterface): void {
+    this.selectedTourIdForRecension = tour.id;
+    this.isRecensionModalVisible = true;
+  }
+
+
+  onRecensionModalClose(success: boolean): void {
+    this.isRecensionModalVisible = false;
+    this.selectedTourIdForRecension = null; 
+    
+    if (success) {
+      this.snackBar.open('Hvala na recenziji!', 'Zatvori', { duration: 3000 });
+    }
+  }
 }

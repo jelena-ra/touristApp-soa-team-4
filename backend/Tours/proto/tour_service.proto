@@ -203,6 +203,7 @@ message GetActiveTourRequest {
 
 message CreateRecensionRequest {
  Recension recension = 1;
+ repeated string picturesBase64 = 2;
 }
 
 

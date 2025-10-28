@@ -10,15 +10,19 @@ import (
 )
 
 func RecensionModelToProto(recension *model.Recension) *tourProto.Recension {
+	pictures := make([]string, 0)
+	if recension.Pictures != nil {
+		pictures = recension.Pictures
+	}
 	return &tourProto.Recension{
 		Id:        recension.ID.Hex(),
-		AuthorId:  recension.AuthorId.Hex(),
+		AuthorId:  recension.AuthorId,
 		TourId:    recension.TourId.Hex(),
 		Rating:    int32(recension.Rating),
 		VisitDate: recension.VisitDate.Format(time.RFC3339),
 		Comment:   recension.Comment,
 		CreatedAt: recension.CreatedAt.Format(time.RFC3339),
-		Pictures:  recension.Pictures,
+		Pictures:  pictures,
 	}
 }
 
@@ -27,10 +31,9 @@ func RecensionProtoToModel(protoRecension *tourProto.Recension) (*model.Recensio
 	recension := &model.Recension{}
 
 	if protoRecension.AuthorId != "" {
-		recension.AuthorId, err = primitive.ObjectIDFromHex(protoRecension.AuthorId)
-		if err != nil {
-			return nil, fmt.Errorf("invalid format for AuthorId: %w", err)
-		}
+		recension.AuthorId = protoRecension.AuthorId
+	} else {
+		return nil, fmt.Errorf("AuthorId is required")
 	}
 
 	if protoRecension.TourId != "" {
@@ -38,6 +41,8 @@ func RecensionProtoToModel(protoRecension *tourProto.Recension) (*model.Recensio
 		if err != nil {
 			return nil, fmt.Errorf("invalid format for TourId: %w", err)
 		}
+	} else {
+		return nil, fmt.Errorf("TourId is required")
 	}
 
 	recension.Rating = int(protoRecension.Rating)

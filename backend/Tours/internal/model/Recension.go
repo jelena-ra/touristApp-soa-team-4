@@ -8,7 +8,7 @@ import (
 
 type Recension struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	AuthorId  primitive.ObjectID `bson:"authorId"`
+	AuthorId  string             `bson:"authorId"`
 	TourId    primitive.ObjectID `bson:"tourId"`
 	Rating    int                `bson:"rating"`
 	VisitDate time.Time          `bson:"visitDate"`

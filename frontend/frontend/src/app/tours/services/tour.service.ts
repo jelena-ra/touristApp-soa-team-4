@@ -5,6 +5,19 @@ import { TourInterface } from "../model/tour.interface";
 import { KeyPointInterface } from "../model/key-point.interface";
 import { TokenStorage } from "../../auth/jwt/token.service";
 
+export interface RecensionPayload {
+  recension: {
+    authorId: string;
+    tourId: string;
+    rating: number;
+    visitDate: string; 
+    comment: string;
+    createdAt: string; 
+    pictures?: string[]; 
+  };
+  picturesBase64: string[]; 
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -59,4 +72,11 @@ export class TourService {
                 map(response => response.message)
             );
     }
+
+    createRecension(payload: RecensionPayload): Observable<any> { 
+    return this.http.post(`http://localhost:8000/api/recensions`, payload);
+  }
+  getRecensionsForTour(tourId: string): Observable<any> { 
+    return this.http.get(`http://localhost:8000/api/recensions/${tourId}`);
+  }
 }

@@ -207,6 +207,8 @@ func main() {
 	).Methods("POST", "OPTIONS")
 	router.Handle("/api/tours/publish/{tourId}", http.HandlerFunc(tourHandler.PublishTourHandle)).Methods("POST")
 	router.Handle("/api/tours/archive/{tourId}", http.HandlerFunc(tourHandler.ArchiveTourHandle)).Methods("POST")
+	router.Handle("/api/recensions", http.HandlerFunc(tourHandler.CreateRecensionHandle)).Methods("POST", "OPTIONS")
+	router.Handle("/api/recensions/{tourId}", http.HandlerFunc(tourHandler.GetRecensionsByTourIDHandle)).Methods("GET")
 
 	//router.Handle("/api/tour-executions/{tourId}", http.HandlerFunc(tourHandler.StartTourHandle)).Methods("POST", "OPTIONS")
 	//router.Handle("/api/tour-executions/{id}/check-proximity", http.HandlerFunc(tourHandler.CheckProximityHandle)).Methods("PUT", "OPTIONS")

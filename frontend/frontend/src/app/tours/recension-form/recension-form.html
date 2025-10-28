@@ -1,0 +1,55 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Napišite recenziju</h2>
+    <form [formGroup]="recensionForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Ocena -->
+      <div class="form-group">
+        <label for="rating">Ocena (1-5):</label>
+        <input type="number" id="rating" formControlName="rating" min="1" max="5">
+        <div *ngIf="recensionForm.get('rating')?.touched && recensionForm.get('rating')?.invalid" class="error">
+          Ocena je obavezna (1-5).
+        </div>
+      </div>
+
+      <!-- Datum posete -->
+      <div class="form-group">
+        <label for="visitDate">Datum posete:</label>
+        <input type="date" id="visitDate" formControlName="visitDate">
+        <div *ngIf="recensionForm.get('visitDate')?.touched && recensionForm.get('visitDate')?.invalid" class="error">
+          Datum posete je obavezan.
+        </div>
+      </div>
+
+      <!-- Komentar -->
+      <div class="form-group">
+        <label for="comment">Komentar:</label>
+        <textarea id="comment" formControlName="comment" rows="5"></textarea>
+        <div *ngIf="recensionForm.get('comment')?.touched && recensionForm.get('comment')?.invalid" class="error">
+          Komentar je obavezan.
+        </div>
+      </div>
+
+      <!-- Slike -->
+      <div class="form-group">
+        <label>Dodajte slike:</label>
+        <input type="file" multiple (change)="onFileSelected($event)" accept="image/*">
+        <div class="image-previews" *ngIf="imagePreviews.length > 0">
+          <div *ngFor="let preview of imagePreviews; let i = index" class="preview-item">
+            <img [src]="preview.url" alt="Preview">
+            <button type="button" class="remove-btn" (click)="removePreview(i)">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dugmad -->
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Odustani</button>
+        <button type="submit" class="btn-primary" [disabled]="recensionForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Slanje...' : 'Pošalji recenziju' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

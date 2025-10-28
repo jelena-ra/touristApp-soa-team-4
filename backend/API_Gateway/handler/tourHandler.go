@@ -512,3 +512,78 @@ func (h *TourHandler) ArchiveTourHandle(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 }
+
+func (h *TourHandler) CreateRecensionHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	var recensionReq tourProto.CreateRecensionRequest
+	if err := json.NewDecoder(r.Body).Decode(&recensionReq); err != nil {
+		log.Printf("Failed to decode request body for recension: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.client.CreateRecension(ctx, &recensionReq)
+	if err != nil {
+		log.Printf("Failed to create recension via gRPC: %v", err)
+		http.Error(w, "Failed to create recension", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{
+		UseEnumNumbers:  false,
+		EmitUnpopulated: true,
+	}
+
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal proto to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonData)
+}
+
+func (h *TourHandler) GetRecensionsByTourIDHandle(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	vars := mux.Vars(r)
+	tourId := vars["tourId"]
+
+	if tourId == "" {
+		http.Error(w, "Tour ID is missing", http.StatusBadRequest)
+		return
+	}
+
+	grpcRequest := &tourProto.TourIDRequest{
+		Id: tourId,
+	}
+
+	resp, err := h.client.GetRecensionsByTourID(ctx, grpcRequest)
+	if err != nil {
+		log.Printf("Failed to get recensions via gRPC for tour %s: %v", tourId, err)
+		http.Error(w, "Failed to get recensions", http.StatusInternalServerError)
+		return
+	}
+
+	marshaler := protojson.MarshalOptions{
+		UseEnumNumbers:  false,
+		EmitUnpopulated: true,
+	}
+
+	jsonData, err := marshaler.Marshal(resp)
+	if err != nil {
+		log.Printf("Failed to marshal recensions proto to JSON: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}

@@ -256,9 +256,38 @@ func (h *TourHandler) CreateRecension(ctx context.Context, req *tourProto.Create
 		return nil, status.Error(codes.InvalidArgument, "Rating must be between 1 and 5")
 	}
 
-	// TODO: Validacija za autora i turu - da li postoje
-
 	modelRecension := must(mapper.RecensionProtoToModel(createInfo))
+
+	picturesBase64 := req.GetPicturesBase64()
+	pictureUrls := make([]string, 0, len(picturesBase64))
+
+	for _, imgBase64 := range picturesBase64 {
+		data, err := base64.StdEncoding.DecodeString(imgBase64)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid base64 image provided")
+		}
+
+		imageID := primitive.NewObjectID()
+		filename := fmt.Sprintf("%s.jpg", imageID.Hex())
+
+		dir := fmt.Sprintf("/app/uploads/recensions/%s", modelRecension.ID.Hex())
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			log.Printf("Failed to create directory: %v", err)
+			return nil, status.Error(codes.Internal, "Failed to create image directory")
+		}
+
+		filePath := path.Join(dir, filename)
+		if err := os.WriteFile(filePath, data, 0644); err != nil {
+			log.Printf("Failed to save image: %v", err)
+			return nil, status.Error(codes.Internal, "Failed to save image")
+		}
+
+		imageUrl := fmt.Sprintf("http://localhost:8000/uploads/recensions/%s/%s", modelRecension.ID.Hex(), filename)
+		pictureUrls = append(pictureUrls, imageUrl)
+	}
+
+	modelRecension.Pictures = pictureUrls
+
 	newRecension := must(h.server.CreateRecension(ctx, modelRecension))
 	protoRecension := mapper.RecensionModelToProto(newRecension)
 
