@@ -94,7 +94,7 @@ func main() {
 	blogGRPCClient := blog_proto.NewBlogServiceClient(blogGRPCConn)
 	blogHandler := handler.NewBlogHandler(blogGRPCClient)
 
-	followingGRPCAddr := "following-service:8084" // Adresa vašeg following servisa
+	followingGRPCAddr := "following-service:8084" // Adresa vaÅ¡eg following servisa
 	followingGRPCConn, err := grpc.Dial(followingGRPCAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),

@@ -12,7 +12,7 @@ services:
       RABBITMQ_DEFAULT_PASS: guest # Ili postavite na sigurnije
     volumes: # <--- DODAJ OVO
       - rabbitmq_data:/var/lib/rabbitmq # Mapiranje za trajno skladištenje podataka
-    command: sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server" # service that first sets the correct permissions and then starts RabbitMQ. The rabbitmq user typically has a UID of 999.
+  #  command: sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server" # service that first sets the correct permissions and then starts RabbitMQ. The rabbitmq user typically has a UID of 999.
     networks:
       - backend
     healthcheck:
