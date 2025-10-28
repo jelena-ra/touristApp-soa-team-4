@@ -5,6 +5,7 @@ import { User } from '../../../auth/model/user.model';
 import { AuthService } from '../../../auth/auth.service';
 import { FollowingService, FollowPayload } from '../../following';
 import { UserCardComponent } from '../../user-card/user-card';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-list',
@@ -36,7 +37,9 @@ export class UserListComponent implements OnInit {
     }
 
     forkJoin({
-      allUsers: this.followingService.getAllUsers(),
+      allUsers: this.followingService.getAllUsers().pipe(
+  map(users => users.filter(user => !user.blocked))
+),
       followedUsersResponse: this.followingService.getFollowings(this.currentUserId)
     }).subscribe(({ allUsers, followedUsersResponse }) => {
       

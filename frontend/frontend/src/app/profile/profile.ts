@@ -93,6 +93,7 @@ export class ProfileComponent implements OnInit {
             this.userId = user.id;
             this.user = user;
             console.log('Trenutni korisnik:', this.userId);
+            console.log('Korisnik role: ', this.user.role);
             console.log('Trenutni korisnik:', this.user);
         });
     this.loadUserToursWithTokens()

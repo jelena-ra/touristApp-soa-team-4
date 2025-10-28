@@ -136,7 +136,7 @@ export class UsersList implements OnInit {
     id: "",
     username: "",
     role: "",
-    isBlocked: false
+    blocked: false
   };
 
   users: any[] = []; 
@@ -144,7 +144,7 @@ export class UsersList implements OnInit {
     id: "",
     username: "",
     role: "",
-    isBlocked: false
+    blocked: false
 };
   constructor(private http: HttpClient, private authService: TokenStorage, private userService: AuthService) { }
 

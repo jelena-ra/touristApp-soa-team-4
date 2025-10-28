@@ -18,7 +18,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   
   const user = authService.user$.getValue();
-  if (user && user.isBlocked) {
+  if (user && user.blocked) {
     console.log('Pristup odbijen: Korisnik je blokiran.');
     router.navigate(['/login']); 
     return false;
