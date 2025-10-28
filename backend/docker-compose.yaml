@@ -106,7 +106,7 @@ services:
     volumes:
       - blog_images_data:/app/images
     depends_on:
-      rabbitmq: # Sada je 'rabbitmq' ključ u mapi
+      rabbitmq:
         condition: service_healthy
       following-service:
         condition: service_started
@@ -147,7 +147,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-     # start_period: 30s
       start_period: 60s
 
   blog-db:
@@ -205,12 +204,10 @@ services:
     networks:
       - backend
     healthcheck:
-     # test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "-u", "user", "-p", "pass", "--authenticationDatabase", "admin" ]
       interval: 10s
       timeout: 5s
       retries: 5
-      #start_period: 30s
       start_period: 60s
 
   purchase-service:
