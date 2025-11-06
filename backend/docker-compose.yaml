@@ -5,14 +5,14 @@ services:
     image: rabbitmq:3-management-alpine
     hostname: rabbitmq
     ports:
-      - "5672:5672" # Standardni AMQP port
-      - "15672:15672" # Management UI port (opciono, ali korisno za debagovanje)
+      - "5672:5672" 
+      - "15672:15672" 
     environment:
-      RABBITMQ_DEFAULT_USER: guest # Ili postavite na sigurnije
-      RABBITMQ_DEFAULT_PASS: guest # Ili postavite na sigurnije
-    volumes: # <--- DODAJ OVO
-      - rabbitmq_data:/var/lib/rabbitmq # Mapiranje za trajno skladištenje podataka
-  #  command: sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server" # service that first sets the correct permissions and then starts RabbitMQ. The rabbitmq user typically has a UID of 999.
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq 
+    command: sh -c "chmod 600 /var/lib/rabbitmq/.erlang.cookie && chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmq-server" # service that first sets the correct permissions and then starts RabbitMQ. The rabbitmq user typically has a UID of 999.
     networks:
       - backend
     healthcheck:
@@ -25,9 +25,7 @@ services:
   stakeholder-service:
     image: stakeholder-service:compose_build
     build:
-      #context: ./Stakeholders
-      #dockerfile: Dockerfile
-      context: .        # <---- UMESTO ./Stakeholders
+      context: .       
       dockerfile: ./Stakeholders/Dockerfile
     restart: unless-stopped
     networks:
@@ -39,7 +37,7 @@ services:
     env_file:
       - ./Stakeholders/.env
     depends_on:
-      rabbitmq: # Sada je 'rabbitmq' ključ u mapi
+      rabbitmq: 
         condition: service_healthy
       stakeholders-db:
         condition: service_healthy
@@ -60,13 +58,9 @@ services:
       - backend
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p mojalutka123 -a neo4j://localhost:7687 'RETURN 1'"]
-     # interval: 10s
-      #timeout: 5s
-      #retries: 5
-      #start_period: 30s
-      interval: 10s       # Proveravaj svakih 10 sekundi
-      timeout: 15s        # Povećano sa 5s na 15s (daj više vremena da se cypher-shell pokrene i poveže)
-      retries: 15         # Povećano sa 5 na 15
+      interval: 10s      
+      timeout: 15s        
+      retries: 15   
       start_period: 60s
 
   saga-db:
